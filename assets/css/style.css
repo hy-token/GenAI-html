@@ -8,6 +8,7 @@ body { margin:0; font-family:"Noto Sans JP",sans-serif; background:#f9f9f9; }
 .icon-intro { color: #9C27B0; }       /* はじめに - 紫 */
 .icon-haskell { color: #5D4F85; }     /* Haskell - ハスケルカラー */
 .icon-html { color: #E44D26; }        /* HTML - オレンジレッド */
+.icon-flutter { color: #02569B; }     /* Flutter - フラッターカラー */
 
 /* デフォルトアイコン */
 .fa-haskell:before {
@@ -24,6 +25,9 @@ body { margin:0; font-family:"Noto Sans JP",sans-serif; background:#f9f9f9; }
 }
 .fa-chess:before {
   content: "\f439";  /* チェスアイコン */
+}
+.fa-flutter:before {
+  content: "\f3e8";  /* モバイルアイコン */
 }
 
 .header{ 

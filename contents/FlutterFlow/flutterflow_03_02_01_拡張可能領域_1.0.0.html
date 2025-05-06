@@ -1,0 +1,147 @@
+<h1>FlutterFlowの実現可能な機能と限界</h1>
+
+<h2>3.2 拡張可能な領域と制限事項</h2>
+
+<h3>概要</h3>
+<p>FlutterFlowは多くの機能を標準で提供していますが、より高度なアプリケーション開発においては拡張が必要になる場合があります。この節では、FlutterFlowの標準機能を超えて拡張できる領域と、その実現方法について解説します。また、現時点でのFlutterFlowの技術的な制限事項や課題についても明確にし、プロジェクト計画時の重要な判断材料を提供します。</p>
+
+<h3>詳細説明</h3>
+
+<h4>拡張可能な領域</h4>
+
+<p>FlutterFlowの標準機能を拡張するための主な方法は以下の通りです：</p>
+
+<table border="1" cellpadding="8" style="border-collapse: collapse; width: 100%;">
+  <tr>
+    <th style="width: 20%;">拡張方法</th>
+    <th style="width: 35%;">対応可能な機能</th>
+    <th style="width: 15%;">難易度</th>
+    <th style="width: 30%;">特記事項</th>
+  </tr>
+  <tr>
+    <td><strong>カスタムコードブロック</strong></td>
+    <td>
+      - 複雑なビジネスロジック<br>
+      - 独自アルゴリズム<br>
+      - 高度なデータ変換<br>
+      - カスタムアニメーション<br>
+      - 条件付きUI制御
+    </td>
+    <td>中程度<br>★★★☆☆</td>
+    <td>
+      Dart/Flutterの知識が必要。<br>
+      FlutterFlow内の特定の場所に<br>
+      コードブロックとして実装可能。
+    </td>
+  </tr>
+  <tr>
+    <td><strong>カスタムウィジェット</strong></td>
+    <td>
+      - 独自UIコンポーネント<br>
+      - 複雑な入力フォーム<br>
+      - カスタムチャート/グラフ<br>
+      - 独自アニメーション効果<br>
+      - 高度なインタラクション
+    </td>
+    <td>やや難しい<br>★★★★☆</td>
+    <td>
+      Flutterウィジェット開発の経験が必要。<br>
+      FlutterFlow内で再利用可能な<br>
+      コンポーネントとして登録できる。
+    </td>
+  </tr>
+  <tr>
+    <td><strong>パッケージ統合</strong></td>
+    <td>
+      - サードパーティライブラリ<br>
+      - Flutter pub.devパッケージ<br>
+      - 専門機能ライブラリ<br>
+      - 外部サービスSDK
+    </td>
+    <td>中〜難<br>★★★★☆</td>
+    <td>
+      依存関係の設定とパッケージ<br>
+      固有の知識が必要。互換性の<br>
+      確認が重要。
+    </td>
+  </tr>
+  <tr>
+    <td><strong>Firebase Functions</strong></td>
+    <td>
+      - バックエンドロジック<br>
+      - スケジュールタスク<br>
+      - 外部API連携<br>
+      - バッチ処理<br>
+      - 高度な認証/認可
+    </td>
+    <td>中程度<br>★★★☆☆</td>
+    <td>
+      Node.js知識が必要。<br>
+      Firebase環境での開発と<br>
+      デプロイの経験があると有利。
+    </td>
+  </tr>
+  <tr>
+    <td><strong>コードエクスポート<br>と拡張</strong></td>
+    <td>
+      - 完全なカスタマイズ<br>
+      - ネイティブ機能統合<br>
+      - 高度なパフォーマンス最適化<br>
+      - 複雑なアーキテクチャ
+    </td>
+    <td>難しい<br>★★★★★</td>
+    <td>
+      本格的なFlutter開発スキルが必要。<br>
+      FlutterFlowからコードをエクスポートし<br>
+      IDEで直接開発する。
+    </td>
+  </tr>
+</table>
+
+<h4>カスタムコードによる拡張例</h4>
+
+<p>以下は、カスタムコードを利用して実現できる代表的な拡張機能の例です：</p>
+
+<svg viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .title { font: bold 18px sans-serif; }
+    .subtitle { font: bold 14px sans-serif; }
+    .code { font: 12px monospace; }
+    .comment { font: italic 12px monospace; fill: #666; }
+    .box { stroke: #333; stroke-width: 2; rx: 10; ry: 10; }
+    .algorithm { fill: #e8f5e9; }
+    .ui { fill: #e3f2fd; }
+    .device { fill: #fff3e0; }
+    .api { fill: #f3e5f5; }
+  </style>
+  
+  <text x="300" y="30" text-anchor="middle" class="title">カスタムコードによる拡張例</text>
+  
+  <!-- 高度なアルゴリズム -->
+  <rect x="20" y="50" width="270" height="150" class="box algorithm" />
+  <text x="155" y="70" text-anchor="middle" class="subtitle">高度なアルゴリズム</text>
+  <text x="30" y="90" class="code">List&lt;Item&gt; recommendItems(User user) {</text>
+  <text x="30" y="108" class="comment">  // ユーザー行動に基づくレコメンデーション</text>
+  <text x="30" y="126" class="code">  final userData = user.getHistory();</text>
+  <text x="30" y="144" class="code">  return items.where((item) =></text>
+  <text x="30" y="162" class="code">    _calculateSimilarity(userData, item) > 0.7</text>
+  <text x="30" y="180" class="code">  ).toList();</text>
+  <text x="30" y="198" class="code">}</text>
+  
+  <!-- カスタムUI -->
+  <rect x="310" y="50" width="270" height="150" class="box ui" />
+  <text x="445" y="70" text-anchor="middle" class="subtitle">カスタムUIウィジェット</text>
+  <text x="320" y="90" class="code">class AnimatedCard extends StatefulWidget {</text>
+  <text x="320" y="108" class="comment">  // 3D効果のあるカードウィジェット</text>
+  <text x="320" y="126" class="code">  @override</text>
+  <text x="320" y="144" class="code">  Widget build(BuildContext context) {</text>
+  <text x="320" y="162" class="code">    return Transform(</text>
+  <text x="320" y="180" class="code">      transform: Matrix4.identity()..setEntry(</text>
+  <text x="320" y="198" class="code">        3, 2, 0.001)..rotateX(_animation.value);</text>
+  
+  <!-- デバイス連携 -->
+  <rect x="20" y="220" width="270" height="150" class="box device" />
+  <text x="155" y="240" text-anchor="middle" class="subtitle">高度なデバイス連携</text>
+  <text x="30" y="260" class="code">Future&lt;void&gt; connectBluetooth() async {</text>
+  <text x="30" y="278" class="comment">  // Bluetoothデバイスへの接続と通信</text>
+  <text

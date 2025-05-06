@@ -1,0 +1,506 @@
+<h1>FlutterFlowの実現可能な機能と限界</h1>
+
+<h2>3.1 標準で実装できる機能一覧</h2>
+
+<h3>概要</h3>
+<p>FlutterFlowは標準で様々な機能を簡単に実装できる豊富な機能セットを備えています。この節では、FlutterFlowで追加のカスタムコードなしで実装できる主要機能を体系的に紹介し、それぞれの実装難易度や工数目安を解説します。機能の種類ごとに実装可能なレベルを理解することで、FlutterFlowの可能性と適用範囲を把握するための基礎知識を提供します。</p>
+
+<h3>詳細説明</h3>
+
+<h4>ユーザーインターフェース (UI) 関連機能</h4>
+
+<table border="1" cellpadding="8" style="border-collapse: collapse; width: 100%;">
+  <tr>
+    <th style="width: 25%;">機能カテゴリ</th>
+    <th style="width: 45%;">実装可能な機能</th>
+    <th style="width: 15%;">難易度</th>
+    <th style="width: 15%;">工数目安</th>
+  </tr>
+  <tr>
+    <td><strong>基本レイアウト</strong></td>
+    <td>
+      - カラム・ロー配置<br>
+      - グリッドレイアウト<br>
+      - スタックと重ね合わせ<br>
+      - スクロール可能エリア<br>
+      - 可変スペース調整<br>
+      - カードビュー
+    </td>
+    <td>簡単<br>★☆☆☆☆</td>
+    <td>数時間</td>
+  </tr>
+  <tr>
+    <td><strong>ナビゲーション</strong></td>
+    <td>
+      - 画面遷移<br>
+      - タブバー<br>
+      - ドロワーメニュー<br>
+      - ボトムシート<br>
+      - モーダルダイアログ<br>
+      - 条件分岐ナビゲーション
+    </td>
+    <td>簡単<br>★☆☆☆☆</td>
+    <td>数時間〜1日</td>
+  </tr>
+  <tr>
+    <td><strong>入力コンポーネント</strong></td>
+    <td>
+      - テキストフィールド<br>
+      - 日付/時間選択<br>
+      - ドロップダウン<br>
+      - チェックボックス/ラジオボタン<br>
+      - スライダー<br>
+      - スイッチ<br>
+      - ファイル/画像アップロード
+    </td>
+    <td>簡単<br>★☆☆☆☆</td>
+    <td>数時間</td>
+  </tr>
+  <tr>
+    <td><strong>リスト表示</strong></td>
+    <td>
+      - 垂直/水平リスト<br>
+      - 無限スクロール<br>
+      - プルツーリフレッシュ<br>
+      - グリッドビュー<br>
+      - セクション付きリスト<br>
+      - スワイプアクション<br>
+      - ドラッグ＆ドロップ並べ替え
+    </td>
+    <td>やや簡単<br>★★☆☆☆</td>
+    <td>0.5〜1日</td>
+  </tr>
+  <tr>
+    <td><strong>視覚的表現</strong></td>
+    <td>
+      - アイコン<br>
+      - 画像表示<br>
+      - プログレスインジケータ<br>
+      - バッジ<br>
+      - レーティング表示<br>
+      - 簡易グラフ/チャート<br>
+      - アニメーション
+    </td>
+    <td>やや簡単<br>★★☆☆☆</td>
+    <td>0.5〜1日</td>
+  </tr>
+  <tr>
+    <td><strong>レスポンシブデザイン</strong></td>
+    <td>
+      - 画面サイズ対応<br>
+      - フレックスレイアウト<br>
+      - 条件付き表示<br>
+      - 異なるデバイス用レイアウト<br>
+      - 横向き/縦向き対応
+    </td>
+    <td>中程度<br>★★★☆☆</td>
+    <td>1〜2日</td>
+  </tr>
+  <tr>
+    <td><strong>高度なUI</strong></td>
+    <td>
+      - カスタムスクロール効果<br>
+      - スライドショー/カルーセル<br>
+      - 視差効果<br>
+      - ぼかし/フィルター効果<br>
+      - ダークモード対応<br>
+      - 多言語対応
+    </td>
+    <td>中〜難<br>★★★★☆</td>
+    <td>2〜3日</td>
+  </tr>
+</table>
+
+<h4>バックエンド連携機能</h4>
+
+<table border="1" cellpadding="8" style="border-collapse: collapse; width: 100%;">
+  <tr>
+    <th style="width: 25%;">機能カテゴリ</th>
+    <th style="width: 45%;">実装可能な機能</th>
+    <th style="width: 15%;">難易度</th>
+    <th style="width: 15%;">工数目安</th>
+  </tr>
+  <tr>
+    <td><strong>Firebase連携</strong></td>
+    <td>
+      - Firestore データベース連携<br>
+      - リアルタイムデータベース<br>
+      - Firebase認証<br>
+      - Firebase Storage<br>
+      - Firebase Cloud Functions<br>
+      - Firebase Messaging (FCM)
+    </td>
+    <td>簡単<br>★★☆☆☆</td>
+    <td>0.5〜2日</td>
+  </tr>
+  <tr>
+    <td><strong>Supabase連携</strong></td>
+    <td>
+      - データベースCRUD操作<br>
+      - Supabase認証<br>
+      - ストレージ連携<br>
+      - リアルタイム更新
+    </td>
+    <td>やや簡単<br>★★☆☆☆</td>
+    <td>1〜2日</td>
+  </tr>
+  <tr>
+    <td><strong>API連携</strong></td>
+    <td>
+      - REST API呼び出し<br>
+      - JSONデータ処理<br>
+      - 認証トークン管理<br>
+      - エラーハンドリング<br>
+      - ライブデータ表示
+    </td>
+    <td>中程度<br>★★★☆☆</td>
+    <td>1〜3日</td>
+  </tr>
+  <tr>
+    <td><strong>ローカルデータ</strong></td>
+    <td>
+      - 共有プリファレンス<br>
+      - ローカルキャッシュ<br>
+      - オフラインデータ同期<br>
+      - セキュアストレージ<br>
+      - ファイルシステム操作
+    </td>
+    <td>やや簡単<br>★★☆☆☆</td>
+    <td>0.5〜2日</td>
+  </tr>
+  <tr>
+    <td><strong>GraphQL</strong></td>
+    <td>
+      - 基本的なクエリ<br>
+      - ミューテーション<br>
+      - サブスクリプション<br>
+      - GraphQLスキーマ連携
+    </td>
+    <td>やや難しい<br>★★★★☆</td>
+    <td>2〜4日</td>
+  </tr>
+  <tr>
+    <td><strong>Webhook</strong></td>
+    <td>
+      - Webhook送信<br>
+      - Webhook受信処理<br>
+      - 外部サービス連携
+    </td>
+    <td>中程度<br>★★★☆☆</td>
+    <td>1〜3日</td>
+  </tr>
+</table>
+
+<h4>機能・ロジック実装</h4>
+
+<table border="1" cellpadding="8" style="border-collapse: collapse; width: 100%;">
+  <tr>
+    <th style="width: 25%;">機能カテゴリ</th>
+    <th style="width: 45%;">実装可能な機能</th>
+    <th style="width: 15%;">難易度</th>
+    <th style="width: 15%;">工数目安</th>
+  </tr>
+  <tr>
+    <td><strong>認証・ユーザー管理</strong></td>
+    <td>
+      - Eメール/パスワード認証<br>
+      - ソーシャルログイン<br>
+      - 2要素認証<br>
+      - パスワードリセット<br>
+      - ユーザープロフィール管理<br>
+      - ロールベースアクセス制御
+    </td>
+    <td>やや簡単<br>★★☆☆☆</td>
+    <td>1〜3日</td>
+  </tr>
+  <tr>
+    <td><strong>データ操作</strong></td>
+    <td>
+      - CRUD操作<br>
+      - データフィルタリング<br>
+      - ソート・ページネーション<br>
+      - 複合クエリ<br>
+      - リレーショナルデータ操作<br>
+      - バッチ処理
+    </td>
+    <td>やや簡単<br>★★☆☆☆</td>
+    <td>1〜2日</td>
+  </tr>
+  <tr>
+    <td><strong>通知機能</strong></td>
+    <td>
+      - プッシュ通知<br>
+      - アプリ内通知<br>
+      - スケジュール通知<br>
+      - 位置ベース通知<br>
+      - 通知管理センター
+    </td>
+    <td>中程度<br>★★★☆☆</td>
+    <td>1〜3日</td>
+  </tr>
+  <tr>
+    <td><strong>位置情報</strong></td>
+    <td>
+      - 現在地取得<br>
+      - 地図表示<br>
+      - マーカー設置<br>
+      - ルート表示<br>
+      - ジオフェンシング<br>
+      - 位置ベース検索
+    </td>
+    <td>中程度<br>★★★☆☆</td>
+    <td>2〜4日</td>
+  </tr>
+  <tr>
+    <td><strong>メディア処理</strong></td>
+    <td>
+      - 画像表示/アップロード<br>
+      - ギャラリーブラウザ<br>
+      - 基本的な画像編集<br>
+      - 音声再生<br>
+      - 動画再生<br>
+      - カメラアクセス
+    </td>
+    <td>中程度<br>★★★☆☆</td>
+    <td>1〜3日</td>
+  </tr>
+  <tr>
+    <td><strong>デバイス連携</strong></td>
+    <td>
+      - カメラ/ギャラリーアクセス<br>
+      - 連絡先アクセス<br>
+      - 基本センサー連携<br>
+      - ファイルシステムアクセス<br>
+      - 共有機能
+    </td>
+    <td>中程度<br>★★★☆☆</td>
+    <td>1〜3日</td>
+  </tr>
+  <tr>
+    <td><strong>支払い機能</strong></td>
+    <td>
+      - 基本的なStripe連携<br>
+      - PayPal連携<br>
+      - アプリ内購入<br>
+      - 購読管理
+    </td>
+    <td>やや難しい<br>★★★★☆</td>
+    <td>3〜5日</td>
+  </tr>
+</table>
+
+<h4>FlutterFlowの標準コンポーネント一覧</h4>
+
+<p>FlutterFlowには多数の標準コンポーネントが用意されており、ドラッグ＆ドロップで簡単に実装できます：</p>
+
+<svg viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .title { font: bold 18px sans-serif; }
+    .subtitle { font: bold 14px sans-serif; }
+    .item { font: 12px sans-serif; }
+    .box { stroke: #333; stroke-width: 2; rx: 10; ry: 10; }
+    .ui { fill: #e8f5e9; }
+    .data { fill: #e3f2fd; }
+    .logic { fill: #fff3e0; }
+    .plugin { fill: #f3e5f5; }
+  </style>
+  
+  <text x="300" y="30" text-anchor="middle" class="title">FlutterFlow標準コンポーネントマップ</text>
+  
+  <!-- UI コンポーネント -->
+  <rect x="30" y="50" width="250" height="150" class="box ui" />
+  <text x="155" y="70" text-anchor="middle" class="subtitle">UIコンポーネント</text>
+  <text x="50" y="95" class="item">• ボタン (標準/アウトライン/アイコン)</text>
+  <text x="50" y="115" class="item">• テキストフィールド (多様なバリエーション)</text>
+  <text x="50" y="135" class="item">• スイッチ / チェックボックス / スライダー</text>
+  <text x="50" y="155" class="item">• カード / コンテナ / ドロップダウン</text>
+  <text x="50" y="175" class="item">• タブ / アコーディオン / ステッパー</text>
+  <text x="50" y="195" class="item">• ナビゲーション (ドロワー / タブバー)</text>
+  
+  <!-- データコンポーネント -->
+  <rect x="320" y="50" width="250" height="150" class="box data" />
+  <text x="445" y="70" text-anchor="middle" class="subtitle">データコンポーネント</text>
+  <text x="340" y="95" class="item">• リストビュー (垂直/水平/グリッド)</text>
+  <text x="340" y="115" class="item">• データテーブル / ページネーション</text>
+  <text x="340" y="135" class="item">• フォーム (バリデーション機能付き)</text>
+  <text x="340" y="155" class="item">• グラフ / チャート (円/棒/折れ線)</text>
+  <text x="340" y="175" class="item">• 画像ギャラリー / カルーセル</text>
+  <text x="340" y="195" class="item">• カレンダー / スケジューラー</text>
+  
+  <!-- ロジックコンポーネント -->
+  <rect x="30" y="220" width="250" height="150" class="box logic" />
+  <text x="155" y="240" text-anchor="middle" class="subtitle">ロジックコンポーネント</text>
+  <text x="50" y="265" class="item">• 認証コンポーネント (ログイン/登録)</text>
+  <text x="50" y="285" class="item">• タイマー / カウントダウン</text>
+  <text x="50" y="305" class="item">• フィルター / ソート機能</text>
+  <text x="50" y="325" class="item">• 無限スクロール</text>
+  <text x="50" y="345" class="item">• プログレスインジケーター</text>
+  <text x="50" y="365" class="item">• ダイアログ / モーダル / トースト</text>
+  
+  <!-- プラグイン連携コンポーネント -->
+  <rect x="320" y="220" width="250" height="150" class="box plugin" />
+  <text x="445" y="240" text-anchor="middle" class="subtitle">プラグイン連携コンポーネント</text>
+  <text x="340" y="265" class="item">• 地図 (Google Maps / MapBox)</text>
+  <text x="340" y="285" class="item">• 支払い (Stripe / PayPal)</text>
+  <text x="340" y="305" class="item">• ソーシャル共有</text>
+  <text x="340" y="325" class="item">• チャット / メッセージング</text>
+  <text x="340" y="345" class="item">• カレンダー同期 (Google / iCloud)</text>
+  <text x="340" y="365" class="item">• アナリティクス統合</text>
+</svg>
+
+<h4>機能カテゴリ別の実装難易度と工数</h4>
+
+<p>以下は、一般的なアプリ機能カテゴリ別の、FlutterFlowでの実装難易度と工数目安です：</p>
+
+<table border="1" cellpadding="8" style="border-collapse: collapse; width: 100%;">
+  <tr>
+    <th>機能カテゴリ</th>
+    <th>実装難易度</th>
+    <th>工数目安</th>
+    <th>特記事項</th>
+  </tr>
+  <tr>
+    <td><strong>基本CRUD操作アプリ</strong><br>(メモ、タスク管理など)</td>
+    <td>★☆☆☆☆<br>非常に簡単</td>
+    <td>1〜3日</td>
+    <td>FlutterFlowの基本機能だけで完全実装可能。データベース連携も簡単。</td>
+  </tr>
+  <tr>
+    <td><strong>コンテンツ配信アプリ</strong><br>(ニュース、ブログなど)</td>
+    <td>★★☆☆☆<br>やや簡単</td>
+    <td>3〜5日</td>
+    <td>リスト表示、フィルタリング、コンテンツ詳細表示など標準機能で対応可能。</td>
+  </tr>
+  <tr>
+    <td><strong>認証・ユーザー管理</strong><br>(会員制アプリなど)</td>
+    <td>★★☆☆☆<br>やや簡単</td>
+    <td>2〜4日</td>
+    <td>Firebase/Supabase認証連携が標準で用意されており、権限管理も比較的容易。</td>
+  </tr>
+  <tr>
+    <td><strong>位置情報サービス</strong><br>(店舗検索、マップなど)</td>
+    <td>★★★☆☆<br>中程度</td>
+    <td>4〜7日</td>
+    <td>地図表示、マーカー、現在地表示は容易だが、高度な位置計算はカスタムコードが必要。</td>
+  </tr>
+  <tr>
+    <td><strong>SNSスタイルアプリ</strong><br>(フィード、いいね、コメントなど)</td>
+    <td>★★★☆☆<br>中程度</td>
+    <td>7〜14日</td>
+    <td>基本機能は標準で実装可能だが、パフォーマンス最適化などで工夫が必要。</td>
+  </tr>
+  <tr>
+    <td><strong>予約・スケジュール管理</strong><br>(イベント、サービス予約など)</td>
+    <td>★★★☆☆<br>中程度</td>
+    <td>5〜10日</td>
+    <td>カレンダー表示、予約枠管理など多くは標準コンポーネントで対応可能。</td>
+  </tr>
+  <tr>
+    <td><strong>ECアプリ</strong><br>(商品表示、カート、決済)</td>
+    <td>★★★★☆<br>やや難しい</td>
+    <td>10〜20日</td>
+    <td>商品表示やカートは容易だが、決済連携や在庫管理は少し複雑。</td>
+  </tr>
+  <tr>
+    <td><strong>チャット・メッセージング</strong></td>
+    <td>★★★★☆<br>やや難しい</td>
+    <td>7〜15日</td>
+    <td>基本チャットは標準機能で実装可能だが、リアルタイム性能改善には工夫が必要。</td>
+  </tr>
+  <tr>
+    <td><strong>動画/音声ストリーミング</strong></td>
+    <td>★★★★★<br>難しい</td>
+    <td>15〜25日</td>
+    <td>基本再生は可能だが、高度なストリーミングやカスタムプレーヤーはカスタムコードが必要。</td>
+  </tr>
+  <tr>
+    <td><strong>AR/VR機能</strong></td>
+    <td>★★★★★<br>難しい</td>
+    <td>20〜30日</td>
+    <td>基本的にはカスタムコードが必須。FlutterFlowでの直接実装は限定的。</td>
+  </tr>
+</table>
+
+<h4>標準で実装できる主要インテグレーション</h4>
+
+<p>FlutterFlowは以下の外部サービスとの連携を標準でサポートしています：</p>
+
+<ol>
+  <li>
+    <strong>データベース/バックエンド</strong>
+    <ul>
+      <li>Firebase Firestore</li>
+      <li>Firebase Realtime Database</li>
+      <li>Supabase</li>
+      <li>REST API</li>
+      <li>GraphQL (基本的な連携)</li>
+    </ul>
+  </li>
+  
+  <li>
+    <strong>認証サービス</strong>
+    <ul>
+      <li>Firebase Authentication</li>
+      <li>Supabase Auth</li>
+      <li>Google Sign-In</li>
+      <li>Apple Sign-In</li>
+      <li>Facebook Login</li>
+      <li>Twitter Login</li>
+    </ul>
+  </li>
+  
+  <li>
+    <strong>決済サービス</strong>
+    <ul>
+      <li>Stripe (基本決済)</li>
+      <li>PayPal (基本連携)</li>
+      <li>Apple In-App Purchase</li>
+      <li>Google Play Billing</li>
+    </ul>
+  </li>
+  
+  <li>
+    <strong>通知・メッセージング</strong>
+    <ul>
+      <li>Firebase Cloud Messaging (FCM)</li>
+      <li>OneSignal</li>
+      <li>Local Notifications</li>
+    </ul>
+  </li>
+  
+  <li>
+    <strong>分析/モニタリング</strong>
+    <ul>
+      <li>Firebase Analytics</li>
+      <li>Google Analytics</li>
+      <li>Crashlytics</li>
+    </ul>
+  </li>
+  
+  <li>
+    <strong>地図/位置情報</strong>
+    <ul>
+      <li>Google Maps</li>
+      <li>MapBox</li>
+      <li>位置情報サービス</li>
+    </ul>
+  </li>
+</ol>
+
+<h4>実装の成功要因</h4>
+
+<p>FlutterFlowでの標準機能実装を成功させるためのポイント：</p>
+
+<ul>
+  <li><strong>機能の適切な切り分け</strong>: 複雑な機能を小さな機能単位に分解し、段階的に実装する</li>
+  <li><strong>適切なテンプレート活用</strong>: FlutterFlowには多くのテンプレートが用意されており、類似機能からスタートすると効率的</li>
+  <li><strong>コンポーネント化の徹底</strong>: 再利用可能なコンポーネントとして設計することで開発効率と保守性が向上</li>
+  <li><strong>データモデルの事前設計</strong>: 特にFirebaseを使用する場合、データベース設計を最初にしっかり行うことが重要</li>
+  <li><strong>ステート管理の理解</strong>: FlutterFlowのステート管理の仕組みを理解して適切に活用する</li>
+</ul>
+
+<h3>参考資料</h3>
+<ul>
+  <li><a href="https://docs.flutterflow.io" target="_blank">FlutterFlow公式ドキュメント</a></li>
+  <li><a href="https://flutterflow.io/components" target="_blank">FlutterFlowコンポーネントライブラリ</a></li>
+</ul>

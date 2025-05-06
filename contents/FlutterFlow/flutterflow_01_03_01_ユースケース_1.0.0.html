@@ -1,0 +1,88 @@
+<h1>FlutterFlowの概要と可能性</h1>
+
+<h2>1.3 適したプロジェクトとユースケース</h2>
+
+<h3>概要</h3>
+<p>FlutterFlowは多くの種類のアプリケーション開発に適していますが、特に効果を発揮するプロジェクトタイプや具体的なユースケースがあります。この節では、FlutterFlowが最も価値を発揮するプロジェクト特性と、実際のビジネスシナリオでの活用例を紹介します。これによって、FlutterFlowの導入検討や適用判断の基準を提供します。</p>
+
+<h3>詳細説明</h3>
+
+<h4>FlutterFlowに最適なプロジェクト特性</h4>
+
+<svg viewBox="0 0 600 300" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .title { font: bold 18px sans-serif; }
+    .category { font: bold 14px sans-serif; }
+    .text { font: 12px sans-serif; }
+    .box { stroke: #333; stroke-width: 2; rx: 10; ry: 10; }
+    .optimal { fill: #b7e1cd; }
+    .suitable { fill: #fce8b2; }
+    .challenging { fill: #f4c7c3; }
+  </style>
+  
+  <text x="300" y="30" text-anchor="middle" class="title">FlutterFlow適合性マップ</text>
+  
+  <!-- 最適なプロジェクト -->
+  <rect x="50" y="50" width="500" height="60" class="box optimal" />
+  <text x="300" y="70" text-anchor="middle" class="category">最適（高ROI）</text>
+  <text x="300" y="95" text-anchor="middle" class="text">MVPs・プロトタイプ、データ駆動型アプリ、コンテンツベースアプリ、シンプルなeコマース、</text>
+  <text x="300" y="110" text-anchor="middle" class="text">社内業務ツール、コミュニティプラットフォーム、予約・スケジュール管理アプリ</text>
+  
+  <!-- 適しているプロジェクト -->
+  <rect x="50" y="130" width="500" height="60" class="box suitable" />
+  <text x="300" y="150" text-anchor="middle" class="category">適している（標準的ROI）</text>
+  <text x="300" y="175" text-anchor="middle" class="text">複雑なeコマース、SNSアプリ、コンテンツ管理システム、デバイスセンサー活用アプリ、</text>
+  <text x="300" y="190" text-anchor="middle" class="text">マルチメディアアプリ、基本的なゲーム、データ可視化アプリケーション</text>
+  
+  <!-- 挑戦的なプロジェクト -->
+  <rect x="50" y="210" width="500" height="70" class="box challenging" />
+  <text x="300" y="230" text-anchor="middle" class="category">挑戦的（低ROI）</text>
+  <text x="300" y="255" text-anchor="middle" class="text">高度なグラフィック処理、リアルタイムゲーム、複雑なアニメーション、</text>
+  <text x="300" y="270" text-anchor="middle" class="text">カスタムハードウェア連携、高負荷AI処理、複雑な金融取引システム</text>
+</svg>
+
+<h4>プロジェクトタイプ別の具体的な適合性</h4>
+
+<table border="1" cellpadding="8" style="border-collapse: collapse; width: 100%;">
+  <tr>
+    <th style="width: 20%;">プロジェクトタイプ</th>
+    <th style="width: 25%;">適合度</th>
+    <th style="width: 30%;">メリット</th>
+    <th style="width: 25%;">考慮点</th>
+  </tr>
+  <tr>
+    <td><strong>MVPとプロトタイプ</strong></td>
+    <td style="background-color: #b7e1cd;">★★★★★<br>（非常に適している）</td>
+    <td>
+      - 1〜2週間でのMVP構築<br>
+      - 低コストでの迅速な市場検証<br>
+      - 投資家向けデモの素早い作成
+    </td>
+    <td>
+      - ローンチ後の急速なスケーリングには追加対応が必要<br>
+      - カスタムコードで拡張性を確保
+    </td>
+  </tr>
+  <tr>
+    <td><strong>コンテンツベースアプリ</strong></td>
+    <td style="background-color: #b7e1cd;">★★★★★<br>（非常に適している）</td>
+    <td>
+      - リッチなUIの迅速な構築<br>
+      - CMS連携の容易さ<br>
+      - マルチプラットフォーム対応
+    </td>
+    <td>
+      - 大量コンテンツでのパフォーマンス最適化<br>
+      - 複雑検索機能は追加開発が必要
+    </td>
+  </tr>
+  <tr>
+    <td><strong>データ駆動型アプリ</strong></td>
+    <td style="background-color: #b7e1cd;">★★★★★<br>（非常に適している）</td>
+    <td>
+      - Firebase/Supabase連携の容易さ<br>
+      - CRUDオペレーションの簡易実装<br>
+      - リアルタイム同期の標準対応
+    </td>
+    <td>
+      - 複雑なデータ処理
