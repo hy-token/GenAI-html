@@ -1,0 +1,202 @@
+<body>
+  <h1>Compositeパターン</h1>
+
+  <div style="background-color: #e6f7ff; border-left: 5px solid #1890ff; padding: 15px; margin: 20px 0;">
+    <h3>問題：</h3>
+    <p>部分-全体の階層構造を表現し、個々のオブジェクトと複合オブジェクトを同じように扱いたい。</p>
+    <h3>例えば：</h3>
+    <p>ファイルシステムで、フォルダとファイルを同じように扱いたい。両方とも「サイズを取得する」「削除する」などの操作ができるようにしたい。</p>
+  </div>
+
+  <h2>1. Compositeパターンとは</h2>
+  <p>Compositeパターンは、オブジェクトを木構造で構成し、個々のオブジェクト（葉）と複合オブジェクト（枝や幹）を同じように扱えるようにするデザインパターンです。</p>
+  
+  <p>簡単に言うと、「入れ子構造を持つものを同じ方法で扱えるようにする」パターンです。</p>
+
+  <h2>2. どんなときに使うの？</h2>
+  <p>以下のような場合にCompositeパターンが役立ちます：</p>
+  <ul>
+    <li><strong>木構造で表現できるデータがある場合</strong>：組織図、ファイルシステム、メニュー階層など</li>
+    <li><strong>個々のオブジェクトと複合オブジェクトを同じように扱いたい場合</strong>：クライアントが両者を区別する必要がない</li>
+    <li><strong>再帰的な構造を扱う場合</strong>：「入れ子」になった構造を処理する必要がある</li>
+    <li><strong>全体と部分の関係がある場合</strong>：全体は部分からなり、部分自体が全体になることもある</li>
+  </ul>
+
+  <h2>3. 仕組み</h2>
+  <p>Compositeパターンは以下の要素から構成されます：</p>
+  <ol>
+    <li><strong>Component（コンポーネント）</strong>：葉と複合オブジェクトに共通するインターフェースを定義</li>
+    <li><strong>Leaf（葉）</strong>：末端のオブジェクト。子を持たない</li>
+    <li><strong>Composite（複合体）</strong>：子を持つコンポーネント。子の管理や操作のためのメソッドを実装</li>
+    <li><strong>Client（クライアント）</strong>：Componentインターフェースを通じてオブジェクトを操作</li>
+  </ol>
+
+  <svg width="100%" height="450" viewBox="0 0 700 450">
+    <!-- Component -->
+    <rect x="250" y="50" width="200" height="80" rx="10" ry="10" fill="#b3e2cd" stroke="#333" stroke-width="2" />
+    <text x="350" y="80" font-family="Arial" font-size="16" text-anchor="middle">Component</text>
+    <text x="350" y="105" font-family="Arial" font-size="12" text-anchor="middle">+ operation()</text>
+    
+    <!-- Leaf -->
+    <rect x="100" y="200" width="200" height="80" rx="10" ry="10" fill="#fdcdac" stroke="#333" stroke-width="2" />
+    <text x="200" y="230" font-family="Arial" font-size="16" text-anchor="middle">Leaf</text>
+    <text x="200" y="255" font-family="Arial" font-size="12" text-anchor="middle">+ operation()</text>
+    
+    <!-- Composite -->
+    <rect x="400" y="200" width="200" height="100" rx="10" ry="10" fill="#cbd5e8" stroke="#333" stroke-width="2" />
+    <text x="500" y="230" font-family="Arial" font-size="16" text-anchor="middle">Composite</text>
+    <text x="500" y="255" font-family="Arial" font-size="12" text-anchor="middle">+ operation()</text>
+    <text x="500" y="275" font-family="Arial" font-size="12" text-anchor="middle">+ add(Component)</text>
+    <text x="500" y="295" font-family="Arial" font-size="12" text-anchor="middle">+ remove(Component)</text>
+    
+    <!-- Client -->
+    <rect x="50" y="50" width="120" height="80" rx="10" ry="10" fill="#f4cae4" stroke="#333" stroke-width="2" />
+    <text x="110" y="95" font-family="Arial" font-size="16" text-anchor="middle">Client</text>
+    
+    <!-- 子オブジェクト -->
+    <rect x="300" y="350" width="120" height="60" rx="10" ry="10" fill="#fdcdac" stroke="#333" stroke-width="2" />
+    <text x="360" y="385" font-family="Arial" font-size="14" text-anchor="middle">Leaf</text>
+    
+    <rect x="450" y="350" width="120" height="60" rx="10" ry="10" fill="#fdcdac" stroke="#333" stroke-width="2" />
+    <text x="510" y="385" font-family="Arial" font-size="14" text-anchor="middle">Leaf</text>
+    
+    <rect x="600" y="350" width="120" height="60" rx="10" ry="10" fill="#cbd5e8" stroke="#333" stroke-width="2" />
+    <text x="660" y="385" font-family="Arial" font-size="14" text-anchor="middle">Composite</text>
+    
+    <!-- 関係を表す線 -->
+    <line x1="170" y1="90" x2="250" y2="90" stroke="#333" stroke-width="1.5" />
+    <line x1="200" y1="200" x2="330" y2="130" stroke="#333" stroke-width="1.5" />
+    <line x1="500" y1="200" x2="370" y2="130" stroke="#333" stroke-width="1.5" />
+    <line x1="360" y1="350" x2="470" y2="300" stroke="#333" stroke-width="1.5" stroke-dasharray="5,5" />
+    <line x1="510" y1="350" x2="500" y2="300" stroke="#333" stroke-width="1.5" stroke-dasharray="5,5" />
+    <line x1="660" y1="350" x2="530" y2="300" stroke="#333" stroke-width="1.5" stroke-dasharray="5,5" />
+    
+    <text x="200" y="75" font-family="Arial" font-size="12" text-anchor="middle">uses</text>
+    <text x="450" y="330" font-family="Arial" font-size="12" text-anchor="middle">children</text>
+    
+    <text x="350" y="25" font-family="Arial" font-size="16" text-anchor="middle" font-weight="bold">Compositeパターン</text>
+  </svg>
+
+  <h2>4. 具体例で理解する</h2>
+  
+  <h3>例1: ファイルシステム</h3>
+  <p>ファイルシステムは、Compositeパターンの典型的な例です。ディレクトリ（フォルダ）とファイルがあり、ディレクトリは他のディレクトリやファイルを含むことができます。</p>
+  <p>これをプログラムで表すと：</p>
+  <ul>
+    <li><strong>Component</strong>：FileSystemItem（ファイルシステムアイテム）- 名前を取得する、サイズを計算する、削除するなどの共通操作を定義</li>
+    <li><strong>Leaf</strong>：File（ファイル）- 単一のファイル</li>
+    <li><strong>Composite</strong>：Directory（ディレクトリ）- 他のFileSystemItemを含むことができる</li>
+  </ul>
+  
+  <p>このようにすると、ファイルとディレクトリを同じように扱うことができます。例えば、「サイズを計算する」操作は、ファイルなら単純にファイルサイズを返し、ディレクトリなら含まれるすべてのアイテムのサイズを合計します。</p>
+
+  <h3>例2: 組織図</h3>
+  <p>会社の組織図も、Compositeパターンで表現できます：</p>
+  <ul>
+    <li><strong>Component</strong>：Employee（従業員）- 名前や給与などの共通情報と操作を定義</li>
+    <li><strong>Leaf</strong>：Developer（開発者）、Designer（デザイナー）など - 部下を持たない従業員</li>
+    <li><strong>Composite</strong>：Manager（マネージャー）- 他の従業員（開発者やマネージャー）を部下に持つことができる</li>
+  </ul>
+  
+  <p>このようにすると、「給与総額を計算する」などの操作が簡単になります。個々の従業員なら自分の給与を返し、マネージャーなら自分の給与と部下全員の給与の合計を返します。</p>
+
+  <div style="background-color: #fff7e6; border: 1px solid #ffd591; padding: 15px; margin: 20px 0; border-radius: 5px;">
+    <h3>中学生向け説明</h3>
+    <p>学校の委員会組織を想像してみてください。生徒会があり、その下に各種委員会（文化委員会、体育委員会など）があります。各委員会にはメンバーがいますが、委員会自体もメンバーと見なすことができます。「出席を取る」という操作は、個人なら「はい」と返すだけですが、委員会なら所属メンバー全員に出席を確認します。Compositeパターンは、このように「個人」と「グループ」を同じように扱えるようにするパターンです。</p>
+  </div>
+
+  <h2>5. 実装上の注意点</h2>
+  
+  <h3>透過性と安全性のトレードオフ</h3>
+  <p>Compositeパターンを実装する際には、透過性（透明性）と安全性のトレードオフを考慮する必要があります：</p>
+  
+  <table border="1" style="border-collapse: collapse; width: 100%;">
+    <tr style="background-color: #f2f2f2;">
+      <th style="padding: 10px;">透過性（透明性）重視</th>
+      <th style="padding: 10px;">安全性重視</th>
+    </tr>
+    <tr>
+      <td style="padding: 10px;">
+        <ul>
+          <li>Componentにaddやremoveなどのメソッドも定義</li>
+          <li>クライアントはLeafとCompositeを区別しなくてよい</li>
+          <li>Leafではこれらのメソッドは何もしないか例外を投げる</li>
+        </ul>
+      </td>
+      <td style="padding: 10px;">
+        <ul>
+          <li>addやremoveなどのメソッドはCompositeだけに定義</li>
+          <li>クライアントはLeafとCompositeを区別する必要がある</li>
+          <li>型安全性が高い</li>
+        </ul>
+      </td>
+    </tr>
+  </table>
+
+  <p>どちらのアプローチを選ぶかは、アプリケーションの要件や使用する言語の特性によって異なります。</p>
+
+  <h2>6. メリットとデメリット</h2>
+  
+  <h3>メリット</h3>
+  <ul>
+    <li><strong>単純なインターフェース</strong>：クライアントは個々のオブジェクトと複合オブジェクトを同じように扱える</li>
+    <li><strong>新しい種類のコンポーネントを追加しやすい</strong>：既存のコードに影響を与えずに新しいLeafやCompositeを追加できる</li>
+    <li><strong>木構造の操作が容易</strong>：再帰的な処理が自然に実装できる</li>
+    <li><strong>オープン・クローズドの原則</strong>：既存のコードを変更せずにシステムを拡張できる</li>
+  </ul>
+
+  <h3>デメリット</h3>
+  <ul>
+    <li><strong>設計が一般的になりすぎる可能性</strong>：コンポーネントインターフェースが広くなりすぎることがある</li>
+    <li><strong>制約の実装が難しい</strong>：特定のCompositeが特定の種類のコンポーネントだけを含むように制限するのが難しい</li>
+    <li><strong>操作の実装が複雑になる場合がある</strong>：すべてのコンポーネントで同じように動作させるのが難しい操作もある</li>
+  </ul>
+
+  <h2>7. 類似パターンとの違い</h2>
+  <table border="1" style="border-collapse: collapse; width: 100%;">
+    <tr style="background-color: #f2f2f2;">
+      <th style="padding: 10px;">パターン</th>
+      <th style="padding: 10px;">主な目的</th>
+      <th style="padding: 10px;">Compositeとの違い</th>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Decorator</strong></td>
+      <td style="padding: 10px;">オブジェクトに新しい振る舞いを動的に追加する</td>
+      <td style="padding: 10px;">Decoratorは機能を追加し、Compositeは構造を構築する</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Iterator</strong></td>
+      <td style="padding: 10px;">コレクションの要素に順番にアクセスする方法を提供する</td>
+      <td style="padding: 10px;">Iteratorはアクセス方法を定義し、Compositeは構造を定義する</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Visitor</strong></td>
+      <td style="padding: 10px;">オブジェクト構造の要素を操作するアルゴリズムを分離する</td>
+      <td style="padding: 10px;">Visitorはコンポジット構造上での処理を分離する、相互に補完する関係</td>
+    </tr>
+  </table>
+
+  <h2>8. 実践的なアドバイス</h2>
+  <ol>
+    <li><strong>共通インターフェースを慎重に設計する</strong>：LeafとCompositeの両方に意味のある操作だけを含めましょう。</li>
+    <li><strong>再帰の深さに注意する</strong>：深すぎる階層構造は、スタックオーバーフローなどの問題を引き起こす可能性があります。</li>
+    <li><strong>親への参照を検討する</strong>：必要に応じて、子から親へのリンクを追加することを検討しましょう。</li>
+    <li><strong>キャッシングを検討する</strong>：頻繁に計算される値（例：ディレクトリのサイズ）はキャッシュすると効率的です。</li>
+    <li><strong>不要な操作の処理方法を決める</strong>：Leafで意味のない操作（例：add、remove）をどう扱うかを明確にしましょう。</li>
+  </ol>
+
+  <h2>9. まとめ</h2>
+  <p>Compositeパターンは、部分-全体の階層構造を表現し、個々のオブジェクトと複合オブジェクトを同じように扱えるようにするデザインパターンです。ファイルシステム、組織図、メニュー階層など、木構造で表現できるデータを扱う場合に特に役立ちます。</p>
+
+  <p>このパターンにより、クライアントは個々のオブジェクトと複合オブジェクトを区別する必要がなくなり、コードの簡潔さと拡張性が向上します。ただし、設計が一般的になりすぎたり、特定の制約を実装するのが難しくなったりする可能性もあるため、適切な状況で使用することが重要です。</p>
+
+  <div style="background-color: #f0f8ff; border: 1px solid #b0c4de; padding: 15px; margin: 20px 0; border-radius: 5px;">
+    <h3>覚えておきたいポイント</h3>
+    <ul>
+      <li>Compositeは「部分と全体を同じように扱う」パターン</li>
+      <li>木構造（階層構造）を扱う場合に適している</li>
+      <li>操作を再帰的に実行できる</li>
+      <li>透過性（透明性）と安全性のトレードオフを考慮する</li>
+    </ul>
+  </div>
+</body>

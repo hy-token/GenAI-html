@@ -1,0 +1,271 @@
+<body>
+  <h1>Proxyパターン</h1>
+
+  <div style="background-color: #e6f7ff; border-left: 5px solid #1890ff; padding: 15px; margin: 20px 0;">
+    <h3>問題：</h3>
+    <p>別のオブジェクトへのアクセスを制御したい。</p>
+    <h3>例えば：</h3>
+    <p>重いオブジェクトの作成を遅らせたい、権限のないユーザーからのアクセスを制限したい、リモートオブジェクトへのアクセスを簡略化したい。</p>
+  </div>
+
+  <h2>1. Proxyパターンとは</h2>
+  <p>Proxyパターンは、あるオブジェクトの代理（代わり）として機能するオブジェクトを提供し、元のオブジェクトへのアクセスを制御するデザインパターンです。プロキシは元のオブジェクトと同じインターフェースを持ち、クライアントからは透過的に使用できます。</p>
+  
+  <p>簡単に言うと、「本物の代わりに立つ代理人」を作るパターンです。</p>
+
+  <h2>2. どんなときに使うの？</h2>
+  <p>以下のような場合にProxyパターンが役立ちます：</p>
+  <ul>
+    <li><strong>遅延初期化（Lazy Initialization）</strong>：重いオブジェクトの作成を、実際に必要になるまで遅らせたい</li>
+    <li><strong>アクセス制御</strong>：特定のクライアントだけがオブジェクトにアクセスできるようにしたい</li>
+    <li><strong>ロギングやキャッシュ</strong>：オブジェクトへのアクセスをログに記録したり、結果をキャッシュしたりしたい</li>
+    <li><strong>リモートプロキシ</strong>：別のアドレス空間にあるオブジェクトへのアクセスを提供したい</li>
+    <li><strong>スマートリファレンス</strong>：オブジェクトが参照されているときに追加の操作を行いたい</li>
+  </ul>
+
+  <h2>3. 仕組み</h2>
+  <p>Proxyパターンは以下の要素から構成されます：</p>
+  <ol>
+    <li><strong>Subject（主体）</strong>：RealSubjectとProxyが実装する共通インターフェース</li>
+    <li><strong>RealSubject（実際の主体）</strong>：Proxyが代理する実際のオブジェクト</li>
+    <li><strong>Proxy（代理）</strong>：RealSubjectへの参照を持ち、Subjectインターフェースを実装。クライアントからのアクセスを制御する</li>
+    <li><strong>Client（クライアント）</strong>：Subjectインターフェースを通じてProxyやRealSubjectを使用する</li>
+  </ol>
+
+  <svg width="100%" height="400" viewBox="0 0 700 400">
+    <!-- Subject -->
+    <rect x="250" y="50" width="200" height="80" rx="10" ry="10" fill="#b3e2cd" stroke="#333" stroke-width="2" />
+    <text x="350" y="80" font-family="Arial" font-size="16" text-anchor="middle">Subject</text>
+    <text x="350" y="105" font-family="Arial" font-size="12" text-anchor="middle">+ request()</text>
+    
+    <!-- RealSubject -->
+    <rect x="450" y="200" width="200" height="80" rx="10" ry="10" fill="#fdcdac" stroke="#333" stroke-width="2" />
+    <text x="550" y="230" font-family="Arial" font-size="16" text-anchor="middle">RealSubject</text>
+    <text x="550" y="255" font-family="Arial" font-size="12" text-anchor="middle">+ request()</text>
+    
+    <!-- Proxy -->
+    <rect x="50" y="200" width="200" height="100" rx="10" ry="10" fill="#cbd5e8" stroke="#333" stroke-width="2" />
+    <text x="150" y="230" font-family="Arial" font-size="16" text-anchor="middle">Proxy</text>
+    <text x="150" y="255" font-family="Arial" font-size="12" text-anchor="middle">- realSubject: RealSubject</text>
+    <text x="150" y="275" font-family="Arial" font-size="12" text-anchor="middle">+ request()</text>
+    
+    <!-- Client -->
+    <rect x="50" y="50" width="120" height="80" rx="10" ry="10" fill="#f4cae4" stroke="#333" stroke-width="2" />
+    <text x="110" y="95" font-family="Arial" font-size="16" text-anchor="middle">Client</text>
+    
+    <!-- 関係を表す線 -->
+    <line x1="170" y1="90" x2="250" y2="90" stroke="#333" stroke-width="1.5" />
+    <line x1="150" y1="200" x2="330" y2="130" stroke="#333" stroke-width="1.5" />
+    <line x1="550" y1="200" x2="370" y2="130" stroke="#333" stroke-width="1.5" />
+    <line x1="250" y1="250" x2="450" y2="250" stroke="#333" stroke-width="1.5" stroke-dasharray="5,5" />
+    
+    <text x="200" y="75" font-family="Arial" font-size="12" text-anchor="middle">uses</text>
+    <text x="350" y="235" font-family="Arial" font-size="12" text-anchor="middle">delegates to</text>
+    
+    <text x="350" y="25" font-family="Arial" font-size="16" text-anchor="middle" font-weight="bold">Proxyパターン</text>
+  </svg>
+
+  <h2>4. Proxyの種類</h2>
+  <p>Proxyパターンにはいくつかの種類があります：</p>
+  
+  <table border="1" style="border-collapse: collapse; width: 100%;">
+    <tr style="background-color: #f2f2f2;">
+      <th style="padding: 10px;">種類</th>
+      <th style="padding: 10px;">目的</th>
+      <th style="padding: 10px;">例</th>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Virtual Proxy<br>（仮想プロキシ）</strong></td>
+      <td style="padding: 10px;">重いオブジェクトの作成を必要になるまで遅らせる</td>
+      <td style="padding: 10px;">大きな画像の表示前にプレースホルダーを表示する</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Protection Proxy<br>（保護プロキシ）</strong></td>
+      <td style="padding: 10px;">オブジェクトへのアクセス権を制御する</td>
+      <td style="padding: 10px;">権限のあるユーザーだけがファイルにアクセスできるようにする</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Remote Proxy<br>（リモートプロキシ）</strong></td>
+      <td style="padding: 10px;">別のアドレス空間にあるオブジェクトへのアクセスを提供する</td>
+      <td style="padding: 10px;">ネットワーク上の別のサーバーにあるオブジェクトを操作する</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Smart Reference<br>（スマートリファレンス）</strong></td>
+      <td style="padding: 10px;">オブジェクトの参照時に追加の操作を行う</td>
+      <td style="padding: 10px;">オブジェクトの参照カウントを管理する</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Caching Proxy<br>（キャッシュプロキシ）</strong></td>
+      <td style="padding: 10px;">結果をキャッシュして再利用する</td>
+      <td style="padding: 10px;">ウェブブラウザのキャッシュ</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Logging Proxy<br>（ロギングプロキシ）</strong></td>
+      <td style="padding: 10px;">メソッド呼び出しをログに記録する</td>
+      <td style="padding: 10px;">デバッグ情報を収集する</td>
+    </tr>
+  </table>
+
+  <h2>5. 具体例で理解する</h2>
+  
+  <h3>例1: 画像の遅延読み込み（Virtual Proxy）</h3>
+  <p>ウェブサイトで大きな画像を表示する例を考えてみましょう：</p>
+  <ul>
+    <li><strong>Subject</strong>：Image（画像）- 「表示する」などの操作を定義</li>
+    <li><strong>RealSubject</strong>：RealImage（実際の画像）- 実際の画像データを読み込み、表示する</li>
+    <li><strong>Proxy</strong>：ProxyImage（プロキシ画像）- 実際に表示が必要になるまで画像の読み込みを遅らせる</li>
+  </ul>
+  
+  <p>このプロキシは、実際に表示メソッドが呼ばれるまで重い画像の読み込み処理を遅らせます。表示されないページの画像を読み込む無駄を省くことができます。</p>
+
+  <h3>例2: ファイルアクセスの制御（Protection Proxy）</h3>
+  <p>ファイルへのアクセスを制限する例を考えてみましょう：</p>
+  <ul>
+    <li><strong>Subject</strong>：File（ファイル）- 「読み込む」「書き込む」などの操作を定義</li>
+    <li><strong>RealSubject</strong>：RealFile（実際のファイル）- 実際のファイル操作を行う</li>
+    <li><strong>Proxy</strong>：SecureFileProxy（セキュアファイルプロキシ）- ユーザーの権限をチェックしてからファイル操作を許可する</li>
+  </ul>
+  
+  <p>このプロキシは、ユーザーが適切な権限を持っているかチェックしてから、実際のファイル操作を行います。不正なアクセスを防ぐことができます。</p>
+
+  <div style="background-color: #fff7e6; border: 1px solid #ffd591; padding: 15px; margin: 20px 0; border-radius: 5px;">
+    <h3>中学生向け説明</h3>
+    <p>秘書を想像してみてください。社長に直接会いたい人がいても、まず秘書が「本当に会う必要があるか」「アポイントメントはあるか」などをチェックします。秘書は社長の代理として、社長への不要な面会を防いでいます。Proxyパターンは、このように「本物の前に立って、アクセスを制御する代理人」の役割を果たします。例えば、大きな画像を表示する前にサムネイルを表示したり、重要なファイルにアクセスする前に権限をチェックしたりします。</p>
+  </div>
+
+  <h2>6. メリットとデメリット</h2>
+  
+  <h3>メリット</h3>
+  <ul>
+    <li><strong>セキュリティの向上</strong>：アクセス制御を一元管理できる</li>
+    <li><strong>パフォーマンスの向上</strong>：必要なときだけ重いオブジェクトを作成したり、キャッシュを使ったりできる</li>
+    <li><strong>単一責任の原則</strong>：元のオブジェクトはコア機能に集中し、プロキシが付加的な責任を担当する</li>
+    <li><strong>オープン・クローズドの原則</strong>：既存のコードを変更せずに、プロキシを通じて機能を追加できる</li>
+    <li><strong>分散システムの簡略化</strong>：リモートオブジェクトへのアクセスを簡単にできる</li>
+  </ul>
+
+  <h3>デメリット</h3>
+  <ul>
+    <li><strong>応答時間の増加</strong>：追加の間接レイヤーによって、処理に時間がかかる場合がある</li>
+    <li><strong>コードの複雑さの増加</strong>：新しいクラスが追加されることで、システムが複雑になる</li>
+    <li><strong>実装の難しさ</strong>：特にリモートプロキシの場合、実装が複雑になることがある</li>
+    <li><strong>振る舞いの予測が難しくなる</strong>：プロキシが透過的でない場合、クライアントコードの挙動予測が難しくなる</li>
+  </ul>
+
+  <h2>7. 類似パターンとの違い</h2>
+  <table border="1" style="border-collapse: collapse; width: 100%;">
+    <tr style="background-color: #f2f2f2;">
+      <th style="padding: 10px;">パターン</th>
+      <th style="padding: 10px;">主な目的</th>
+      <th style="padding: 10px;">Proxyとの違い</th>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Adapter</strong></td>
+      <td style="padding: 10px;">互換性のないインターフェースを変換する</td>
+      <td style="padding: 10px;">Adapterはインターフェースを変更し、Proxyは同じインターフェースを維持する</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Decorator</strong></td>
+      <td style="padding: 10px;">オブジェクトに動的に機能を追加する</td>
+      <td style="padding: 10px;">Decoratorは機能を追加・拡張し、Proxyはアクセスを制御する</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Facade</strong></td>
+      <td style="padding: 10px;">複雑なサブシステムにシンプルなインターフェースを提供する</td>
+      <td style="padding: 10px;">Facadeはインターフェースを簡略化し、Proxyはアクセスを制御する</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Mediator</strong></td>
+      <td style="padding: 10px;">オブジェクト間の通信を集中管理する</td>
+      <td style="padding: 10px;">Mediatorは多対多の関係を管理し、Proxyは一対一の関係を管理する</td>
+    </tr>
+  </table>
+
+  <h2>8. 実践的なアドバイス</h2>
+  <ol>
+    <li><strong>インターフェースを一致させる</strong>：プロキシと実際のオブジェクトは同じインターフェースを実装し、クライアントから見て透過的であるべきです。</li>
+    <li><strong>目的に合ったプロキシを選ぶ</strong>：Virtual Proxy、Protection Proxy、Remote Proxyなど、目的に合った種類のプロキシを選びましょう。</li>
+    <li><strong>過剰に使用しない</strong>：必要な場合にのみプロキシを使用しましょう。すべてのオブジェクトにプロキシを使うと、システムが複雑になりすぎる可能性があります。</li>
+    <li><strong>遅延初期化に注意する</strong>：Virtual Proxyを使う場合、初回アクセス時に遅延が生じる可能性があります。必要に応じて非同期処理を検討しましょう。</li>
+    <li><strong>キャッシュ戦略を検討する</strong>：Caching Proxyを使う場合、適切なキャッシュ更新戦略やキャッシュ容量を考慮しましょう。</li>
+  </ol>
+
+  <h2>9. 実装例</h2>
+  <p>画像の遅延読み込み（Virtual Proxy）の実装例を疑似コードで示します：</p>
+  
+  <pre style="background-color: #f5f5f5; padding: 10px; border-radius: 5px;">
+// Subject（インターフェース）
+interface Image {
+    void display();
+}
+
+// RealSubject（実際のオブジェクト）
+class RealImage implements Image {
+    private String filename;
+    
+    public RealImage(String filename) {
+        this.filename = filename;
+        loadFromDisk(); // 重い操作
+    }
+    
+    private void loadFromDisk() {
+        System.out.println("Loading image: " + filename);
+        // 実際の画像読み込み処理（時間がかかる）
+    }
+    
+    public void display() {
+        System.out.println("Displaying image: " + filename);
+        // 実際の画像表示処理
+    }
+}
+
+// Proxy（代理オブジェクト）
+class ProxyImage implements Image {
+    private String filename;
+    private RealImage realImage = null;
+    
+    public ProxyImage(String filename) {
+        this.filename = filename;
+        // この時点では重いRealImageは作成しない
+    }
+    
+    public void display() {
+        // 実際に表示が必要になった時点でRealImageを作成
+        if (realImage == null) {
+            realImage = new RealImage(filename);
+        }
+        realImage.display();
+    }
+}
+
+// クライアント
+class Client {
+    public static void main(String[] args) {
+        // プロキシを使用（この時点では重い画像は読み込まれない）
+        Image image = new ProxyImage("large_image.jpg");
+        
+        // ここで初めて重い画像が読み込まれる
+        image.display();
+        
+        // 2回目の表示では、既に読み込まれた画像を使用（高速）
+        image.display();
+    }
+}
+  </pre>
+
+  <h2>10. まとめ</h2>
+  <p>Proxyパターンは、あるオブジェクトの代理として機能するオブジェクトを提供し、元のオブジェクトへのアクセスを制御するデザインパターンです。遅延初期化、アクセス制御、ロギング、キャッシュなど、様々な目的で使用されます。</p>
+
+  <p>このパターンは、セキュリティの向上、パフォーマンスの向上、単一責任の原則の適用など、多くのメリットがありますが、応答時間の増加やコードの複雑さの増加などのデメリットもあります。適切な状況で適切な種類のプロキシを選択することが重要です。</p>
+
+  <div style="background-color: #f0f8ff; border: 1px solid #b0c4de; padding: 15px; margin: 20px 0; border-radius: 5px;">
+    <h3>覚えておきたいポイント</h3>
+    <ul>
+      <li>Proxyは「本物の代わりに立つ代理人」を作るパターン</li>
+      <li>本物と同じインターフェースを持ち、クライアントから見て透過的に使える</li>
+      <li>Virtual Proxy、Protection Proxy、Remote Proxyなど、様々な種類がある</li>
+      <li>アクセス制御、遅延初期化、キャッシュなど、様々な目的で使用される</li>
+      <li>本物のオブジェクトに集中して欲しくない責任を分離できる</li>
+    </ul>
+  </div>
+</body>

@@ -1,0 +1,174 @@
+<body>
+  <h1>Adapterパターン</h1>
+
+  <div style="background-color: #e6f7ff; border-left: 5px solid #1890ff; padding: 15px; margin: 20px 0;">
+    <h3>問題：</h3>
+    <p>互換性のないインターフェースを持つクラスを一緒に動作させたい。</p>
+    <h3>例えば：</h3>
+    <p>新しく導入したシステムと、既存の古いシステムを連携させたい。</p>
+  </div>
+
+  <h2>1. Adapterパターンとは</h2>
+  <p>Adapterパターンは、あるクラスのインターフェースを、クライアントが期待する別のインターフェースに変換するデザインパターンです。互換性のないクラス同士を連携させることができます。</p>
+  
+  <p>簡単に言うと、「変換アダプタ」のようなもので、異なるインターフェースを持つクラス同士を「変換」して一緒に動作させるパターンです。</p>
+
+  <h2>2. どんなときに使うの？</h2>
+  <p>以下のような場合にAdapterパターンが役立ちます：</p>
+  <ul>
+    <li><strong>既存のクラスを使いたいが、そのインターフェースが現在のシステムと合わない場合</strong>：外部ライブラリやレガシーシステムとの連携など</li>
+    <li><strong>すでに開発済みのクラスを再利用したい場合</strong>：既存のクラスのインターフェースを変更せずに、新しいインターフェースに適合させたい</li>
+    <li><strong>複数の類似した機能を持つサブクラスを使いたいが、そのインターフェースがわずかに異なる場合</strong>：共通のインターフェースを提供することで、コードの重複を減らせる</li>
+    <li><strong>外部APIやサービスとの連携</strong>：異なるフォーマットやプロトコルを持つAPIを統一的に扱いたい</li>
+  </ul>
+
+  <h2>3. 仕組み</h2>
+  <p>Adapterパターンは主に2つの方法で実装できます：</p>
+  
+  <h3>クラスアダプタ（継承を使う方法）</h3>
+  <ol>
+    <li><strong>Target（ターゲット）</strong>：クライアントが使用するインターフェース</li>
+    <li><strong>Adaptee（適合される側）</strong>：適合させる必要がある既存のクラス</li>
+    <li><strong>Adapter（アダプタ）</strong>：TargetインターフェースとAdapteeを接続するクラス（多重継承を使う）</li>
+  </ol>
+
+  <h3>オブジェクトアダプタ（委譲を使う方法）</h3>
+  <ol>
+    <li><strong>Target（ターゲット）</strong>：クライアントが使用するインターフェース</li>
+    <li><strong>Adaptee（適合される側）</strong>：適合させる必要がある既存のクラス</li>
+    <li><strong>Adapter（アダプタ）</strong>：TargetインターフェースとAdapteeを接続するクラス（Adapteeのインスタンスを保持する）</li>
+  </ol>
+
+  <svg width="100%" height="400" viewBox="0 0 700 400">
+    <!-- Target -->
+    <rect x="100" y="50" width="180" height="80" rx="10" ry="10" fill="#b3e2cd" stroke="#333" stroke-width="2" />
+    <text x="190" y="80" font-family="Arial" font-size="16" text-anchor="middle">Target</text>
+    <text x="190" y="110" font-family="Arial" font-size="12" text-anchor="middle">+ request()</text>
+    
+    <!-- Client -->
+    <rect x="100" y="200" width="180" height="80" rx="10" ry="10" fill="#fdcdac" stroke="#333" stroke-width="2" />
+    <text x="190" y="240" font-family="Arial" font-size="16" text-anchor="middle">Client</text>
+    
+    <!-- Adapter -->
+    <rect x="350" y="50" width="180" height="80" rx="10" ry="10" fill="#cbd5e8" stroke="#333" stroke-width="2" />
+    <text x="440" y="80" font-family="Arial" font-size="16" text-anchor="middle">Adapter</text>
+    <text x="440" y="110" font-family="Arial" font-size="12" text-anchor="middle">+ request()</text>
+    
+    <!-- Adaptee -->
+    <rect x="350" y="200" width="180" height="80" rx="10" ry="10" fill="#f4cae4" stroke="#333" stroke-width="2" />
+    <text x="440" y="240" font-family="Arial" font-size="16" text-anchor="middle">Adaptee</text>
+    <text x="440" y="270" font-family="Arial" font-size="12" text-anchor="middle">+ specificRequest()</text>
+    
+    <!-- 関係を表す線 -->
+    <line x1="190" y1="200" x2="190" y2="130" stroke="#333" stroke-width="1.5" />
+    <line x1="280" y1="90" x2="350" y2="90" stroke="#333" stroke-width="1.5" stroke-dasharray="5,5" />
+    <line x1="440" y1="130" x2="440" y2="200" stroke="#333" stroke-width="1.5" />
+    
+    <text x="190" y="170" font-family="Arial" font-size="12" text-anchor="middle">uses</text>
+    <text x="310" y="75" font-family="Arial" font-size="12" text-anchor="middle">implements</text>
+    <text x="455" y="170" font-family="Arial" font-size="12" text-anchor="middle">adapts</text>
+    
+    <text x="350" y="25" font-family="Arial" font-size="16" text-anchor="middle" font-weight="bold">Adapterパターン（オブジェクトアダプタ）</text>
+    
+    <!-- オブジェクトアダプタの説明 -->
+    <rect x="50" y="320" width="600" height="60" rx="10" ry="10" fill="#f8f9fa" stroke="#ccc" stroke-width="1" />
+    <text x="70" y="345" font-family="Arial" font-size="14" text-anchor="start">オブジェクトアダプタ：Adapterは内部でAdapteeのオブジェクトを保持し、</text>
+    <text x="70" y="365" font-family="Arial" font-size="14" text-anchor="start">クライアントからのrequest()呼び出しをAdapteeのspecificRequest()に変換する</text>
+  </svg>
+
+  <h2>4. 具体例で理解する</h2>
+  
+  <h3>例1: 電源アダプタ</h3>
+  <p>日本の電化製品をアメリカで使うときに、電源アダプタを使うことを想像してみてください。日本の電源プラグ（110V）とアメリカのコンセント（220V）は形状が異なりますが、アダプタを使えば接続できます。</p>
+  <p>これをプログラムで表すと：</p>
+  <ul>
+    <li><strong>Target</strong>：アメリカのコンセント（220V）</li>
+    <li><strong>Adaptee</strong>：日本の電化製品（110V）</li>
+    <li><strong>Adapter</strong>：電源アダプタ（110V/220V変換器）</li>
+    <li><strong>Client</strong>：電化製品を使いたいユーザー</li>
+  </ul>
+
+  <h3>例2: データフォーマット変換</h3>
+  <p>あるプログラムがXMLフォーマットでデータを出力し、別のプログラムがJSONフォーマットでデータを受け取る例を考えてみましょう：</p>
+  <ul>
+    <li><strong>Target</strong>：JSONデータを扱うインターフェース</li>
+    <li><strong>Adaptee</strong>：XMLデータを出力するクラス</li>
+    <li><strong>Adapter</strong>：XMLからJSONに変換するアダプタ</li>
+    <li><strong>Client</strong>：JSONデータを使いたいプログラム</li>
+  </ul>
+  
+  <p>このアダプタを使えば、XMLを出力するシステムと、JSONを入力とするシステムを連携させることができます。クライアントはXMLのことを気にせず、いつも通りJSONインターフェースを使えます。</p>
+
+  <div style="background-color: #fff7e6; border: 1px solid #ffd591; padding: 15px; margin: 20px 0; border-radius: 5px;">
+    <h3>中学生向け説明</h3>
+    <p>海外旅行で使う電源アダプタを想像してみてください。日本のプラグはアメリカのコンセントに直接差し込めませんが、アダプタを使えば問題なく使えます。Adapterパターンは、このように「形が合わない（互換性がない）」部品同士をつなぐための「変換器」を作るパターンです。</p>
+  </div>
+
+  <h2>5. メリットとデメリット</h2>
+  
+  <h3>メリット</h3>
+  <ul>
+    <li><strong>既存のクラスを再利用できる</strong>：互換性のないインターフェースを持つクラスでも、アダプタを通して使える</li>
+    <li><strong>単一責任の原則</strong>：変換ロジックをアダプタに集中させることで、他のクラスをシンプルに保てる</li>
+    <li><strong>オープン・クローズドの原則</strong>：既存のコードを変更せずに、新しいタイプのアダプタを追加できる</li>
+    <li><strong>クライアントコードを簡潔に保てる</strong>：クライアントは変換の詳細を知る必要がなく、一貫したインターフェースを使える</li>
+  </ul>
+
+  <h3>デメリット</h3>
+  <ul>
+    <li><strong>複雑さが増す</strong>：新たなクラスやインターフェースが追加されるため、コードが複雑になる場合がある</li>
+    <li><strong>効率が低下する可能性</strong>：アダプタを通すことで、直接メソッドを呼び出すよりも多少のオーバーヘッドが生じる</li>
+    <li><strong>全ての機能を適合させるのが難しい場合がある</strong>：インターフェースの違いが大きすぎると、完全な適合が難しいことがある</li>
+  </ul>
+
+  <h2>6. 実践的なアドバイス</h2>
+  <ol>
+    <li><strong>どちらのアダプタタイプを使うか考える</strong>：言語によっては多重継承がサポートされていないため、オブジェクトアダプタ（委譲）の方が一般的に使われます。</li>
+    <li><strong>インターフェースを簡潔に保つ</strong>：ターゲットインターフェースはシンプルにしましょう。必要な機能だけに絞ることで、アダプタの実装が簡単になります。</li>
+    <li><strong>双方向アダプタを検討する</strong>：両方向の変換が必要な場合は、双方向アダプタ（両方のインターフェースを実装する）を検討しましょう。</li>
+    <li><strong>アダプタが本当に必要か考える</strong>：場合によっては、インターフェースを最初から統一する方が良いこともあります。アダプタは既存のコードを変更できない場合に特に役立ちます。</li>
+  </ol>
+
+  <h2>7. 類似パターンとの違い</h2>
+  <table border="1" style="border-collapse: collapse; width: 100%;">
+    <tr style="background-color: #f2f2f2;">
+      <th style="padding: 10px;">パターン</th>
+      <th style="padding: 10px;">主な目的</th>
+      <th style="padding: 10px;">Adapterとの違い</th>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Bridge</strong></td>
+      <td style="padding: 10px;">抽象と実装を分離する</td>
+      <td style="padding: 10px;">最初から設計するのがBridge、後から接続するのがAdapter</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Decorator</strong></td>
+      <td style="padding: 10px;">オブジェクトに新しい責任を動的に追加する</td>
+      <td style="padding: 10px;">インターフェースを変更せずに機能を追加するのがDecorator</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Proxy</strong></td>
+      <td style="padding: 10px;">オブジェクトへのアクセスを制御する</td>
+      <td style="padding: 10px;">同じインターフェースでアクセス制御するのがProxy</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Facade</strong></td>
+      <td style="padding: 10px;">複雑なサブシステムに簡単なインターフェースを提供する</td>
+      <td style="padding: 10px;">複数のクラスを単純化するのがFacade、異なるインターフェースを適合させるのがAdapter</td>
+    </tr>
+  </table>
+
+  <h2>8. まとめ</h2>
+  <p>Adapterパターンは、互換性のないインターフェースを持つクラスを一緒に動作させるためのデザインパターンです。既存のコードを変更せずに再利用したい場合や、外部ライブラリやレガシーシステムとの連携に特に役立ちます。</p>
+
+  <p>「変換器」のような役割を果たし、クライアントが期待するインターフェース（Target）と、実際に機能を提供するクラス（Adaptee）の間の橋渡しをします。</p>
+
+  <div style="background-color: #f0f8ff; border: 1px solid #b0c4de; padding: 15px; margin: 20px 0; border-radius: 5px;">
+    <h3>覚えておきたいポイント</h3>
+    <ul>
+      <li>Adapterは「互換性のないインターフェース同士をつなぐ変換器」を作るパターン</li>
+      <li>既存のコードを変更せずに再利用したい場合に役立つ</li>
+      <li>クラスアダプタ（継承）とオブジェクトアダプタ（委譲）の2種類がある</li>
+      <li>電源アダプタや言語の翻訳者のようなものと考えるとわかりやすい</li>
+    </ul>
+  </div>

@@ -1,0 +1,212 @@
+<body>
+  <h1>Decoratorパターン</h1>
+
+  <div style="background-color: #e6f7ff; border-left: 5px solid #1890ff; padding: 15px; margin: 20px 0;">
+    <h3>問題：</h3>
+    <p>オブジェクトに新しい機能や責任を動的に追加したいが、クラスの継承を使うと柔軟性が低くなる。</p>
+    <h3>例えば：</h3>
+    <p>カフェで、コーヒーにミルク、砂糖、ホイップクリームなどのトッピングを自由に組み合わせて追加したい。</p>
+  </div>
+
+  <h2>1. Decoratorパターンとは</h2>
+  <p>Decoratorパターンは、オブジェクトに新しい機能や責任を動的に追加するデザインパターンです。継承を使わずに機能を拡張できるため、より柔軟な設計が可能になります。</p>
+  
+  <p>簡単に言うと、「オブジェクトを包装（ラッピング）して新しい機能を追加する」パターンです。</p>
+
+  <h2>2. どんなときに使うの？</h2>
+  <p>以下のような場合にDecoratorパターンが役立ちます：</p>
+  <ul>
+    <li><strong>実行時に動的に機能を追加したい場合</strong>：プログラムの実行中に、オブジェクトの機能を追加したり削除したりしたい</li>
+    <li><strong>継承を使うと柔軟性が低くなる場合</strong>：継承だけでは、あらゆる機能の組み合わせに対応するためには膨大な数のサブクラスが必要になる</li>
+    <li><strong>機能の組み合わせが多様な場合</strong>：様々な機能を自由に組み合わせて使いたい</li>
+    <li><strong>既存のコードを変更せずに機能を追加したい場合</strong>：オープン・クローズドの原則に従いたい</li>
+    <li><strong>基本機能と追加機能を分離したい場合</strong>：関心の分離をしたい</li>
+  </ul>
+
+  <h2>3. 仕組み</h2>
+  <p>Decoratorパターンは以下の要素から構成されます：</p>
+  <ol>
+    <li><strong>Component（コンポーネント）</strong>：デコレータと具体的なコンポーネントの共通インターフェースを定義</li>
+    <li><strong>ConcreteComponent（具体的なコンポーネント）</strong>：基本的な機能を実装したクラス</li>
+    <li><strong>Decorator（デコレータ）</strong>：Componentへの参照を持ち、Componentインターフェースを実装</li>
+    <li><strong>ConcreteDecorator（具体的なデコレータ）</strong>：Componentに新しい機能を追加する具体的なクラス</li>
+  </ol>
+
+  <svg width="100%" height="450" viewBox="0 0 700 450">
+    <!-- Component -->
+    <rect x="250" y="50" width="200" height="80" rx="10" ry="10" fill="#b3e2cd" stroke="#333" stroke-width="2" />
+    <text x="350" y="80" font-family="Arial" font-size="16" text-anchor="middle">Component</text>
+    <text x="350" y="105" font-family="Arial" font-size="12" text-anchor="middle">+ operation()</text>
+    
+    <!-- ConcreteComponent -->
+    <rect x="100" y="200" width="200" height="80" rx="10" ry="10" fill="#fdcdac" stroke="#333" stroke-width="2" />
+    <text x="200" y="230" font-family="Arial" font-size="16" text-anchor="middle">ConcreteComponent</text>
+    <text x="200" y="255" font-family="Arial" font-size="12" text-anchor="middle">+ operation()</text>
+    
+    <!-- Decorator -->
+    <rect x="400" y="200" width="200" height="100" rx="10" ry="10" fill="#cbd5e8" stroke="#333" stroke-width="2" />
+    <text x="500" y="230" font-family="Arial" font-size="16" text-anchor="middle">Decorator</text>
+    <text x="500" y="255" font-family="Arial" font-size="12" text-anchor="middle">- component: Component</text>
+    <text x="500" y="275" font-family="Arial" font-size="12" text-anchor="middle">+ operation()</text>
+    
+    <!-- ConcreteDecoratorA -->
+    <rect x="300" y="350" width="200" height="80" rx="10" ry="10" fill="#f4cae4" stroke="#333" stroke-width="2" />
+    <text x="400" y="380" font-family="Arial" font-size="16" text-anchor="middle">ConcreteDecoratorA</text>
+    <text x="400" y="405" font-family="Arial" font-size="12" text-anchor="middle">+ operation()</text>
+    
+    <!-- ConcreteDecoratorB -->
+    <rect x="550" y="350" width="200" height="80" rx="10" ry="10" fill="#f4cae4" stroke="#333" stroke-width="2" />
+    <text x="650" y="380" font-family="Arial" font-size="16" text-anchor="middle">ConcreteDecoratorB</text>
+    <text x="650" y="405" font-family="Arial" font-size="12" text-anchor="middle">+ operation()</text>
+    
+    <!-- 関係を表す線 -->
+    <line x1="200" y1="200" x2="330" y2="130" stroke="#333" stroke-width="1.5" />
+    <line x1="500" y1="200" x2="370" y2="130" stroke="#333" stroke-width="1.5" />
+    <line x1="400" y1="350" x2="470" y2="300" stroke="#333" stroke-width="1.5" />
+    <line x1="650" y1="350" x2="530" y2="300" stroke="#333" stroke-width="1.5" />
+    
+    <!-- コンポーネントへの参照 -->
+    <line x1="400" y1="230" x2="250" y2="230" stroke="#333" stroke-width="1.5" stroke-dasharray="5,5" />
+    <polygon points="250,230 260,225 260,235" fill="#333" />
+    
+    <text x="350" y="25" font-family="Arial" font-size="16" text-anchor="middle" font-weight="bold">Decoratorパターン</text>
+    
+    <!-- 説明文 -->
+    <rect x="50" y="150" width="600" height="30" rx="5" ry="5" fill="#f8f9fa" stroke="#ccc" stroke-width="1" />
+    <text x="350" y="170" font-family="Arial" font-size="14" text-anchor="middle">デコレータは同じインターフェースを実装し、機能を追加しながら元のコンポーネントに委譲する</text>
+  </svg>
+
+  <h2>4. 具体例で理解する</h2>
+  
+  <h3>例1: コーヒーショップのメニュー</h3>
+  <p>コーヒーショップでコーヒーにトッピングを追加する例を考えてみましょう：</p>
+  <ul>
+    <li><strong>Component</strong>：Beverage（飲み物）- 「説明を取得する」「価格を計算する」などの共通操作を定義</li>
+    <li><strong>ConcreteComponent</strong>：Espresso（エスプレッソ）、HouseBlend（ハウスブレンド）など - 基本の飲み物</li>
+    <li><strong>Decorator</strong>：CondimentDecorator（トッピング装飾者）- Beverageを拡張し、コンポーネントへの参照を持つ</li>
+    <li><strong>ConcreteDecorator</strong>：Milk（ミルク）、Sugar（砂糖）、Whip（ホイップクリーム）など - 具体的なトッピング</li>
+  </ul>
+  
+  <p>これにより、「ミルク入りエスプレッソ」「砂糖とホイップクリーム入りハウスブレンド」など、様々な組み合わせを柔軟に作成できます。価格計算も、基本のコーヒーの価格にトッピングの価格を加算するだけです。</p>
+
+  <h3>例2: テキストフォーマッタ</h3>
+  <p>テキストに様々な装飾（太字、斜体、下線など）を追加する例も考えてみましょう：</p>
+  <ul>
+    <li><strong>Component</strong>：Text（テキスト）- 「テキストを取得する」などの操作を定義</li>
+    <li><strong>ConcreteComponent</strong>：PlainText（プレーンテキスト）- 装飾のないテキスト</li>
+    <li><strong>Decorator</strong>：TextDecorator（テキスト装飾者）- Textを拡張し、コンポーネントへの参照を持つ</li>
+    <li><strong>ConcreteDecorator</strong>：BoldText（太字）、ItalicText（斜体）、UnderlineText（下線）など - 具体的な装飾</li>
+  </ul>
+  
+  <p>これにより、「太字で下線付きのテキスト」「斜体で太字のテキスト」など、様々な装飾の組み合わせを柔軟に作成できます。</p>
+
+  <div style="background-color: #fff7e6; border: 1px solid #ffd591; padding: 15px; margin: 20px 0; border-radius: 5px;">
+    <h3>中学生向け説明</h3>
+    <p>おにぎりを想像してみてください。基本のおにぎり（白米）があり、それに海苔、ゴマ、塩などの「トッピング」を追加できます。これらのトッピングは自由に組み合わせることができます。「海苔と塩」「ゴマと海苔」などです。Decoratorパターンは、このように「基本のものに様々な追加要素を組み合わせる」仕組みを提供します。</p>
+  </div>
+
+  <h2>5. 継承との違い</h2>
+  <p>Decoratorパターンと継承の主な違いは以下の通りです：</p>
+  
+  <table border="1" style="border-collapse: collapse; width: 100%;">
+    <tr style="background-color: #f2f2f2;">
+      <th style="padding: 10px;">継承の場合</th>
+      <th style="padding: 10px;">Decoratorパターンの場合</th>
+    </tr>
+    <tr>
+      <td style="padding: 10px;">
+        <ul>
+          <li>コンパイル時に機能が決定される（静的）</li>
+          <li>すべての組み合わせに対してサブクラスが必要</li>
+          <li>スーパークラスの変更が全サブクラスに影響する</li>
+          <li>単一継承の制限がある言語では柔軟性が制限される</li>
+        </ul>
+      </td>
+      <td style="padding: 10px;">
+        <ul>
+          <li>実行時に機能を追加できる（動的）</li>
+          <li>少数のクラスで多くの組み合わせを表現できる</li>
+          <li>委譲（デコレータ内でコンポーネントのメソッドを呼び出す）を使用</li>
+          <li>機能追加の順序を変えられる</li>
+        </ul>
+      </td>
+    </tr>
+  </table>
+
+  <h3>クラス爆発の問題</h3>
+  <p>継承だけを使うと、機能の組み合わせの数だけクラスが必要になる「クラス爆発」が起こる可能性があります。例えば、4種類のコーヒーと3種類のトッピングがあり、それぞれ有無を選べるとすると、最大で4 × 2³ = 32クラスが必要になります。</p>
+  
+  <p>Decoratorパターンを使えば、4 + 3 = 7クラスだけで同じ機能を実現できます。</p>
+
+  <h2>6. メリットとデメリット</h2>
+  
+  <h3>メリット</h3>
+  <ul>
+    <li><strong>柔軟性の向上</strong>：継承よりも柔軟に機能を追加できる</li>
+    <li><strong>単一責任の原則</strong>：各デコレータは特定の機能だけに責任を持つ</li>
+    <li><strong>オープン・クローズドの原則</strong>：既存のコードを変更せずに新しい機能を追加できる</li>
+    <li><strong>動的な機能追加</strong>：実行時に機能を追加したり削除したりできる</li>
+    <li><strong>機能の組み合わせの自由度</strong>：様々な機能を自由に組み合わせられる</li>
+  </ul>
+
+  <h3>デメリット</h3>
+  <ul>
+    <li><strong>多数の小さなオブジェクト</strong>：デコレータが多くなると、デバッグや追跡が難しくなる場合がある</li>
+    <li><strong>コードの複雑さ</strong>：デコレータチェーンが長くなると、理解や管理が難しくなる場合がある</li>
+    <li><strong>特定のデコレータの削除が難しい</strong>：チェーンの中間にあるデコレータを削除するのが難しい</li>
+    <li><strong>デコレータの順序依存性</strong>：一部のケースでは、デコレータの適用順序が結果に影響する</li>
+  </ul>
+
+  <h2>7. 類似パターンとの違い</h2>
+  <table border="1" style="border-collapse: collapse; width: 100%;">
+    <tr style="background-color: #f2f2f2;">
+      <th style="padding: 10px;">パターン</th>
+      <th style="padding: 10px;">主な目的</th>
+      <th style="padding: 10px;">Decoratorとの違い</th>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Adapter</strong></td>
+      <td style="padding: 10px;">互換性のないインターフェースを一緒に動作させる</td>
+      <td style="padding: 10px;">Adapterはインターフェースを変換し、Decoratorは機能を追加する</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Composite</strong></td>
+      <td style="padding: 10px;">部分-全体の階層構造を表現する</td>
+      <td style="padding: 10px;">Compositeは構造を構築し、Decoratorは機能を追加する</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Strategy</strong></td>
+      <td style="padding: 10px;">アルゴリズムを交換可能にする</td>
+      <td style="padding: 10px;">Strategyは振る舞いを入れ替え、Decoratorは機能を追加する</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Proxy</strong></td>
+      <td style="padding: 10px;">オブジェクトへのアクセスを制御する</td>
+      <td style="padding: 10px;">Proxyはアクセス制御し、Decoratorは機能を追加する</td>
+    </tr>
+  </table>
+
+  <h2>8. 実践的なアドバイス</h2>
+  <ol>
+    <li><strong>共通インターフェースを明確に定義する</strong>：Component（基本となるインターフェース）は、すべてのデコレータでも使える操作だけを含めるようにしましょう。</li>
+    <li><strong>デコレータの責任を限定する</strong>：各デコレータは単一の機能追加に責任を持つようにしましょう。</li>
+    <li><strong>デバッグの難しさに注意する</strong>：デコレータチェーンが長くなると、どのデコレータがどのような動作をしているのか追跡するのが難しくなります。適切なロギングや名前付けが重要です。</li>
+    <li><strong>型安全性に注意する</strong>：動的に機能を組み合わせる場合、型の不整合が発生しないように注意しましょう。</li>
+    <li><strong>デコレータファクトリーを検討する</strong>：複雑なデコレータチェーンを作成する場合は、ファクトリーパターンを使って作成プロセスを簡略化することを検討しましょう。</li>
+  </ol>
+
+  <h2>9. まとめ</h2>
+  <p>Decoratorパターンは、オブジェクトに新しい機能や責任を動的に追加するデザインパターンです。継承の代わりに委譲を使うことで、より柔軟で再利用可能な設計を実現します。</p>
+
+  <p>このパターンは、様々な機能の組み合わせを表現したい場合や、実行時に機能を追加したい場合に特に役立ちます。ただし、デコレータが多くなると、コードの複雑さやデバッグの難しさが増すこともあるため、適切な状況で使用することが重要です。</p>
+
+  <div style="background-color: #f0f8ff; border: 1px solid #b0c4de; padding: 15px; margin: 20px 0; border-radius: 5px;">
+    <h3>覚えておきたいポイント</h3>
+    <ul>
+      <li>Decoratorは「オブジェクトを包装して新しい機能を追加する」パターン</li>
+      <li>継承よりも柔軟に機能を追加できる</li>
+      <li>実行時に動的に機能を追加・削除できる</li>
+      <li>単一責任の原則とオープン・クローズドの原則に従った設計が可能</li>
+      <li>デコレータチェーンが複雑になりすぎないように注意する</li>
+    </ul>
+  </div>

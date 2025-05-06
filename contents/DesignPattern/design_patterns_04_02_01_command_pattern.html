@@ -1,0 +1,129 @@
+<body>
+  <h1>Commandパターン</h1>
+
+  <div style="background-color: #e6f7ff; border-left: 5px solid #1890ff; padding: 15px; margin: 20px 0;">
+    <h3>問題：</h3>
+    <p>操作（アクション）をオブジェクトとしてカプセル化したい。操作の実行を遅らせたり、履歴を管理したり、操作を取り消したりしたい。</p>
+    <h3>例えば：</h3>
+    <p>テキストエディタの「コピー」「貼り付け」「元に戻す」のような操作や、リモコンのボタンとそれに対応する家電の動作を分離したい。</p>
+  </div>
+
+  <h2>1. Commandパターンとは</h2>
+  <p>Commandパターンは、要求（リクエスト）をオブジェクトとしてカプセル化するデザインパターンです。これにより、異なる要求を持つクライアントをパラメータ化し、操作の実行を遅らせたり、キューに入れたり、ログに記録したり、取り消し可能にしたりすることができます。</p>
+
+  <p>簡単に言うと、「操作（何をするか）をオブジェクトとして表現する」パターンです。</p>
+
+  <h2>2. どんなときに使うの？</h2>
+  <p>以下のような場合にCommandパターンが役立ちます：</p>
+  <ul>
+    <li><strong>操作を遅らせて実行したい場合</strong>：バッチ処理やタスクスケジューリング</li>
+    <li><strong>操作の履歴を保持したい場合</strong>：「元に戻す（Undo）」機能の実装</li>
+    <li><strong>操作をキューに入れて処理したい場合</strong>：非同期処理や負荷分散</li>
+    <li><strong>操作をパラメータとして渡したい場合</strong>：コールバック関数の代わりに使用</li>
+    <li><strong>GUI要素と実際の処理を分離したい場合</strong>：ボタンやメニュー項目とそれに関連する処理</li>
+    <li><strong>マクロ（複数の操作のシーケンス）を実装したい場合</strong>：複数のコマンドをまとめて実行</li>
+    <li><strong>トランザクションをサポートしたい場合</strong>：一連の操作を原子的に実行/ロールバック</li>
+  </ul>
+
+  <h2>3. 仕組み</h2>
+  <p>Commandパターンは以下の要素から構成されます：</p>
+  <ol>
+    <li><strong>Command（コマンド）</strong>：操作を実行するためのインターフェース</li>
+    <li><strong>ConcreteCommand（具体的なコマンド）</strong>：具体的な操作を実装するクラス</li>
+    <li><strong>Invoker（呼び出し元）</strong>：コマンドの実行をトリガーするオブジェクト</li>
+    <li><strong>Receiver（受信者）</strong>：実際の処理を行うオブジェクト</li>
+    <li><strong>Client（クライアント）</strong>：ConcreteCommandを作成し、Receiverを設定する</li>
+  </ol>
+  <h2>4. 具体例で理解する</h2>
+
+  <h3>例1: リモコン</h3>
+  <p>テレビのリモコンの例を考えてみましょう：</p>
+  <ul>
+    <li><strong>Command</strong>：Button（ボタン）- ボタンの押下を表すインターフェース</li>
+    <li><strong>ConcreteCommand</strong>：TurnOnCommand、TurnOffCommand、ChangeChannelCommand など</li>
+    <li><strong>Receiver</strong>：Television（テレビ）- 実際に電源のオン/オフやチャンネル変更を行う</li>
+    <li><strong>Invoker</strong>：RemoteControl（リモコン）- ボタンを押すとコマンドを実行する</li>
+    <li><strong>Client</strong>：アプリケーション - コマンドを作成してリモコンにセットする</li>
+  </ul>
+
+  <p>この例では、リモコン（インボーカー）はテレビ（レシーバー）の詳細を知らず、単にボタン（コマンド）に関連付けられたコマンドを実行するだけです。新しい機能を追加したい場合、新しいコマンドクラスを作成するだけで、既存のコードを変更する必要はありません。</p>
+
+  <h3>例2: テキストエディタの操作</h3>
+  <p>テキストエディタの「コピー」「貼り付け」「元に戻す」の例を考えてみましょう：</p>
+  <ul>
+    <li><strong>Command</strong>：EditCommand - テキスト編
+
+      <body>
+        <h1>Commandパターン</h1>
+
+        <div style="background-color: #e6f7ff; border-left: 5px solid #1890ff; padding: 15px; margin: 20px 0;">
+          <h3>問題：</h3>
+          <p>操作（アクション）をオブジェクトとしてカプセル化したい。操作の実行を遅らせたり、履歴を管理したり、操作を取り消したりしたい。</p>
+          <h3>例えば：</h3>
+          <p>テキストエディタの「コピー」「貼り付け」「元に戻す」のような操作や、リモコンのボタンとそれに対応する家電の動作を分離したい。</p>
+        </div>
+
+        <h2>1. Commandパターンとは</h2>
+        <p>Commandパターンは、要求（リクエスト）をオブジェクトとしてカプセル化するデザインパターンです。これにより、異なる要求を持つクライアントをパラメータ化し、操作の実行を遅らせたり、キューに入れたり、ログに記録したり、取り消し可能にしたりすることができます。</p>
+
+        <p>簡単に言うと、「操作（何をするか）をオブジェクトとして表現する」パターンです。</p>
+
+        <h2>2. どんなときに使うの？</h2>
+        <p>以下のような場合にCommandパターンが役立ちます：</p>
+        <ul>
+          <li><strong>操作を遅らせて実行したい場合</strong>：バッチ処理やタスクスケジューリング</li>
+          <li><strong>操作の履歴を保持したい場合</strong>：「元に戻す（Undo）」機能の実装</li>
+          <li><strong>操作をキューに入れて処理したい場合</strong>：非同期処理や負荷分散</li>
+          <li><strong>操作をパラメータとして渡したい場合</strong>：コールバック関数の代わりに使用</li>
+          <li><strong>GUI要素と実際の処理を分離したい場合</strong>：ボタンやメニュー項目とそれに関連する処理</li>
+          <li><strong>マクロ（複数の操作のシーケンス）を実装したい場合</strong>：複数のコマンドをまとめて実行</li>
+          <li><strong>トランザクションをサポートしたい場合</strong>：一連の操作を原子的に実行/ロールバック</li>
+        </ul>
+
+        <h2>3. 仕組み</h2>
+        <p>Commandパターンは以下の要素から構成されます：</p>
+        <ol>
+          <li><strong>Command（コマンド）</strong>：操作を実行するためのインターフェース</li>
+          <li><strong>ConcreteCommand（具体的なコマンド）</strong>：具体的な操作を実装するクラス</li>
+          <li><strong>Invoker（呼び出し元）</strong>：コマンドの実行をトリガーするオブジェクト</li>
+          <li><strong>Receiver（受信者）</strong>：実際の処理を行うオブジェクト</li>
+          <li><strong>Client（クライアント）</strong>：ConcreteCommandを作成し、Receiverを設定する</li>
+        </ol>
+
+        <svg width="100%" height="500" viewBox="0 0 700 500">
+          <!-- Command -->
+          <rect x="250" y="50" width="200" height="80" rx="10" ry="10" fill="#b3e2cd" stroke="#333" stroke-width="2" />
+          <text x="350" y="80" font-family="Arial" font-size="16" text-anchor="middle">Command</text>
+          <text x="350" y="105" font-family="Arial" font-size="12" text-anchor="middle">+ execute()</text>
+
+          <!-- ConcreteCommand -->
+          <rect x="250" y="200" width="200" height="100" rx="10" ry="10" fill="#cbd5e8" stroke="#333" stroke-width="2" />
+          <text x="350" y="230" font-family="Arial" font-size="16" text-anchor="middle">ConcreteCommand</text>
+          <text x="350" y="255" font-family="Arial" font-size="12" text-anchor="middle">- receiver</text>
+          <text x="350" y="275" font-family="Arial" font-size="12" text-anchor="middle">+ execute()</text>
+
+          <!-- Receiver -->
+          <rect x="450" y="350" width="200" height="80" rx="10" ry="10" fill="#fdcdac" stroke="#333" stroke-width="2" />
+          <text x="550" y="380" font-family="Arial" font-size="16" text-anchor="middle">Receiver</text>
+          <text x="550" y="405" font-family="Arial" font-size="12" text-anchor="middle">+ action()</text>
+
+          <!-- Invoker -->
+          <rect x="50" y="350" width="200" height="80" rx="10" ry="10" fill="#f4cae4" stroke="#333" stroke-width="2" />
+          <text x="150" y="380" font-family="Arial" font-size="16" text-anchor="middle">Invoker</text>
+          <text x="150" y="405" font-family="Arial" font-size="12" text-anchor="middle">- command</text>
+
+          <!-- Client -->
+          <rect x="50" y="50" width="120" height="80" rx="10" ry="10" fill="#e6f5c9" stroke="#333" stroke-width="2" />
+          <text x="110" y="95" font-family="Arial" font-size="16" text-anchor="middle">Client</text>
+
+          <!-- 関係を表す線 -->
+          <line x1="350" y1="200" x2="350" y2="130" stroke="#333" stroke-width="1.5" />
+          <line x1="350" y1="300" x2="550" y2="350" stroke="#333" stroke-width="1.5" stroke-dasharray="5,5" />
+          <line x1="150" y1="350" x2="350" y2="300" stroke="#333" stroke-width="1.5" stroke-dasharray="5,5" />
+          <line x1="170" y1="90" x2="250" y2="90" stroke="#333" stroke-width="1.5" />
+
+          <text x="350" y="25" font-family="Arial" font-size="16" text-anchor="middle" font-weight="bold">Commandパターン</text>
+
+          <!-- 説明文 -->
+          <rect x="50" y="450" width="600" height="30" rx="5" ry="5" fill="#f8f9fa" stroke="#ccc" stroke-width="1" />
+          <text x="350" y="470" font-family="Arial" font-size="14" text-anchor="middle">コマンドは要求をカプセル化し、インボーカーとレシーバーを分離する</text>

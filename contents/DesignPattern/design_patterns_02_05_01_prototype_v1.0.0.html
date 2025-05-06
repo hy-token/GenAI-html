@@ -1,0 +1,153 @@
+<body>
+  <h1>Prototypeパターン</h1>
+
+  <div style="background-color: #e6f7ff; border-left: 5px solid #1890ff; padding: 15px; margin: 20px 0;">
+    <h3>問題：</h3>
+    <p>既存のオブジェクトをコピーして新しいオブジェクトを作りたい（クラスに依存せずに）。</p>
+    <h3>例えば：</h3>
+    <p>ゲームで敵キャラクターの基本形があり、それをコピーして少しずつ変更した敵キャラクターをたくさん作りたい。</p>
+  </div>
+
+  <h2>1. Prototypeパターンとは</h2>
+  <p>Prototypeパターンは、既存のオブジェクト（プロトタイプ）をコピーして新しいオブジェクトを作成するデザインパターンです。このパターンを使うと、オブジェクトの作成コストを減らし、クラスの実装詳細に依存せずにオブジェクトを複製できます。</p>
+  
+  <p>簡単に言うと、「既存のオブジェクトをコピーして新しいオブジェクトを作る」パターンです。</p>
+
+  <h2>2. どんなときに使うの？</h2>
+  <p>以下のような場合にPrototypeパターンが役立ちます：</p>
+  <ul>
+    <li><strong>オブジェクトの作成コストが高い場合</strong>：データベースからの読み込みや複雑な計算が必要な場合など</li>
+    <li><strong>オブジェクトの状態が重要で、同じ状態から始めたい場合</strong>：初期状態が設定された「テンプレート」を用意しておきたい場合</li>
+    <li><strong>クラスのインスタンス化ではなく、既存のオブジェクトのコピーが必要な場合</strong>：クラスの具体的な型に依存したくない場合</li>
+    <li><strong>実行時に生成するクラスを指定したい場合</strong>：どのオブジェクトをコピーするかを実行時に決めたい場合</li>
+    <li><strong>同じオブジェクトの複数のバリエーションが必要な場合</strong>：基本オブジェクトからわずかに異なるオブジェクトをたくさん作りたい場合</li>
+  </ul>
+
+  <h2>3. 仕組み</h2>
+  <p>Prototypeパターンは以下の要素から構成されます：</p>
+  <ol>
+    <li><strong>Prototype（プロトタイプ）</strong>：自分自身をコピーするためのインターフェースを定義する</li>
+    <li><strong>ConcretePrototype（具体的なプロトタイプ）</strong>：Prototypeインターフェースを実装し、自分自身をコピーする</li>
+    <li><strong>Client（クライアント）</strong>：プロトタイプに複製を指示する</li>
+  </ol>
+
+  <svg width="100%" height="350" viewBox="0 0 700 350">
+    <!-- Prototype -->
+    <rect x="250" y="50" width="200" height="80" rx="10" ry="10" fill="#b3e2cd" stroke="#333" stroke-width="2" />
+    <text x="350" y="80" font-family="Arial" font-size="16" text-anchor="middle">Prototype</text>
+    <text x="350" y="110" font-family="Arial" font-size="12" text-anchor="middle">+ clone(): Prototype</text>
+    
+    <!-- ConcretePrototypeA -->
+    <rect x="100" y="200" width="200" height="80" rx="10" ry="10" fill="#cbd5e8" stroke="#333" stroke-width="2" />
+    <text x="200" y="230" font-family="Arial" font-size="16" text-anchor="middle">ConcretePrototypeA</text>
+    <text x="200" y="260" font-family="Arial" font-size="12" text-anchor="middle">+ clone(): Prototype</text>
+    
+    <!-- ConcretePrototypeB -->
+    <rect x="400" y="200" width="200" height="80" rx="10" ry="10" fill="#cbd5e8" stroke="#333" stroke-width="2" />
+    <text x="500" y="230" font-family="Arial" font-size="16" text-anchor="middle">ConcretePrototypeB</text>
+    <text x="500" y="260" font-family="Arial" font-size="12" text-anchor="middle">+ clone(): Prototype</text>
+    
+    <!-- Client -->
+    <circle cx="100" cy="80" r="40" fill="#fdcdac" stroke="#333" stroke-width="2" />
+    <text x="100" y="85" font-family="Arial" font-size="16" text-anchor="middle">Client</text>
+    
+    <!-- 関係を表す線 -->
+    <line x1="140" y1="80" x2="250" y2="80" stroke="#333" stroke-width="1.5" />
+    <line x1="200" y1="200" x2="320" y2="130" stroke="#333" stroke-width="1.5" />
+    <line x1="500" y1="200" x2="380" y2="130" stroke="#333" stroke-width="1.5" />
+    
+    <text x="180" y="65" font-family="Arial" font-size="12" text-anchor="middle">uses</text>
+    
+    <text x="350" y="25" font-family="Arial" font-size="16" text-anchor="middle" font-weight="bold">Prototypeパターン</text>
+  </svg>
+
+  <h2>4. 具体例で理解する</h2>
+  
+  <h3>例1: 図工の型紙</h3>
+  <p>図工の授業で型紙を使うことを想像してみてください。一度型紙（プロトタイプ）を作れば、それを使って同じ形をたくさん作ることができます。</p>
+  <p>これをプログラムで表すと：</p>
+  <ul>
+    <li><strong>型紙</strong>（Prototype）：コピーするためのインターフェースを定義</li>
+    <li><strong>星型の型紙</strong>、<strong>ハート型の型紙</strong>（ConcretePrototype）：具体的な型紙</li>
+    <li><strong>生徒</strong>（Client）：型紙を使って形を作る</li>
+  </ul>
+
+  <h3>例2: ゲームの敵キャラクター</h3>
+  <p>ゲームで敵キャラクターを作る例を考えてみましょう：</p>
+  <ul>
+    <li><strong>敵キャラクター</strong>（Prototype）：自分自身をコピーするメソッドを定義</li>
+    <li><strong>スライム</strong>、<strong>ゾンビ</strong>、<strong>ドラゴン</strong>（ConcretePrototype）：具体的な敵キャラクターの種類</li>
+    <li><strong>敵生成システム</strong>（Client）：プロトタイプから敵をコピーして生成</li>
+  </ul>
+  
+  <p>例えば、ドラゴンの基本形を作っておき、それをコピーして「色の違うドラゴン」「サイズの違うドラゴン」「武器の違うドラゴン」などを作ることができます。毎回ドラゴンを一から作るよりも効率的です。</p>
+
+  <div style="background-color: #fff7e6; border: 1px solid #ffd591; padding: 15px; margin: 20px 0; border-radius: 5px;">
+    <h3>中学生向け説明</h3>
+    <p>学校で友達とノートを交換してコピーすることを想像してみてください。友達のキレイなノートをコピーすれば、一から書くよりも早くて正確ですよね。Prototypeパターンは、このように「既にあるものをコピーして新しいものを作る」というパターンです。</p>
+  </div>
+
+  <h2>5. 浅いコピーと深いコピー</h2>
+  <p>Prototypeパターンを実装する際に注意すべき重要なポイントとして、「浅いコピー（Shallow Copy）」と「深いコピー（Deep Copy）」の違いがあります。</p>
+  
+  <table border="1" style="border-collapse: collapse; width: 100%;">
+    <tr style="background-color: #f2f2f2;">
+      <th style="padding: 10px;">浅いコピー</th>
+      <th style="padding: 10px;">深いコピー</th>
+    </tr>
+    <tr>
+      <td style="padding: 10px;">オブジェクトの参照（アドレス）だけをコピーする</td>
+      <td style="padding: 10px;">オブジェクトの内容まで完全にコピーする</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px;">元のオブジェクトを変更すると、コピーしたオブジェクトも変わる</td>
+      <td style="padding: 10px;">元のオブジェクトを変更しても、コピーしたオブジェクトは変わらない</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px;">速いが安全でない場合がある</td>
+      <td style="padding: 10px;">遅いが安全</td>
+    </tr>
+  </table>
+
+  <p>一般的に、Prototypeパターンでは「深いコピー」を使うことが多いですが、状況によって適切な方法を選ぶ必要があります。</p>
+
+  <h2>6. メリットとデメリット</h2>
+  
+  <h3>メリット</h3>
+  <ul>
+    <li><strong>オブジェクトの作成コストを削減できる</strong>：複雑なオブジェクトの初期化を何度も行う必要がない</li>
+    <li><strong>クラスに依存せずにオブジェクトをコピーできる</strong>：具体的なクラスの型を知らなくてもコピーできる</li>
+    <li><strong>実行時にオブジェクトを追加・削除できる</strong>：プロトタイプの登録システムを使えば、動的にプロトタイプを管理できる</li>
+    <li><strong>複雑なオブジェクト構造もコピーできる</strong>：深いコピーを実装すれば、複雑な構造も再現できる</li>
+  </ul>
+
+  <h3>デメリット</h3>
+  <ul>
+    <li><strong>循環参照のあるオブジェクトのコピーが難しい</strong>：オブジェクトが互いに参照し合っている場合、コピーが複雑になる</li>
+    <li><strong>深いコピーの実装が難しい場合がある</strong>：オブジェクトが複雑な場合、完全なコピーを作るのが難しくなる</li>
+    <li><strong>コンストラクタの呼び出しをバイパスする</strong>：コピー元のオブジェクトの状態を引き継ぐため、コンストラクタの初期化ロジックが実行されない場合がある</li>
+  </ul>
+
+  <h2>7. 実践的なアドバイス</h2>
+  <ol>
+    <li><strong>浅いコピーと深いコピーを適切に選ぶ</strong>：状況に応じて、適切なコピー方法を選びましょう。</li>
+    <li><strong>プロトタイプレジストリを検討する</strong>：よく使うプロトタイプを一元管理するレジストリを作れば、必要なときに簡単に取り出せます。</li>
+    <li><strong>言語の機能を活用する</strong>：多くのプログラミング言語には、オブジェクトのコピーをサポートする機能があります。これらを活用しましょう。</li>
+    <li><strong>Prototypeパターンが本当に必要か考える</strong>：オブジェクトの作成コストが高くない場合は、通常のコンストラクタでも十分かもしれません。</li>
+  </ol>
+
+  <h2>8. まとめ</h2>
+  <p>Prototypeパターンは、既存のオブジェクトをコピーして新しいオブジェクトを作成するデザインパターンです。オブジェクトの作成コストが高い場合や、同じ初期状態から始まるオブジェクトをたくさん作りたい場合に特に役立ちます。</p>
+
+  <p>ただし、深いコピーの実装や循環参照の処理など、注意すべき点もあるため、状況に応じて適切に使用する必要があります。</p>
+
+  <div style="background-color: #f0f8ff; border: 1px solid #b0c4de; padding: 15px; margin: 20px 0; border-radius: 5px;">
+    <h3>覚えておきたいポイント</h3>
+    <ul>
+      <li>Prototypeは「既存のオブジェクトをコピーして新しいオブジェクトを作る」パターン</li>
+      <li>オブジェクトの作成コストが高い場合に特に役立つ</li>
+      <li>浅いコピーと深いコピーの違いに注意</li>
+      <li>クラスに依存せずにオブジェクトを複製できる</li>
+    </ul>
+  </div>
+</body>

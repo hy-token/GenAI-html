@@ -1,0 +1,118 @@
+<body>
+  <h1>Singletonパターン</h1>
+
+  <div style="background-color: #e6f7ff; border-left: 5px solid #1890ff; padding: 15px; margin: 20px 0;">
+    <h3>問題：</h3>
+    <p>あるクラスのインスタンス（実体）が<strong>プログラム全体でただ1つだけ</strong>存在することを保証したい。</p>
+    <h3>例えば：</h3>
+    <p>学校のシステムで、「校長先生」は一人だけである必要がある。</p>
+  </div>
+
+  <h2>1. Singletonパターンとは</h2>
+  <p>Singletonパターンは、特定のクラスのインスタンスが<strong>プログラム全体で1つだけ</strong>作られることを保証するデザインパターンです。このパターンを使うと、システム内のどの部分からでも同じインスタンスにアクセスできます。</p>
+  
+  <h2>2. どんなときに使うの？</h2>
+  <p>以下のような場合にSingletonパターンが役立ちます：</p>
+  <ul>
+    <li><strong>設定マネージャー</strong>：アプリの設定は一箇所で管理したい</li>
+    <li><strong>データベース接続</strong>：データベースへの接続は通常1つだけで十分</li>
+    <li><strong>ファイルマネージャー</strong>：ファイル操作を一元管理したい</li>
+    <li><strong>ゲームの「スコアボード」</strong>：スコアを記録する場所は一つだけでいい</li>
+    <li><strong>システムのログ記録</strong>：ログを書き込む機能は1つにまとめたい</li>
+  </ul>
+
+  <h2>3. 仕組み</h2>
+  <p>Singletonパターンの仕組みは以下のとおりです：</p>
+  <ol>
+    <li>クラスのコンストラクタを<strong>プライベート</strong>（外部から呼び出せないように）する</li>
+    <li>クラス内に自分自身のインスタンスを保持する<strong>静的な変数</strong>を用意する</li>
+    <li>インスタンスを取得するための<strong>静的なメソッド</strong>（getInstance()など）を提供する</li>
+    <li>このメソッドは、インスタンスが存在しなければ新しく作り、すでに存在すれば既存のものを返す</li>
+  </ol>
+
+  <svg width="100%" height="300" viewBox="0 0 600 300">
+    <rect x="200" y="50" width="200" height="80" rx="10" ry="10" fill="#8dd3c7" stroke="#333" stroke-width="2" />
+    <text x="300" y="85" font-family="Arial" font-size="16" text-anchor="middle">Singleton</text>
+    <text x="300" y="110" font-family="Arial" font-size="12" text-anchor="middle">- instance: Singleton</text>
+    <text x="300" y="125" font-family="Arial" font-size="12" text-anchor="middle">+ getInstance(): Singleton</text>
+    
+    <rect x="50" y="200" width="120" height="50" rx="5" ry="5" fill="#ffffb3" stroke="#333" stroke-width="1" />
+    <text x="110" y="230" font-family="Arial" font-size="14" text-anchor="middle">クライアント1</text>
+    
+    <rect x="240" y="200" width="120" height="50" rx="5" ry="5" fill="#ffffb3" stroke="#333" stroke-width="1" />
+    <text x="300" y="230" font-family="Arial" font-size="14" text-anchor="middle">クライアント2</text>
+    
+    <rect x="430" y="200" width="120" height="50" rx="5" ry="5" fill="#ffffb3" stroke="#333" stroke-width="1" />
+    <text x="490" y="230" font-family="Arial" font-size="14" text-anchor="middle">クライアント3</text>
+    
+    <line x1="110" y1="200" x2="215" y2="130" stroke="#333" stroke-width="1.5" stroke-dasharray="5,5" />
+    <line x1="300" y1="200" x2="300" y2="130" stroke="#333" stroke-width="1.5" stroke-dasharray="5,5" />
+    <line x1="490" y1="200" x2="385" y2="130" stroke="#333" stroke-width="1.5" stroke-dasharray="5,5" />
+    
+    <text x="150" y="165" font-family="Arial" font-size="12" text-anchor="middle" fill="#333">getInstance()</text>
+    <text x="300" y="165" font-family="Arial" font-size="12" text-anchor="middle" fill="#333">getInstance()</text>
+    <text x="450" y="165" font-family="Arial" font-size="12" text-anchor="middle" fill="#333">getInstance()</text>
+    
+    <text x="300" y="30" font-family="Arial" font-size="16" text-anchor="middle" font-weight="bold">Singletonパターン</text>
+  </svg>
+
+  <h2>4. 具体例で理解する</h2>
+  
+  <h3>例1: 学校の放送室</h3>
+  <p>学校の放送室を想像してみてください。放送設備は学校に1つしかありません。誰が使うにしても、同じ放送設備を使わないといけません。</p>
+  <p>これをプログラムで表すと：</p>
+  <ul>
+    <li>「放送室」クラスはSingletonパターンで実装する</li>
+    <li>「放送する」という機能を持つ</li>
+    <li>学校のどこからでも同じ放送室にアクセスできる</li>
+  </ul>
+
+  <h3>例2: ゲームのスコア管理</h3>
+  <p>ゲームでプレイヤーのスコアを管理する「スコアマネージャー」を考えてみましょう。</p>
+  <ul>
+    <li>スコアは一元管理する必要がある（複数あると混乱する）</li>
+    <li>ゲームのどの部分からでもスコアを更新・参照できる必要がある</li>
+    <li>「スコアマネージャー」クラスをSingletonパターンで実装すれば、どこからでも同じスコア情報にアクセスできる</li>
+  </ul>
+
+  <div style="background-color: #fff7e6; border: 1px solid #ffd591; padding: 15px; margin: 20px 0; border-radius: 5px;">
+    <h3>中学生向け説明</h3>
+    <p>友達と遊ぶとき、「鬼ごっこのルール」は1つだけです。もし複数のルールがあると混乱しますよね。Singletonパターンは、「このクラスのインスタンスは1つだけ！」と決めるパターンです。例えば、クラスの日直は1日に1人だけですよね。それと同じです。</p>
+  </div>
+
+  <h2>5. メリットとデメリット</h2>
+  
+  <h3>メリット</h3>
+  <ul>
+    <li><strong>一貫性の保証</strong>：同じインスタンスを使うので、データの一貫性が保たれる</li>
+    <li><strong>グローバルアクセス</strong>：プログラムのどこからでもアクセスできる</li>
+    <li><strong>インスタンス化の制御</strong>：インスタンスの数を正確に制御できる</li>
+    <li><strong>メモリ効率</strong>：必要なオブジェクトを1つだけ作るので、メモリを節約できる</li>
+  </ul>
+
+  <h3>デメリット</h3>
+  <ul>
+    <li><strong>結合度が高くなる</strong>：多くのクラスがSingletonに依存すると、変更が難しくなる</li>
+    <li><strong>テストが難しい</strong>：インスタンスが固定されるため、テスト用のモックに置き換えにくい</li>
+    <li><strong>マルチスレッド環境での注意</strong>：複数のスレッドから同時にアクセスされる場合、注意が必要</li>
+  </ul>
+
+  <h2>6. 実践的なアドバイス</h2>
+  <ol>
+    <li><strong>本当に必要か考える</strong>：Singletonは強力ですが、過剰に使うとプログラムが複雑になります。本当に「インスタンスが1つしかない」という保証が必要な場合だけ使いましょう。</li>
+    <li><strong>グローバル変数との違いを理解する</strong>：Singletonはただのグローバル変数ではありません。インスタンス化のタイミングや方法を制御できます。</li>
+    <li><strong>「遅延初期化」を検討する</strong>：最初からインスタンスを作るのではなく、必要になった時点で作る方法もあります。</li>
+  </ol>
+
+  <h2>7. まとめ</h2>
+  <p>Singletonパターンは、クラスのインスタンスが1つだけであることを保証するパターンです。設定管理、リソース共有、一元管理が必要な場合に便利です。ただし、過剰に使うとプログラムの柔軟性が失われるので、本当に必要な場合にのみ使うことをお勧めします。</p>
+
+  <div style="background-color: #f0f8ff; border: 1px solid #b0c4de; padding: 15px; margin: 20px 0; border-radius: 5px;">
+    <h3>覚えておきたいポイント</h3>
+    <ul>
+      <li>Singletonは「1つのインスタンスだけを持つクラス」を作るパターン</li>
+      <li>設定、リソース共有、ログ記録などに適している</li>
+      <li>過剰に使うとプログラムが硬直化するので注意</li>
+    </ul>
+  </div>
+</body>

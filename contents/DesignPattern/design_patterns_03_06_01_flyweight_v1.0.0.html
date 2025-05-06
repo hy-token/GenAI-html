@@ -1,0 +1,241 @@
+<body>
+  <h1>Flyweightパターン</h1>
+
+  <div style="background-color: #e6f7ff; border-left: 5px solid #1890ff; padding: 15px; margin: 20px 0;">
+    <h3>問題：</h3>
+    <p>大量の小さなオブジェクトを効率的に扱いたい。メモリ使用量を減らし、パフォーマンスを向上させたい。</p>
+    <h3>例えば：</h3>
+    <p>テキストエディタで大量の文字を表示する際に、各文字ごとにオブジェクトを作るとメモリを大量に消費してしまう。</p>
+  </div>
+
+  <h2>1. Flyweightパターンとは</h2>
+  <p>Flyweightパターンは、共有可能なオブジェクトを再利用することで、メモリ使用量を減らし、パフォーマンスを向上させるデザインパターンです。多数の同じようなオブジェクトを効率的に扱うために使用されます。</p>
+  
+  <p>簡単に言うと、「共通データを共有して、メモリ使用量を減らす」パターンです。</p>
+
+  <h2>2. どんなときに使うの？</h2>
+  <p>以下のような場合にFlyweightパターンが役立ちます：</p>
+  <ul>
+    <li><strong>大量の小さなオブジェクトを作成する必要がある場合</strong>：テキストエディタの文字、ゲームの粒子効果など</li>
+    <li><strong>オブジェクトの数が多すぎてメモリ不足になる恐れがある場合</strong>：モバイルデバイスやメモリ制約のある環境</li>
+    <li><strong>オブジェクトの多くの状態が共有できる場合</strong>：内部状態（共有可能）と外部状態（コンテキスト依存）に分けられる</li>
+    <li><strong>オブジェクトのアイデンティティが重要でない場合</strong>：特定のインスタンスである必要がなく、内容が同じであれば共有できる</li>
+  </ul>
+
+  <h2>3. 仕組み</h2>
+  <p>Flyweightパターンは以下の要素から構成されます：</p>
+  <ol>
+    <li><strong>Flyweight（フライウェイト）</strong>：共有インターフェースを定義するクラスまたはインターフェース</li>
+    <li><strong>ConcreteFlyweight（具体的なフライウェイト）</strong>：Flyweightを実装し、内部状態を持つクラス</li>
+    <li><strong>FlyweightFactory（フライウェイトファクトリー）</strong>：フライウェイトオブジェクトを作成・管理するファクトリー</li>
+    <li><strong>Client（クライアント）</strong>：フライウェイトを使用し、外部状態を管理する</li>
+  </ol>
+
+  <h3>内部状態と外部状態</h3>
+  <p>Flyweightパターンでは、オブジェクトの状態を2つに分けることが重要です：</p>
+  <ul>
+    <li><strong>内部状態（Intrinsic State）</strong>：オブジェクト間で共有できる状態。コンテキストに依存しない不変の情報</li>
+    <li><strong>外部状態（Extrinsic State）</strong>：コンテキストに依存する状態。クライアントが管理し、フライウェイトに渡す</li>
+  </ul>
+
+  <svg width="100%" height="450" viewBox="0 0 700 450">
+    <!-- Flyweight -->
+    <rect x="250" y="50" width="200" height="80" rx="10" ry="10" fill="#b3e2cd" stroke="#333" stroke-width="2" />
+    <text x="350" y="80" font-family="Arial" font-size="16" text-anchor="middle">Flyweight</text>
+    <text x="350" y="105" font-family="Arial" font-size="12" text-anchor="middle">+ operation(extrinsicState)</text>
+    
+    <!-- FlyweightFactory -->
+    <rect x="50" y="200" width="200" height="100" rx="10" ry="10" fill="#cbd5e8" stroke="#333" stroke-width="2" />
+    <text x="150" y="230" font-family="Arial" font-size="16" text-anchor="middle">FlyweightFactory</text>
+    <text x="150" y="255" font-family="Arial" font-size="12" text-anchor="middle">- flyweights: Map</text>
+    <text x="150" y="275" font-family="Arial" font-size="12" text-anchor="middle">+ getFlyweight(key)</text>
+    
+    <!-- ConcreteFlyweight -->
+    <rect x="300" y="200" width="200" height="100" rx="10" ry="10" fill="#fdcdac" stroke="#333" stroke-width="2" />
+    <text x="400" y="230" font-family="Arial" font-size="16" text-anchor="middle">ConcreteFlyweight</text>
+    <text x="400" y="255" font-family="Arial" font-size="12" text-anchor="middle">- intrinsicState</text>
+    <text x="400" y="275" font-family="Arial" font-size="12" text-anchor="middle">+ operation(extrinsicState)</text>
+    
+    <!-- Client -->
+    <rect x="500" y="350" width="200" height="80" rx="10" ry="10" fill="#f4cae4" stroke="#333" stroke-width="2" />
+    <text x="600" y="380" font-family="Arial" font-size="16" text-anchor="middle">Client</text>
+    <text x="600" y="405" font-family="Arial" font-size="12" text-anchor="middle">- extrinsicState</text>
+    
+    <!-- 関係を表す線 -->
+    <line x1="400" y1="200" x2="350" y2="130" stroke="#333" stroke-width="1.5" />
+    <line x1="150" y1="300" x2="400" y2="350" stroke="#333" stroke-width="1.5" stroke-dasharray="5,5" />
+    <line x1="500" y1="390" x2="250" y2="250" stroke="#333" stroke-width="1.5" stroke-dasharray="5,5" />
+    <line x1="600" y1="350" x2="400" y2="300" stroke="#333" stroke-width="1.5" stroke-dasharray="5,5" />
+    
+    <text x="350" y="25" font-family="Arial" font-size="16" text-anchor="middle" font-weight="bold">Flyweightパターン</text>
+    
+    <!-- 説明文 -->
+    <rect x="50" y="150" width="600" height="30" rx="5" ry="5" fill="#f8f9fa" stroke="#ccc" stroke-width="1" />
+    <text x="350" y="170" font-family="Arial" font-size="14" text-anchor="middle">内部状態は共有され、外部状態はクライアントから渡される</text>
+  </svg>
+
+  <h2>4. 具体例で理解する</h2>
+  
+  <h3>例1: テキストエディタ</h3>
+  <p>テキストエディタで文字を表示する例を考えてみましょう：</p>
+  <ul>
+    <li><strong>Flyweight</strong>：Character（文字）- 文字の描画などの操作を定義</li>
+    <li><strong>ConcreteFlyweight</strong>：CharacterA、CharacterB、...など - 特定の文字のグリフデータ（形状）を持つ</li>
+    <li><strong>FlyweightFactory</strong>：CharacterFactory - 文字オブジェクトを作成・管理</li>
+    <li><strong>Client</strong>：TextEditor - 文字の位置、サイズ、色などの外部状態を管理</li>
+  </ul>
+  
+  <p>この例では：</p>
+  <ul>
+    <li><strong>内部状態</strong>：文字のグリフデータ（形状）</li>
+    <li><strong>外部状態</strong>：文字の位置、フォントサイズ、色など</li>
+  </ul>
+  
+  <p>例えば、「Hello」というテキストを表示する場合、「H」「e」「l」「o」の4種類の文字オブジェクトだけを作成し、「l」は2回再利用します。各文字の位置などは外部状態として管理します。</p>
+
+  <h3>例2: ゲームの粒子効果</h3>
+  <p>ゲームで大量の粒子（パーティクル）を表示する例も考えてみましょう：</p>
+  <ul>
+    <li><strong>Flyweight</strong>：Particle（粒子）- 粒子の描画などの操作を定義</li>
+    <li><strong>ConcreteFlyweight</strong>：FireParticle、SmokeParticle、...など - 粒子のテクスチャなどの内部状態を持つ</li>
+    <li><strong>FlyweightFactory</strong>：ParticleFactory - 粒子オブジェクトを作成・管理</li>
+    <li><strong>Client</strong>：ParticleSystem - 粒子の位置、速度、寿命などの外部状態を管理</li>
+  </ul>
+  
+  <p>この例では：</p>
+  <ul>
+    <li><strong>内部状態</strong>：粒子のテクスチャ、基本的な振る舞いなど</li>
+    <li><strong>外部状態</strong>：粒子の位置、速度、寿命、透明度など</li>
+  </ul>
+  
+  <p>数千、数万の粒子を表示する場合でも、基本的な粒子の種類（火、煙、水など）のオブジェクトだけを作成し、個々の粒子の状態は外部状態として管理します。</p>
+
+  <div style="background-color: #fff7e6; border: 1px solid #ffd591; padding: 15px; margin: 20px 0; border-radius: 5px;">
+    <h3>中学生向け説明</h3>
+    <p>学校の図書室を想像してみてください。図書室には同じ本が何冊もあるわけではなく、1冊だけあり、みんながその本を共有して使います。Flyweightパターンは、このように「同じもの」を共有することで、資源（この場合はメモリ）を節約するパターンです。例えば、ゲームで100体の同じモンスターがいる場合、100個の別々のモンスターデータを作るのではなく、基本データは1つだけ作って、位置などの情報だけを100個用意します。</p>
+  </div>
+
+  <h2>5. メリットとデメリット</h2>
+  
+  <h3>メリット</h3>
+  <ul>
+    <li><strong>メモリ使用量の削減</strong>：共有可能なデータを共有することで、メモリ使用量を大幅に削減できる</li>
+    <li><strong>パフォーマンスの向上</strong>：オブジェクトの作成・破棄のコストが減り、処理速度が向上する</li>
+    <li><strong>アプリケーションの応答性の向上</strong>：特にメモリに制約のある環境で効果的</li>
+    <li><strong>オブジェクト数の削減</strong>：システム内のオブジェクト数が減り、ガベージコレクションの負荷も減少</li>
+  </ul>
+
+  <h3>デメリット</h3>
+  <ul>
+    <li><strong>コードの複雑さの増加</strong>：内部状態と外部状態を明確に分離する必要がある</li>
+    <li><strong>デバッグの難しさ</strong>：オブジェクトが共有されるため、デバッグが難しくなる場合がある</li>
+    <li><strong>実行時のオーバーヘッド</strong>：外部状態を渡す必要があるため、メソッド呼び出しのオーバーヘッドが増える</li>
+    <li><strong>スレッドセーフティの考慮</strong>：共有オブジェクトを複数のスレッドで使用する場合、同期の問題に注意が必要</li>
+  </ul>
+
+  <h2>6. 類似パターンとの違い</h2>
+  <table border="1" style="border-collapse: collapse; width: 100%;">
+    <tr style="background-color: #f2f2f2;">
+      <th style="padding: 10px;">パターン</th>
+      <th style="padding: 10px;">主な目的</th>
+      <th style="padding: 10px;">Flyweightとの違い</th>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Singleton</strong></td>
+      <td style="padding: 10px;">クラスのインスタンスが1つだけであることを保証する</td>
+      <td style="padding: 10px;">Singletonは単一のインスタンスを強制し、Flyweightは同じ内容のオブジェクトを共有する</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Object Pool</strong></td>
+      <td style="padding: 10px;">オブジェクトの再利用によりパフォーマンスを向上させる</td>
+      <td style="padding: 10px;">Object Poolは任意のオブジェクトを再利用し、Flyweightは同じ内容のオブジェクトを共有する</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Proxy</strong></td>
+      <td style="padding: 10px;">オブジェクトへのアクセスを制御する</td>
+      <td style="padding: 10px;">Proxyはアクセス制御に焦点を当て、Flyweightはメモリ効率に焦点を当てる</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Composite</strong></td>
+      <td style="padding: 10px;">部分-全体の階層構造を表現する</td>
+      <td style="padding: 10px;">Compositeは構造に焦点を当て、FlyweightはCompositeと組み合わせて使われることがある</td>
+    </tr>
+  </table>
+
+  <h2>7. 実践的なアドバイス</h2>
+  <ol>
+    <li><strong>内部状態と外部状態を明確に分ける</strong>：共有可能な「内部状態」と個別に必要な「外部状態」を明確に区別しましょう。</li>
+    <li><strong>不変のフライウェイトを作る</strong>：フライウェイトオブジェクトは不変（変更されない）であるべきです。これによりスレッドセーフティの問題を避けられます。</li>
+    <li><strong>ファクトリーを使う</strong>：フライウェイトの作成・管理には必ずファクトリーを使いましょう。これにより、共有オブジェクトを効率的に管理できます。</li>
+    <li><strong>キャッシュを検討する</strong>：ファクトリー内でキャッシュを使用し、既存のフライウェイトオブジェクトを効率的に検索できるようにしましょう。</li>
+    <li><strong>適用範囲を考慮する</strong>：すべてのオブジェクトにFlyweightパターンを適用する必要はありません。メモリ使用量が問題になる部分に限定的に適用しましょう。</li>
+  </ol>
+
+  <h2>8. 実装例</h2>
+  <p>簡単なテキストエディタでの文字表示の実装例を疑似コードで示します：</p>
+  
+  <pre style="background-color: #f5f5f5; padding: 10px; border-radius: 5px;">
+// フライウェイトインターフェース
+interface Character {
+    void display(int x, int y, String color); // 外部状態を引数で受け取る
+}
+
+// 具体的なフライウェイト
+class ConcreteCharacter implements Character {
+    private char symbol; // 内部状態
+    
+    public ConcreteCharacter(char symbol) {
+        this.symbol = symbol;
+    }
+    
+    public void display(int x, int y, String color) {
+        // 指定された位置と色で文字を描画
+        System.out.println("文字 " + symbol + " を位置 (" + x + "," + y + ") に色 " + color + " で表示");
+    }
+}
+
+// フライウェイトファクトリー
+class CharacterFactory {
+    private Map&lt;Character, Character&gt; characters = new HashMap&lt;&gt;();
+    
+    public Character getCharacter(char symbol) {
+        // 既存のオブジェクトがあれば再利用、なければ新規作成
+        if (!characters.containsKey(symbol)) {
+            characters.put(symbol, new ConcreteCharacter(symbol));
+        }
+        return characters.get(symbol);
+    }
+}
+
+// クライアント
+class TextEditor {
+    private CharacterFactory factory = new CharacterFactory();
+    
+    public void displayText(String text, int startX, int startY, String color) {
+        int currentX = startX;
+        for (int i = 0; i < text.length(); i++) {
+            Character character = factory.getCharacter(text.charAt(i));
+            character.display(currentX, startY, color); // 外部状態を渡す
+            currentX += 10; // 次の文字の位置
+        }
+    }
+}
+  </pre>
+  
+  <p>この例では、テキストエディタが「Hello」というテキストを表示する場合、「H」「e」「l」「o」の4種類の文字オブジェクトだけを作成し、「l」は2回再利用します。各文字の位置と色は外部状態として渡されます。</p>
+
+  <h2>9. まとめ</h2>
+  <p>Flyweightパターンは、共有可能なオブジェクトを再利用することで、メモリ使用量を減らし、パフォーマンスを向上させるデザインパターンです。内部状態と外部状態を明確に分離し、内部状態を共有することで効率化を図ります。</p>
+
+  <p>このパターンは、大量の小さなオブジェクトを扱う場合や、メモリ制約のある環境で特に役立ちます。ただし、コードの複雑さが増したり、デバッグが難しくなったりするデメリットもあるため、適切な状況で使用することが重要です。</p>
+
+  <div style="background-color: #f0f8ff; border: 1px solid #b0c4de; padding: 15px; margin: 20px 0; border-radius: 5px;">
+    <h3>覚えておきたいポイント</h3>
+    <ul>
+      <li>Flyweightは「共通データを共有して、メモリ使用量を減らす」パターン</li>
+      <li>内部状態（共有可能）と外部状態（個別）を明確に分ける</li>
+      <li>フライウェイトファクトリーを使って共有オブジェクトを管理する</li>
+      <li>大量の小さなオブジェクトを扱う場合に特に効果的</li>
+      <li>メモリ効率とコードの複雑さのトレードオフを考慮する</li>
+    </ul>
+  </div>

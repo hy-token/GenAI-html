@@ -1,0 +1,132 @@
+<body>
+  <h1>Factory Methodパターン</h1>
+
+  <div style="background-color: #e6f7ff; border-left: 5px solid #1890ff; padding: 15px; margin: 20px 0;">
+    <h3>問題：</h3>
+    <p>どのクラスのインスタンスを生成するかをサブクラスに任せたい。</p>
+    <h3>例えば：</h3>
+    <p>ゲームで敵キャラクターを作る工場があるとして、ステージによって出てくる敵の種類を変えたい。</p>
+  </div>
+
+  <h2>1. Factory Methodパターンとは</h2>
+  <p>Factory Methodパターンは、オブジェクトを作成するための「工場」を用意し、具体的にどのクラスのインスタンスを生成するかを「工場」のサブクラスに任せるデザインパターンです。</p>
+  
+  <p>簡単に言うと、「オブジェクトの作り方は親クラスで決めるけど、具体的に何を作るかは子クラスで決める」という仕組みです。</p>
+
+  <h2>2. どんなときに使うの？</h2>
+  <p>以下のような場合にFactory Methodパターンが役立ちます：</p>
+  <ul>
+    <li><strong>ゲームで敵キャラクターの種類を簡単に追加したい</strong>：新しい敵の種類を追加するとき、既存のコードを変更せずに新しい工場を追加できる</li>
+    <li><strong>OSによって異なる見た目のボタンを作りたい</strong>：Windows用、Mac用など、環境に応じた適切なUIコンポーネントを作成できる</li>
+    <li><strong>データベースの種類に応じて適切な接続方法を使いたい</strong>：MySQL、PostgreSQL、SQLiteなど、異なるデータベースへの接続方法を統一的に扱える</li>
+    <li><strong>ファイル形式に応じて適切なリーダーを作りたい</strong>：PDFリーダー、テキストリーダー、Excelリーダーなど、ファイル形式に応じたリーダーを生成できる</li>
+  </ul>
+
+  <h2>3. 仕組み</h2>
+  <p>Factory Methodパターンは以下の要素から構成されます：</p>
+  <ol>
+    <li><strong>Creator（作成者）</strong>：抽象的な工場のクラス。オブジェクトを作る方法を定義するが、具体的に何を作るかは決めない</li>
+    <li><strong>ConcreteCreator（具体的な作成者）</strong>：Creatorのサブクラス。具体的にどのオブジェクトを作るかを決める</li>
+    <li><strong>Product（製品）</strong>：作成されるオブジェクトのインターフェース</li>
+    <li><strong>ConcreteProduct（具体的な製品）</strong>：実際に作成される具体的なオブジェクト</li>
+  </ol>
+
+  <svg width="100%" height="380" viewBox="0 0 700 380">
+    <rect x="100" y="50" width="200" height="80" rx="10" ry="10" fill="#b3e2cd" stroke="#333" stroke-width="2" />
+    <text x="200" y="80" font-family="Arial" font-size="16" text-anchor="middle">Creator</text>
+    <text x="200" y="110" font-family="Arial" font-size="12" text-anchor="middle">+ factoryMethod(): Product</text>
+    
+    <rect x="400" y="50" width="200" height="80" rx="10" ry="10" fill="#fdcdac" stroke="#333" stroke-width="2" />
+    <text x="500" y="80" font-family="Arial" font-size="16" text-anchor="middle">Product</text>
+    <text x="500" y="110" font-family="Arial" font-size="12" text-anchor="middle">(インターフェース)</text>
+    
+    <rect x="50" y="200" width="200" height="80" rx="10" ry="10" fill="#cbd5e8" stroke="#333" stroke-width="2" />
+    <text x="150" y="230" font-family="Arial" font-size="16" text-anchor="middle">ConcreteCreatorA</text>
+    <text x="150" y="260" font-family="Arial" font-size="12" text-anchor="middle">+ factoryMethod(): ProductA</text>
+    
+    <rect x="350" y="200" width="200" height="80" rx="10" ry="10" fill="#cbd5e8" stroke="#333" stroke-width="2" />
+    <text x="450" y="230" font-family="Arial" font-size="16" text-anchor="middle">ConcreteCreatorB</text>
+    <text x="450" y="260" font-family="Arial" font-size="12" text-anchor="middle">+ factoryMethod(): ProductB</text>
+    
+    <rect x="50" y="350" width="200" height="60" rx="10" ry="10" fill="#f4cae4" stroke="#333" stroke-width="2" />
+    <text x="150" y="390" font-family="Arial" font-size="16" text-anchor="middle">ConcreteProductA</text>
+    
+    <rect x="350" y="350" width="200" height="60" rx="10" ry="10" fill="#f4cae4" stroke="#333" stroke-width="2" />
+    <text x="450" y="390" font-family="Arial" font-size="16" text-anchor="middle">ConcreteProductB</text>
+    
+    <line x1="150" y1="200" x2="180" y2="130" stroke="#333" stroke-width="1.5" />
+    <line x1="450" y1="200" x2="420" y2="130" stroke="#333" stroke-width="1.5" />
+    
+    <line x1="150" y1="350" x2="150" y2="280" stroke="#333" stroke-width="1.5" />
+    <line x1="450" y1="350" x2="450" y2="280" stroke="#333" stroke-width="1.5" />
+    
+    <line x1="150" y1="350" x2="450" y2="110" stroke="#333" stroke-width="1.5" stroke-dasharray="5,5" />
+    <line x1="450" y1="350" x2="500" y2="130" stroke="#333" stroke-width="1.5" stroke-dasharray="5,5" />
+    
+    <text x="350" y="20" font-family="Arial" font-size="16" text-anchor="middle" font-weight="bold">Factory Methodパターン</text>
+  </svg>
+
+  <h2>4. 具体例で理解する</h2>
+  
+  <h3>例1: お弁当工場</h3>
+  <p>お弁当工場を想像してみてください。基本的な工場の設計図（親クラス）はありますが、「和食弁当工場」と「洋食弁当工場」（子クラス）では、作り出す弁当が違います。</p>
+  <p>これをプログラムで表すと：</p>
+  <ul>
+    <li>「お弁当工場」は抽象クラス（Creator）で、「お弁当を作る」というメソッドを持つ</li>
+    <li>「和食弁当工場」と「洋食弁当工場」は具体的な工場（ConcreteCreator）</li>
+    <li>「お弁当」はインターフェース（Product）</li>
+    <li>「和食弁当」と「洋食弁当」は具体的な製品（ConcreteProduct）</li>
+  </ul>
+
+  <h3>例2: ゲームの敵キャラクター工場</h3>
+  <p>ゲームで敵キャラクターを作る例を考えてみましょう：</p>
+  <ul>
+    <li>「敵工場」（抽象クラス）：敵を作る基本的な方法を定義</li>
+    <li>「簡単モード敵工場」「普通モード敵工場」「難しいモード敵工場」（具体的な工場）：それぞれのモードに適した敵を作る</li>
+    <li>「敵キャラクター」（インターフェース）：すべての敵が持つ共通の機能（移動する、攻撃するなど）</li>
+    <li>「スライム」「ゾンビ」「ドラゴン」（具体的な敵）：実際の敵キャラクター</li>
+  </ul>
+
+  <p>このようにすると、ゲームの難易度を変えるだけで、出てくる敵の種類や強さを簡単に変更できます。さらに、新しい敵の種類を追加するときも、既存のコードを変更せずに拡張できます。</p>
+
+  <div style="background-color: #fff7e6; border: 1px solid #ffd591; padding: 15px; margin: 20px 0; border-radius: 5px;">
+    <h3>中学生向け説明</h3>
+    <p>学校の文化祭で「出し物を計画する委員会」を想像してみてください。委員会（Creator）は「出し物を計画する」という役割を持っています。1年生委員会、2年生委員会、3年生委員会（ConcreteCreator）はそれぞれ、自分たちに合った出し物（Product）を計画します。1年生は簡単な出し物、3年生は複雑な出し物など、学年によって違いますが、「計画する」という役割は同じです。</p>
+  </div>
+
+  <h2>5. メリットとデメリット</h2>
+  
+  <h3>メリット</h3>
+  <ul>
+    <li><strong>柔軟性</strong>：新しい製品を追加するとき、既存のコードを変更せずに拡張できる</li>
+    <li><strong>結合度を下げる</strong>：製品を使うコードは、具体的な製品クラスを知る必要がない</li>
+    <li><strong>単一責任の原則</strong>：製品の作成ロジックを一箇所にまとめられる</li>
+    <li><strong>オープン・クローズドの原則</strong>：新しい種類の製品を追加しても、既存のコードを変更する必要がない</li>
+  </ul>
+
+  <h3>デメリット</h3>
+  <ul>
+    <li><strong>コードが複雑になる可能性</strong>：シンプルな問題に対して、過剰に複雑な設計になることがある</li>
+    <li><strong>クラス数が増える</strong>：新しい製品ごとに、新しいサブクラスを作る必要がある</li>
+    <li><strong>すべての製品が同じインターフェースを持つ必要がある</strong>：製品間の違いが大きい場合、共通のインターフェースを作るのが難しいことがある</li>
+  </ul>
+
+  <h2>6. 実践的なアドバイス</h2>
+  <ol>
+    <li><strong>共通のインターフェースを設計する</strong>：すべての製品に共通する機能を明確にし、インターフェースとして定義しましょう。</li>
+    <li><strong>過剰に複雑にしない</strong>：製品の種類が少なく、変更の可能性も低い場合は、シンプルな方法でも十分かもしれません。</li>
+    <li><strong>命名規則を明確に</strong>：Creator、ConcreteCreator、Product、ConcreteProductなど、役割がわかる名前を付けると理解しやすくなります。</li>
+    <li><strong>パラメータ化されたFactory Methodも検討する</strong>：製品の種類をパラメータで指定する方法もあります。これにより、工場のサブクラスを減らせる場合があります。</li>
+  </ol>
+
+  <h2>7. まとめ</h2>
+  <p>Factory Methodパターンは、オブジェクトの作成ロジックをサブクラスに委ねることで、柔軟性と拡張性を高めるデザインパターンです。新しい種類の製品を追加するとき、既存のコードを変更せずに拡張できるため、大規模なシステムや将来の変更が予想されるシステムで特に役立ちます。</p>
+
+  <div style="background-color: #f0f8ff; border: 1px solid #b0c4de; padding: 15px; margin: 20px 0; border-radius: 5px;">
+    <h3>覚えておきたいポイント</h3>
+    <ul>
+      <li>Factory Methodは「オブジェクトの作り方は親クラスで決めるけど、具体的に何を作るかは子クラスで決める」パターン</li>
+      <li>柔軟性と拡張性を高めたい場合に役立つ</li>
+      <li>新しい種類の製品を追加する場合、既存のコードを変更せずに済む</li>
+    </ul>
+  </div>

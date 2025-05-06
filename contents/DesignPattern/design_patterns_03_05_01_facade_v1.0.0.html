@@ -1,0 +1,185 @@
+<body>
+  <h1>Facadeパターン</h1>
+
+  <div style="background-color: #e6f7ff; border-left: 5px solid #1890ff; padding: 15px; margin: 20px 0;">
+    <h3>問題：</h3>
+    <p>複雑なサブシステムに対して、シンプルなインターフェースを提供したい。</p>
+    <h3>例えば：</h3>
+    <p>複雑な家電システム（テレビ、照明、音響機器など）を「映画モード」ボタン一つで操作できるようにしたい。</p>
+  </div>
+
+  <h2>1. Facadeパターンとは</h2>
+  <p>Facadeパターンは、複雑なサブシステムに対してシンプルなインターフェース（窓口）を提供するデザインパターンです。クライアントはサブシステムの複雑な内部処理を知る必要がなく、Facade（ファサード）を通じて簡単に操作できます。</p>
+  
+  <p>簡単に言うと、「複雑な仕組みの前に立つシンプルな窓口」を作るパターンです。</p>
+
+  <h2>2. どんなときに使うの？</h2>
+  <p>以下のような場合にFacadeパターンが役立ちます：</p>
+  <ul>
+    <li><strong>複雑なサブシステムをシンプルに見せたい場合</strong>：内部の複雑さを隠蔽したい</li>
+    <li><strong>サブシステムの結合度を下げたい場合</strong>：クライアントとサブシステムの間に層を設けることで、結合度を下げたい</li>
+    <li><strong>共通の操作をまとめたい場合</strong>：頻繁に使われる操作の組み合わせをまとめたい</li>
+    <li><strong>レガシーシステムをラップしたい場合</strong>：古いシステムに対して新しいインターフェースを提供したい</li>
+    <li><strong>階層化されたシステムを構築したい場合</strong>：サブシステムごとにファサードを提供し、階層化したい</li>
+  </ul>
+
+  <h2>3. 仕組み</h2>
+  <p>Facadeパターンは以下の要素から構成されます：</p>
+  <ol>
+    <li><strong>Facade（ファサード）</strong>：サブシステムに対するシンプルなインターフェースを提供するクラス</li>
+    <li><strong>サブシステム</strong>：複雑な機能を実装する複数のクラス群</li>
+    <li><strong>Client（クライアント）</strong>：Facadeを使用して、サブシステムを間接的に操作する</li>
+  </ol>
+
+  <svg width="100%" height="400" viewBox="0 0 700 400">
+    <!-- Facade -->
+    <rect x="250" y="50" width="200" height="80" rx="10" ry="10" fill="#b3e2cd" stroke="#333" stroke-width="2" />
+    <text x="350" y="95" font-family="Arial" font-size="18" text-anchor="middle">Facade</text>
+    
+    <!-- Client -->
+    <rect x="50" y="50" width="120" height="80" rx="10" ry="10" fill="#f4cae4" stroke="#333" stroke-width="2" />
+    <text x="110" y="95" font-family="Arial" font-size="16" text-anchor="middle">Client</text>
+    
+    <!-- サブシステム -->
+    <rect x="100" y="250" width="140" height="80" rx="10" ry="10" fill="#fdcdac" stroke="#333" stroke-width="2" />
+    <text x="170" y="295" font-family="Arial" font-size="16" text-anchor="middle">SubsystemA</text>
+    
+    <rect x="280" y="250" width="140" height="80" rx="10" ry="10" fill="#fdcdac" stroke="#333" stroke-width="2" />
+    <text x="350" y="295" font-family="Arial" font-size="16" text-anchor="middle">SubsystemB</text>
+    
+    <rect x="460" y="250" width="140" height="80" rx="10" ry="10" fill="#fdcdac" stroke="#333" stroke-width="2" />
+    <text x="530" y="295" font-family="Arial" font-size="16" text-anchor="middle">SubsystemC</text>
+    
+    <!-- 関係を表す線 -->
+    <line x1="170" y1="90" x2="250" y2="90" stroke="#333" stroke-width="1.5" />
+    <line x1="290" y1="130" x2="170" y2="250" stroke="#333" stroke-width="1.5" stroke-dasharray="5,5" />
+    <line x1="350" y1="130" x2="350" y2="250" stroke="#333" stroke-width="1.5" stroke-dasharray="5,5" />
+    <line x1="410" y1="130" x2="530" y2="250" stroke="#333" stroke-width="1.5" stroke-dasharray="5,5" />
+    
+    <text x="200" y="75" font-family="Arial" font-size="12" text-anchor="middle">uses</text>
+    
+    <text x="350" y="25" font-family="Arial" font-size="16" text-anchor="middle" font-weight="bold">Facadeパターン</text>
+    
+    <!-- 説明文 -->
+    <rect x="50" y="180" width="600" height="30" rx="5" ry="5" fill="#f8f9fa" stroke="#ccc" stroke-width="1" />
+    <text x="350" y="200" font-family="Arial" font-size="14" text-anchor="middle">Facadeは複雑なサブシステムへのシンプルなインターフェースを提供する</text>
+  </svg>
+
+  <h2>4. 具体例で理解する</h2>
+  
+  <h3>例1: ホームシアターシステム</h3>
+  <p>複数の家電製品（テレビ、DVDプレーヤー、サウンドシステム、照明など）からなるホームシアターシステムを考えてみましょう：</p>
+  <ul>
+    <li><strong>Facade</strong>：HomeTheaterFacade（ホームシアターファサード）- 「映画を見る」「音楽を聴く」などの高レベル操作を提供</li>
+    <li><strong>サブシステム</strong>：TV（テレビ）、DVDPlayer（DVDプレーヤー）、SoundSystem（サウンドシステム）、Lights（照明）など</li>
+  </ul>
+  
+  <p>例えば、「映画を見る」という操作は以下のような複数のステップからなります：</p>
+  <ol>
+    <li>照明を暗くする</li>
+    <li>テレビの電源を入れる</li>
+    <li>DVDプレーヤーの電源を入れる</li>
+    <li>サウンドシステムの電源を入れる</li>
+    <li>サウンドシステムを適切なモードに設定する</li>
+    <li>DVDプレーヤーで再生を開始する</li>
+  </ol>
+  
+  <p>これらの複雑なステップをFacadeが隠蔽し、クライアントは単に「watchMovie()」というメソッドを呼び出すだけで済みます。</p>
+
+  <h3>例2: コンピュータの起動プロセス</h3>
+  <p>コンピュータの起動プロセスも、Facadeパターンの例として考えることができます：</p>
+  <ul>
+    <li><strong>Facade</strong>：Computer（コンピュータ）- 「電源を入れる」という高レベル操作を提供</li>
+    <li><strong>サブシステム</strong>：CPU、Memory（メモリ）、HardDrive（ハードドライブ）、OS（オペレーティングシステム）など</li>
+  </ul>
+  
+  <p>「電源を入れる」という単純な操作の裏では、多くの複雑なプロセスが実行されます：</p>
+  <ol>
+    <li>電源ユニットがすべてのコンポーネントに電力を供給</li>
+    <li>CPUが初期化される</li>
+    <li>メモリが初期化される</li>
+    <li>BIOSが起動する</li>
+    <li>ハードドライブからOSが読み込まれる</li>
+    <li>OSが起動プロセスを完了する</li>
+  </ol>
+  
+  <p>ユーザーはこれらの複雑な処理を知る必要はなく、単に電源ボタンを押すだけで、コンピュータが使える状態になります。</p>
+
+  <div style="background-color: #fff7e6; border: 1px solid #ffd591; padding: 15px; margin: 20px 0; border-radius: 5px;">
+    <h3>中学生向け説明</h3>
+    <p>コンビニのレジを想像してみてください。お客さん（クライアント）は、商品を買うために複雑な在庫管理システムや決済システム（サブシステム）のことを知る必要はありません。レジ係の人（Facade）が、その複雑なシステムの「窓口」となり、お客さんは簡単に買い物ができます。Facadeパターンは、このように「複雑な仕組みの前に立つシンプルな窓口」を作るパターンです。</p>
+  </div>
+
+  <h2>5. メリットとデメリット</h2>
+  
+  <h3>メリット</h3>
+  <ul>
+    <li><strong>複雑さの隠蔽</strong>：サブシステムの複雑な内部処理をクライアントから隠蔽できる</li>
+    <li><strong>結合度の低減</strong>：クライアントとサブシステムの間の結合度を下げられる</li>
+    <li><strong>使いやすさの向上</strong>：複雑な操作を簡単なインターフェースでまとめられる</li>
+    <li><strong>レイヤー化の促進</strong>：システムを層に分けて構造化できる</li>
+    <li><strong>サブシステムの変更の影響を局所化</strong>：サブシステムが変更されても、ファサードだけを修正すれば良い</li>
+  </ul>
+
+  <h3>デメリット</h3>
+  <ul>
+    <li><strong>柔軟性の低下</strong>：すべての機能を使いたい場合には制限になる可能性がある</li>
+    <li><strong>「神クラス」になる可能性</strong>：ファサードに多くの責任が集中する可能性がある</li>
+    <li><strong>オーバーヘッド</strong>：単純な処理に対しても余分な層が追加される</li>
+    <li><strong>サブシステムへの依存</strong>：ファサードがサブシステムに強く依存することがある</li>
+  </ul>
+
+  <h2>6. 類似パターンとの違い</h2>
+  <table border="1" style="border-collapse: collapse; width: 100%;">
+    <tr style="background-color: #f2f2f2;">
+      <th style="padding: 10px;">パターン</th>
+      <th style="padding: 10px;">主な目的</th>
+      <th style="padding: 10px;">Facadeとの違い</th>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Adapter</strong></td>
+      <td style="padding: 10px;">互換性のないインターフェースを一緒に動作させる</td>
+      <td style="padding: 10px;">Adapterは既存のインターフェースを変換し、Facadeは新しいシンプルなインターフェースを提供する</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Mediator</strong></td>
+      <td style="padding: 10px;">オブジェクト間の通信を集中管理する</td>
+      <td style="padding: 10px;">Mediatorはオブジェクト間の相互作用を管理し、Facadeはサブシステムへのアクセスを簡略化する</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Proxy</strong></td>
+      <td style="padding: 10px;">オブジェクトへのアクセスを制御する</td>
+      <td style="padding: 10px;">Proxyは単一のオブジェクトへのアクセスを制御し、Facadeは複数のオブジェクトへのアクセスを簡略化する</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Singleton</strong></td>
+      <td style="padding: 10px;">クラスのインスタンスが1つだけであることを保証する</td>
+      <td style="padding: 10px;">SingletonはFacadeの実装方法の一つで、ファサードを単一のインスタンスとして提供することがある</td>
+    </tr>
+  </table>
+
+  <h2>7. 実践的なアドバイス</h2>
+  <ol>
+    <li><strong>ファサードを薄く保つ</strong>：ファサードは単にサブシステムへのアクセスを提供し、複雑なロジックを追加しないようにしましょう。</li>
+    <li><strong>複数のファサードを検討する</strong>：大きなサブシステムに対しては、異なる用途に特化した複数のファサードを提供することを検討しましょう。</li>
+    <li><strong>サブシステムへの直接アクセスも許可する</strong>：必要に応じて、クライアントがサブシステムに直接アクセスできるようにすることも検討しましょう。</li>
+    <li><strong>ファサードはサブシステムに依存する</strong>：ファサードはサブシステムに依存しますが、サブシステムはファサードに依存しないようにしましょう。</li>
+    <li><strong>デフォルトのオプションを提供する</strong>：一般的な使用ケースに対しては、デフォルトの設定を提供し、必要に応じてカスタマイズできるようにしましょう。</li>
+  </ol>
+
+  <h2>8. まとめ</h2>
+  <p>Facadeパターンは、複雑なサブシステムに対してシンプルなインターフェースを提供するデザインパターンです。クライアントはサブシステムの複雑な内部処理を知る必要がなく、ファサードを通じて簡単に操作できます。</p>
+
+  <p>このパターンは、複雑さの隠蔽、結合度の低減、使いやすさの向上などのメリットがありますが、柔軟性の低下や「神クラス」になる可能性などのデメリットもあります。適切な状況で使用することが重要です。</p>
+
+  <div style="background-color: #f0f8ff; border: 1px solid #b0c4de; padding: 15px; margin: 20px 0; border-radius: 5px;">
+    <h3>覚えておきたいポイント</h3>
+    <ul>
+      <li>Facadeは「複雑な仕組みの前に立つシンプルな窓口」を作るパターン</li>
+      <li>サブシステムの複雑さをクライアントから隠蔽する</li>
+      <li>頻繁に使われる操作の組み合わせをまとめる</li>
+      <li>ファサードはサブシステムへのアクセスを提供するだけで、複雑なロジックは追加しない</li>
+      <li>必要に応じて、異なる用途に特化した複数のファサードを提供することも検討する</li>
+    </ul>
+  </div>
+</body>

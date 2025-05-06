@@ -1,0 +1,189 @@
+<body>
+  <h1>Strategyパターン</h1>
+
+  <div style="background-color: #e6f7ff; border-left: 5px solid #1890ff; padding: 15px; margin: 20px 0;">
+    <h3>問題：</h3>
+    <p>アルゴリズムの集合を定義し、それぞれをカプセル化して交換可能にしたい。クライアントに影響を与えずにアルゴリズムを変更したい。</p>
+    <h3>例えば：</h3>
+    <p>ナビゲーションアプリで、徒歩、自転車、車、公共交通機関など、状況に応じて異なる経路計算アルゴリズムを使用したい。</p>
+  </div>
+
+  <h2>1. Strategyパターンとは</h2>
+  <p>Strategyパターンは、アルゴリズムの集合を定義し、それぞれをカプセル化して交換可能にするデザインパターンです。クライアント側から見ると、同じインターフェースを通じて異なるアルゴリズムを使用できるため、クライアントに影響を与えずにアルゴリズムを切り替えることができます。</p>
+  
+  <p>簡単に言うと、「アルゴリズムを入れ替え可能にする」パターンで、実行時にアルゴリズムを選択できます。</p>
+
+  <h2>2. どんなときに使うの？</h2>
+  <p>以下のような場合にStrategyパターンが役立ちます：</p>
+  <ul>
+    <li><strong>複数のアルゴリズム（戦略）が存在する場合</strong>：同じ問題を解くための異なる方法がある</li>
+    <li><strong>実行時にアルゴリズムを切り替えたい場合</strong>：状況に応じて最適なアルゴリズムを選択したい</li>
+    <li><strong>条件分岐を避けたい場合</strong>：複雑なif-elseやswitch文を置き換えたい</li>
+    <li><strong>アルゴリズムとそれを使用するクライアントを分離したい場合</strong>：変更の影響範囲を限定したい</li>
+    <li><strong>特定の機能の実装を変更しやすくしたい場合</strong>：将来的な拡張や変更を見据えている</li>
+  </ul>
+
+  <h2>3. 仕組み</h2>
+  <p>Strategyパターンは以下の要素から構成されます：</p>
+  <ol>
+    <li><strong>Strategy（戦略）</strong>：全てのサポートされているアルゴリズムに共通のインターフェースを宣言する</li>
+    <li><strong>ConcreteStrategy（具体的な戦略）</strong>：Strategyインターフェースを実装し、具体的なアルゴリズムを提供する</li>
+    <li><strong>Context（コンテキスト）</strong>：Strategyへの参照を保持し、Strategyを使用するクライアント</li>
+  </ol>
+
+  <svg width="100%" height="450" viewBox="0 0 700 450">
+    <!-- Strategy -->
+    <rect x="250" y="50" width="200" height="80" rx="10" ry="10" fill="#b3e2cd" stroke="#333" stroke-width="2" />
+    <text x="350" y="80" font-family="Arial" font-size="16" text-anchor="middle">Strategy</text>
+    <text x="350" y="105" font-family="Arial" font-size="12" text-anchor="middle">+ algorithm()</text>
+    
+    <!-- ConcreteStrategyA -->
+    <rect x="100" y="200" width="200" height="80" rx="10" ry="10" fill="#cbd5e8" stroke="#333" stroke-width="2" />
+    <text x="200" y="230" font-family="Arial" font-size="16" text-anchor="middle">ConcreteStrategyA</text>
+    <text x="200" y="255" font-family="Arial" font-size="12" text-anchor="middle">+ algorithm()</text>
+    
+    <!-- ConcreteStrategyB -->
+    <rect x="400" y="200" width="200" height="80" rx="10" ry="10" fill="#cbd5e8" stroke="#333" stroke-width="2" />
+    <text x="500" y="230" font-family="Arial" font-size="16" text-anchor="middle">ConcreteStrategyB</text>
+    <text x="500" y="255" font-family="Arial" font-size="12" text-anchor="middle">+ algorithm()</text>
+    
+    <!-- Context -->
+    <rect x="250" y="350" width="200" height="100" rx="10" ry="10" fill="#fdcdac" stroke="#333" stroke-width="2" />
+    <text x="350" y="380" font-family="Arial" font-size="16" text-anchor="middle">Context</text>
+    <text x="350" y="405" font-family="Arial" font-size="12" text-anchor="middle">- strategy: Strategy</text>
+    <text x="350" y="425" font-family="Arial" font-size="12" text-anchor="middle">+ setStrategy(strategy)</text>
+    
+    <!-- 関係を表す線 -->
+    <line x1="200" y1="200" x2="350" y2="130" stroke="#333" stroke-width="1.5" />
+    <line x1="500" y1="200" x2="350" y2="130" stroke="#333" stroke-width="1.5" />
+    <line x1="350" y1="350" x2="350" y2="130" stroke="#333" stroke-width="1.5" stroke-dasharray="5,5" />
+    
+    <text x="350" y="25" font-family="Arial" font-size="16" text-anchor="middle" font-weight="bold">Strategyパターン</text>
+    
+    <!-- 説明文 -->
+    <rect x="50" y="300" width="600" height="30" rx="5" ry="5" fill="#f8f9fa" stroke="#ccc" stroke-width="1" />
+    <text x="350" y="320" font-family="Arial" font-size="14" text-anchor="middle">Contextはアルゴリズムの実装を知らず、Strategyインターフェースを通じて利用する</text>
+  </svg>
+
+  <h2>4. 具体例で理解する</h2>
+  
+  <h3>例1: 支払い方法</h3>
+  <p>ECサイトで様々な支払い方法を提供する例を考えてみましょう：</p>
+  <ul>
+    <li><strong>Strategy</strong>：PaymentStrategy - 支払い処理の方法を定義するインターフェース</li>
+    <li><strong>ConcreteStrategy</strong>：CreditCardPayment、PayPalPayment、BankTransferPayment など</li>
+    <li><strong>Context</strong>：ShoppingCart - 選択された支払い方法を使用して支払いを処理する</li>
+  </ul>
+  
+  <p>この例では、ショッピングカート（Context）は選択された支払い方法（Strategy）を使用して支払いを処理します。クレジットカード支払い、PayPal支払い、銀行振込など、様々な支払い方法（ConcreteStrategy）があり、それぞれが異なる処理を行いますが、共通のインターフェースを通じて利用されます。</p>
+
+  <p>ユーザーは支払い時に支払い方法を選択でき、アプリケーションは選択に応じて適切な支払い戦略を設定します。新しい支払い方法を追加する場合も、新しいStrategyクラスを作成して既存のシステムに統合するだけで済みます。</p>
+
+  <h3>例2: ソート方法</h3>
+  <p>データのソート方法を選択できるアプリケーションの例も考えてみましょう：</p>
+  <ul>
+    <li><strong>Strategy</strong>：SortStrategy - データソート方法を定義するインターフェース</li>
+    <li><strong>ConcreteStrategy</strong>：QuickSort、MergeSort、BubbleSort など</li>
+    <li><strong>Context</strong>：SortedList - 選択されたソート方法を使用してデータをソートする</li>
+  </ul>
+  
+  <p>この例では、データのサイズや特性に応じて最適なソートアルゴリズムを選択できます。例えば、小さなデータセットには単純なバブルソート、大きなデータセットにはより効率的なクイックソートやマージソートを使用するといった具合です。</p>
+
+  <p>アプリケーションは実行時に最適なソートアルゴリズムを選択でき、ソートアルゴリズムの実装はSortedListクラスから分離されているため、新しいアルゴリズムを追加しても既存のコードに影響を与えません。</p>
+
+  <div style="background-color: #fff7e6; border: 1px solid #ffd591; padding: 15px; margin: 20px 0; border-radius: 5px;">
+    <h3>中学生向け説明</h3>
+    <p>旅行に行くとき、「どうやって目的地に行くか」を考えますね。電車、バス、飛行機、車など、行き方（戦略）はいくつかあり、状況に応じて選びます。急いでいるなら飛行機、景色を楽しみたいなら車、など。Strategyパターンは、このように「目的は同じだけど、やり方を選べる」仕組みです。例えば、写真加工アプリで「ぼかし効果」を適用するとき、強いぼかし、弱いぼかし、部分的なぼかしなど、様々な方法（アルゴリズム）があります。Strategyパターンを使うと、ユーザーが好きな方法を選べるようになり、アプリ側も新しいぼかし方法を簡単に追加できます。</p>
+  </div>
+
+  <h2>5. メリットとデメリット</h2>
+  
+  <h3>メリット</h3>
+  <ul>
+    <li><strong>アルゴリズムの交換が容易</strong>：実行時にアルゴリズムを切り替えることができる</li>
+    <li><strong>開放/閉鎖の原則</strong>：新しいアルゴリズムを追加しても既存のコードを変更する必要がない</li>
+    <li><strong>条件分岐の排除</strong>：複雑なif-elseやswitch文を避けることができる</li>
+    <li><strong>アルゴリズムの再利用</strong>：アルゴリズムをカプセル化して他のコンテキストでも再利用できる</li>
+    <li><strong>テストの容易さ</strong>：各戦略を個別にテストすることが容易</li>
+  </ul>
+
+  <h3>デメリット</h3>
+  <ul>
+    <li><strong>クラス数の増加</strong>：アルゴリズムごとに新しいクラスが必要になり、クラス数が増える</li>
+    <li><strong>クライアントの複雑化</strong>：クライアントは適切な戦略を選択する必要があり、その選択ロジックが複雑になる場合もある</li>
+    <li><strong>コミュニケーションオーバーヘッド</strong>：戦略とコンテキスト間でデータの受け渡しが必要な場合がある</li>
+    <li><strong>シンプルなケースでの過剰設計</strong>：アルゴリズムが少なく、変更の可能性が低い場合は過剰な設計になる可能性がある</li>
+  </ul>
+
+  <h2>6. 類似パターンとの違い</h2>
+  <table border="1" style="border-collapse: collapse; width: 100%;">
+    <tr style="background-color: #f2f2f2;">
+      <th style="padding: 10px;">パターン</th>
+      <th style="padding: 10px;">主な目的</th>
+      <th style="padding: 10px;">Strategyとの違い</th>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>State</strong></td>
+      <td style="padding: 10px;">オブジェクトの内部状態に応じて振る舞いを変える</td>
+      <td style="padding: 10px;">Stateは内部状態に応じて自動的に変化し、Strategyはクライアントが明示的に選択する</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Template Method</strong></td>
+      <td style="padding: 10px;">アルゴリズムの骨格を定義し、サブクラスに詳細を任せる</td>
+      <td style="padding: 10px;">Template Methodは継承を使い、Strategyは委譲（コンポジション）を使う</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Command</strong></td>
+      <td style="padding: 10px;">操作をオブジェクトとしてカプセル化する</td>
+      <td style="padding: 10px;">Commandは操作をカプセル化し、Strategyはアルゴリズム全体をカプセル化する</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Decorator</strong></td>
+      <td style="padding: 10px;">オブジェクトに動的に機能を追加する</td>
+      <td style="padding: 10px;">Decoratorは機能を追加し、Strategyは実装を置き換える</td>
+    </tr>
+  </table>
+
+  <h2>7. 実践的なアドバイス</h2>
+  <ol>
+    <li><strong>インターフェースを適切に設計する</strong>：全ての戦略で共通のインターフェースをしっかりと設計しましょう。後から変更するのは難しくなります。</li>
+    <li><strong>戦略の選択メカニズムを検討する</strong>：適切な戦略を選択するロジックをどこに配置するか（ファクトリー、設定ファイル、ユーザー選択など）を検討しましょう。</li>
+    <li><strong>デフォルト戦略を用意する</strong>：明示的に戦略が指定されていない場合のデフォルト戦略を用意しておくと便利です。</li>
+    <li><strong>戦略間で共通のコードを抽出する</strong>：複数の戦略で共通のコードがある場合は、抽象クラスや共通のユーティリティを使って重複を避けましょう。</li>
+    <li><strong>コンテキストと戦略の間のデータ共有を最適化する</strong>：必要なデータのみを渡すように設計し、過剰な結合を避けましょう。</li>
+  </ol>
+
+  <h2>8. まとめ</h2>
+  <p>Strategyパターンは、アルゴリズムの集合を定義し、それぞれをカプセル化して交換可能にするデザインパターンです。このパターンにより、クライアントに影響を与えずにアルゴリズムを変更したり、実行時にアルゴリズムを切り替えたりすることができます。</p>
+
+  <p>このパターンは、支払い処理、ソートアルゴリズム、検証ルール、経路計算など、様々な場面で活用できます。アルゴリズムを分離してカプセル化することで、コードの保守性と拡張性が向上しますが、クラス数の増加やクライアントの複雑化などのデメリットもあるため、適切な状況で使用することが重要です。</p>
+
+  <div style="background-color: #f0f8ff; border: 1px solid #b0c4de; padding: 15px; margin: 20px 0; border-radius: 5px;">
+    <h3>覚えておきたいポイント</h3>
+    <ul>
+      <li>Strategyは「アルゴリズムを入れ替え可能にする」パターン</li>
+      <li>同じインターフェースを持つ異なるアルゴリズムをカプセル化する</li>
+      <li>実行時にアルゴリズムを切り替えることができる</li>
+      <li>コンテキストとアルゴリズムを分離し、それぞれを独立して変更できる</li>
+      <li>条件分岐（if-elseやswitch）の代わりに多態性を活用できる</li>
+    </ul>
+  </div>
+
+  <h2>9. 用語集</h2>
+  <dl>
+    <dt><strong>戦略（Strategy）</strong></dt>
+    <dd>特定の機能を実現するためのアルゴリズムのインターフェース。すべての具体的な戦略はこのインターフェースを実装する。</dd>
+    
+    <dt><strong>具体的な戦略（ConcreteStrategy）</strong></dt>
+    <dd>Strategyインターフェースを実装し、具体的なアルゴリズムを提供するクラス。</dd>
+    
+    <dt><strong>コンテキスト（Context）</strong></dt>
+    <dd>Strategyへの参照を保持し、Strategyを使用するクライアント。適切な戦略を選択・設定する責任を持つ場合もある。</dd>
+    
+    <dt><strong>委譲（Delegation）</strong></dt>
+    <dd>あるオブジェクトが処理の一部を別のオブジェクトに任せること。Strategyパターンではコンテキストがアルゴリズムの実行を戦略オブジェクトに委譲する。</dd>
+    
+    <dt><strong>コンポジション（Composition）</strong></dt>
+    <dd>「持つ」関係によるオブジェクト間の関連付け。Strategyパターンではコンテキストが戦略オブジェクトを「持つ」関係になる。継承よりも柔軟性が高い。</dd>
+  </dl>
+</body>

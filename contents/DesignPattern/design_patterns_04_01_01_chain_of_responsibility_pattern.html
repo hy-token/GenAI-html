@@ -1,0 +1,366 @@
+<body>
+  <h1>Chain of Responsibilityパターン</h1>
+
+  <div style="background-color: #e6f7ff; border-left: 5px solid #1890ff; padding: 15px; margin: 20px 0;">
+    <h3>問題：</h3>
+    <p>複数のオブジェクトがリクエストを処理する可能性があり、どのオブジェクトがリクエストを処理すべきか事前に決定できない。リクエストの送信者と受信者を分離したい。</p>
+    <h3>例えば：</h3>
+    <p>ヘルプシステムで、ユーザーからの質問を適切なヘルプハンドラーに転送する場合や、承認システムで、申請を適切な承認者に順次転送する場合。</p>
+  </div>
+
+  <h2>1. Chain of Responsibilityパターンとは</h2>
+  <p>Chain of Responsibilityパターンは、リクエストを送信者から一連の処理オブジェクト（ハンドラー）のチェーンに沿って渡すデザインパターンです。チェーン内の各ハンドラーは、リクエストを処理するか、チェーンの次のハンドラーに渡します。</p>
+  
+  <p>簡単に言うと、「責任のリレー」を行うパターンで、リクエストが適切なハンドラーに到達するまで順次転送します。</p>
+
+  <h2>2. どんなときに使うの？</h2>
+  <p>以下のような場合にChain of Responsibilityパターンが役立ちます：</p>
+  <ul>
+    <li><strong>複数のオブジェクトがリクエストを処理できる場合</strong>：どのオブジェクトが処理すべきか事前に決定できない</li>
+    <li><strong>リクエストの送信者から受信者を分離したい場合</strong>：送信者は具体的な受信者を知る必要がない</li>
+    <li><strong>リクエストを処理するオブジェクトを動的に指定したい場合</strong>：実行時に処理の順序や構成を変更できる</li>
+    <li><strong>一連の処理を順番に試したい場合</strong>：最初のハンドラーで処理できなければ次のハンドラーに移る</li>
+    <li><strong>責任の分散が必要な場合</strong>：単一のモノリシックなハンドラーではなく、小さな専門的なハンドラーに責任を分散させる</li>
+  </ul>
+
+  <h2>3. 仕組み</h2>
+  <p>Chain of Responsibilityパターンは以下の要素から構成されます：</p>
+  <ol>
+    <li><strong>Handler（ハンドラー）</strong>：リクエストを処理するインターフェースを定義し、後続のハンドラーへの参照を持つ</li>
+    <li><strong>ConcreteHandler（具体的なハンドラー）</strong>：Handlerを実装し、特定の種類のリクエストを処理する</li>
+    <li><strong>Client（クライアント）</strong>：リクエストをチェーンの最初のハンドラーに送信する</li>
+  </ol>
+
+  <svg width="100%" height="500" viewBox="0 0 700 500">
+    <!-- Handler -->
+    <rect x="250" y="50" width="200" height="100" rx="10" ry="10" fill="#b3e2cd" stroke="#333" stroke-width="2" />
+    <text x="350" y="80" font-family="Arial" font-size="16" text-anchor="middle">Handler</text>
+    <text x="350" y="105" font-family="Arial" font-size="12" text-anchor="middle">- successor</text>
+    <text x="350" y="125" font-family="Arial" font-size="12" text-anchor="middle">+ handleRequest(request)</text>
+    
+    <!-- ConcreteHandlerA -->
+    <rect x="50" y="200" width="200" height="100" rx="10" ry="10" fill="#cbd5e8" stroke="#333" stroke-width="2" />
+    <text x="150" y="230" font-family="Arial" font-size="16" text-anchor="middle">ConcreteHandlerA</text>
+    <text x="150" y="255" font-family="Arial" font-size="12" text-anchor="middle">- successor</text>
+    <text x="150" y="275" font-family="Arial" font-size="12" text-anchor="middle">+ handleRequest(request)</text>
+    
+    <!-- ConcreteHandlerB -->
+    <rect x="350" y="200" width="200" height="100" rx="10" ry="10" fill="#cbd5e8" stroke="#333" stroke-width="2" />
+    <text x="450" y="230" font-family="Arial" font-size="16" text-anchor="middle">ConcreteHandlerB</text>
+    <text x="450" y="255" font-family="Arial" font-size="12" text-anchor="middle">- successor</text>
+    <text x="450" y="275" font-family="Arial" font-size="12" text-anchor="middle">+ handleRequest(request)</text>
+    
+    <!-- Client -->
+    <rect x="50" y="50" width="120" height="80" rx="10" ry="10" fill="#f4cae4" stroke="#333" stroke-width="2" />
+    <text x="110" y="95" font-family="Arial" font-size="16" text-anchor="middle">Client</text>
+    
+    <!-- 関係を表す線 -->
+    <line x1="170" y1="90" x2="250" y2="90" stroke="#333" stroke-width="1.5" />
+    <line x1="150" y1="200" x2="350" y2="130" stroke="#333" stroke-width="1.5" />
+    <line x1="450" y1="200" x2="350" y2="130" stroke="#333" stroke-width="1.5" />
+    <line x1="350" y1="90" x2="450" y2="90" stroke="#333" stroke-width="1.5" stroke-dasharray="5,5" />
+    <line x1="150" y1="250" x2="350" y2="250" stroke="#333" stroke-width="1.5" stroke-dasharray="5,5" />
+    <line x1="450" y1="250" x2="650" y2="250" stroke="#333" stroke-width="1.5" stroke-dasharray="5,5" />
+    
+    <text x="350" y="25" font-family="Arial" font-size="16" text-anchor="middle" font-weight="bold">Chain of Responsibilityパターン</text>
+    
+    <!-- 説明文 -->
+    <rect x="50" y="350" width="600" height="30" rx="5" ry="5" fill="#f8f9fa" stroke="#ccc" stroke-width="1" />
+    <text x="350" y="370" font-family="Arial" font-size="14" text-anchor="middle">リクエストは最初のハンドラーから処理可能なハンドラーに渡されていく</text>
+    
+    <!-- 処理の流れ -->
+    <rect x="50" y="400" width="600" height="80" rx="5" ry="5" fill="#f8f9fa" stroke="#ccc" stroke-width="1" />
+    <text x="150" y="425" font-family="Arial" font-size="14" text-anchor="middle">リクエスト</text>
+    <text x="150" y="445" font-family="Arial" font-size="14" text-anchor="middle">↓</text>
+    <text x="150" y="465" font-family="Arial" font-size="14" text-anchor="middle">処理できる？</text>
+    
+    <text x="350" y="425" font-family="Arial" font-size="14" text-anchor="middle">リクエスト</text>
+    <text x="350" y="445" font-family="Arial" font-size="14" text-anchor="middle">↓</text>
+    <text x="350" y="465" font-family="Arial" font-size="14" text-anchor="middle">処理できる？</text>
+    
+    <text x="550" y="425" font-family="Arial" font-size="14" text-anchor="middle">リクエスト</text>
+    <text x="550" y="445" font-family="Arial" font-size="14" text-anchor="middle">↓</text>
+    <text x="550" y="465" font-family="Arial" font-size="14" text-anchor="middle">処理できる？</text>
+    
+    <line x1="200" y1="445" x2="300" y2="445" stroke="#333" stroke-width="1.5" stroke-dasharray="5,5" />
+    <text x="250" y="435" font-family="Arial" font-size="12" text-anchor="middle">No</text>
+    
+    <line x1="400" y1="445" x2="500" y2="445" stroke="#333" stroke-width="1.5" stroke-dasharray="5,5" />
+    <text x="450" y="435" font-family="Arial" font-size="12" text-anchor="middle">No</text>
+  </svg>
+
+  <h2>4. 具体例で理解する</h2>
+  
+  <h3>例1: ヘルプシステム</h3>
+  <p>ソフトウェアのヘルプシステムの例を考えてみましょう：</p>
+  <ul>
+    <li><strong>Handler</strong>：HelpHandler - ヘルプリクエストを処理するインターフェース</li>
+    <li><strong>ConcreteHandler</strong>：ButtonHelpHandler, DialogHelpHandler, ApplicationHelpHandler - 特定のコンテキストに関するヘルプを提供</li>
+    <li><strong>Client</strong>：User - ヘルプリクエストを送信するユーザー</li>
+  </ul>
+  
+  <p>この例では、ユーザーがボタンに関するヘルプを要求すると、まずButtonHelpHandlerが処理を試みます。もし対応するヘルプがなければ、リクエストは親コンポーネントのDialogHelpHandlerに転送され、そこでも処理できなければApplicationHelpHandlerに転送されます。各ハンドラーは自分の責任範囲内のリクエストのみを処理し、それ以外はチェーンの次のハンドラーに渡します。</p>
+
+  <h3>例2: 承認システム</h3>
+  <p>購入承認システムの例も考えてみましょう：</p>
+  <ul>
+    <li><strong>Handler</strong>：Approver - 購入承認リクエストを処理するインターフェース</li>
+    <li><strong>ConcreteHandler</strong>：Manager, Director, VicePresident, President - 異なる権限レベルの承認者</li>
+    <li><strong>Client</strong>：PurchaseRequest - 特定の金額の購入リクエスト</li>
+  </ul>
+  
+  <p>この例では、購入金額に応じて適切な承認者が決まります。例えば：</p>
+  <ul>
+    <li>1,000円以下：マネージャーが承認</li>
+    <li>10,000円以下：ディレクターが承認</li>
+    <li>100,000円以下：副社長が承認</li>
+    <li>100,000円超：社長が承認</li>
+  </ul>
+  
+  <p>購入リクエストは最初にマネージャーに送られ、マネージャーの権限を超える場合は次のレベルの承認者に転送されます。各承認者は自分の権限内のリクエストのみを処理し、それ以外はチェーンの次のハンドラーに渡します。</p>
+
+  <div style="background-color: #fff7e6; border: 1px solid #ffd591; padding: 15px; margin: 20px 0; border-radius: 5px;">
+    <h3>中学生向け説明</h3>
+    <p>学校での「お願い事」を想像してみてください。あなたが何か許可が必要なとき、最初に担任の先生に聞きますよね。担任の先生が決められない場合は、学年主任の先生に相談し、それでも決められなければ教頭先生、最終的には校長先生に話が行きます。Chain of Responsibilityパターンは、このように「お願い事（リクエスト）」がどんどん上の人に転送されていく仕組みに似ています。各先生（ハンドラー）は自分の権限内のことだけ決め、権限外のことは次の先生に任せます。これにより、あなた（クライアント）は最初の先生にだけ話せばよく、誰が最終的に決めるかを気にする必要がありません。</p>
+  </div>
+
+  <h2>5. メリットとデメリット</h2>
+  
+  <h3>メリット</h3>
+  <ul>
+    <li><strong>送信者と受信者の分離</strong>：リクエストの送信者は、どのオブジェクトが処理するかを知る必要がない</li>
+    <li><strong>単一責任の原則</strong>：各ハンドラーは特定の処理に集中できる</li>
+    <li><strong>開放/閉鎖の原則</strong>：既存のコードを変更せずに新しいハンドラーを追加できる</li>
+    <li><strong>処理の柔軟性</strong>：実行時にチェーンの構成や順序を変更できる</li>
+    <li><strong>リクエスト処理の分散</strong>：複雑な処理を小さなハンドラーに分割できる</li>
+  </ul>
+
+  <h3>デメリット</h3>
+  <ul>
+    <li><strong>処理の保証がない</strong>：どのハンドラーも処理しない場合、リクエストが失われる可能性がある</li>
+    <li><strong>デバッグの難しさ</strong>：リクエストがチェーンを通過する過程を追跡するのが難しい</li>
+    <li><strong>パフォーマンスの懸念</strong>：長いチェーンの場合、処理に時間がかかる可能性がある</li>
+    <li><strong>循環依存の可能性</strong>：不適切に設計すると、チェーンに循環が生じる恐れがある</li>
+    <li><strong>設計の複雑さ</strong>：適切なチェーンの設計と責任の分担が必要</li>
+  </ul>
+
+  <h2>6. 類似パターンとの違い</h2>
+  <table border="1" style="border-collapse: collapse; width: 100%;">
+    <tr style="background-color: #f2f2f2;">
+      <th style="padding: 10px;">パターン</th>
+      <th style="padding: 10px;">主な目的</th>
+      <th style="padding: 10px;">Chain of Responsibilityとの違い</th>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Decorator</strong></td>
+      <td style="padding: 10px;">オブジェクトに動的に機能を追加する</td>
+      <td style="padding: 10px;">Decoratorは機能を追加し、Chain of Responsibilityは適切なハンドラーを見つける</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Command</strong></td>
+      <td style="padding: 10px;">要求をオブジェクトとしてカプセル化する</td>
+      <td style="padding: 10px;">Commandはリクエスト自体をカプセル化し、Chain of Responsibilityはリクエストの処理者を決定する</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Mediator</strong></td>
+      <td style="padding: 10px;">オブジェクト間の通信を仲介する</td>
+      <td style="padding: 10px;">Mediatorは多対多の関係を管理し、Chain of Responsibilityは一対多の関係を管理する</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Observer</strong></td>
+      <td style="padding: 10px;">オブジェクトの状態変化を他のオブジェクトに通知する</td>
+      <td style="padding: 10px;">Observerは一対多の通知を行い、Chain of Responsibilityは処理の責任を分散する</td>
+    </tr>
+  </table>
+
+  <h2>7. 実践的なアドバイス</h2>
+  <ol>
+    <li><strong>デフォルトのハンドラーを用意する</strong>：チェーンの最後に必ずリクエストを処理するデフォルトハンドラーを配置しましょう。これにより、リクエストが処理されずに失われることを防ぎます。</li>
+    <li><strong>ハンドラーの順序を考慮する</strong>：最も特化したハンドラーを先に、より一般的なハンドラーを後に配置すると効率的です。</li>
+    <li><strong>循環参照に注意する</strong>：ハンドラーのチェーンに循環参照があると無限ループになる可能性があります。チェーンの終端を明確にしましょう。</li>
+    <li><strong>ロギングを活用する</strong>：リクエストがチェーンをどのように通過するかをログに記録すると、デバッグが容易になります。</li>
+    <li><strong>抽象クラスやインターフェースを使用する</strong>：ハンドラーの共通機能を抽象クラスやインターフェースに定義すると、コードの重複を減らせます。</li>
+  </ol>
+
+  <h2>8. 実装例</h2>
+  <p>購入承認システムの実装例を疑似コードで示します：</p>
+  
+  <pre style="background-color: #f5f5f5; padding: 10px; border-radius: 5px;">
+// ハンドラーの抽象クラス
+abstract class PurchaseApprover {
+    protected PurchaseApprover successor;
+    protected String approverName;
+    
+    public PurchaseApprover(String name) {
+        this.approverName = name;
+    }
+    
+    public void setSuccessor(PurchaseApprover successor) {
+        this.successor = successor;
+    }
+    
+    // リクエストを処理するか、次のハンドラーに渡す
+    public abstract void processRequest(PurchaseRequest request);
+}
+
+// 購入リクエスト
+class PurchaseRequest {
+    private int id;
+    private String purpose;
+    private double amount;
+    
+    public PurchaseRequest(int id, String purpose, double amount) {
+        this.id = id;
+        this.purpose = purpose;
+        this.amount = amount;
+    }
+    
+    public double getAmount() {
+        return amount;
+    }
+    
+    public String getPurpose() {
+        return purpose;
+    }
+    
+    public int getId() {
+        return id;
+    }
+}
+
+// マネージャー（具体的なハンドラー）
+class Manager extends PurchaseApprover {
+    public Manager(String name) {
+        super(name);
+    }
+    
+    @Override
+    public void processRequest(PurchaseRequest request) {
+        if (request.getAmount() <= 1000) {
+            System.out.println("マネージャー " + approverName + " が購入依頼 #" + 
+                request.getId() + " を承認しました。（金額: " + request.getAmount() + "円）");
+        } else if (successor != null) {
+            // 権限を超える場合は次のハンドラーに渡す
+            successor.processRequest(request);
+        } else {
+            System.out.println("購入依頼 #" + request.getId() + " は承認されませんでした。");
+        }
+    }
+}
+
+// ディレクター（具体的なハンドラー）
+class Director extends PurchaseApprover {
+    public Director(String name) {
+        super(name);
+    }
+    
+    @Override
+    public void processRequest(PurchaseRequest request) {
+        if (request.getAmount() <= 10000) {
+            System.out.println("ディレクター " + approverName + " が購入依頼 #" + 
+                request.getId() + " を承認しました。（金額: " + request.getAmount() + "円）");
+        } else if (successor != null) {
+            successor.processRequest(request);
+        } else {
+            System.out.println("購入依頼 #" + request.getId() + " は承認されませんでした。");
+        }
+    }
+}
+
+// 副社長（具体的なハンドラー）
+class VicePresident extends PurchaseApprover {
+    public VicePresident(String name) {
+        super(name);
+    }
+    
+    @Override
+    public void processRequest(PurchaseRequest request) {
+        if (request.getAmount() <= 100000) {
+            System.out.println("副社長 " + approverName + " が購入依頼 #" + 
+                request.getId() + " を承認しました。（金額: " + request.getAmount() + "円）");
+        } else if (successor != null) {
+            successor.processRequest(request);
+        } else {
+            System.out.println("購入依頼 #" + request.getId() + " は承認されませんでした。");
+        }
+    }
+}
+
+// 社長（具体的なハンドラー）
+class President extends PurchaseApprover {
+    public President(String name) {
+        super(name);
+    }
+    
+    @Override
+    public void processRequest(PurchaseRequest request) {
+        // 社長はチェーンの最後なので、金額に関わらず処理する
+        System.out.println("社長 " + approverName + " が購入依頼 #" + 
+            request.getId() + " を承認しました。（金額: " + request.getAmount() + "円）");
+    }
+}
+
+// クライアント
+public class ChainOfResponsibilityExample {
+    public static void main(String[] args) {
+        // ハンドラーのチェーンを作成
+        Manager manager = new Manager("佐藤");
+        Director director = new Director("田中");
+        VicePresident vp = new VicePresident("鈴木");
+        President president = new President("山田");
+        
+        // チェーンを設定
+        manager.setSuccessor(director);
+        director.setSuccessor(vp);
+        vp.setSuccessor(president);
+        
+        // さまざまな金額の購入リクエストを処理
+        PurchaseRequest request1 = new PurchaseRequest(1, "事務用品", 800);
+        PurchaseRequest request2 = new PurchaseRequest(2, "設備修理", 5000);
+        PurchaseRequest request3 = new PurchaseRequest(3, "ソフトウェア", 25000);
+        PurchaseRequest request4 = new PurchaseRequest(4, "新規サーバー", 500000);
+        
+        manager.processRequest(request1); // マネージャーが承認
+        manager.processRequest(request2); // ディレクターが承認
+        manager.processRequest(request3); // 副社長が承認
+        manager.processRequest(request4); // 社長が承認
+    }
+}
+  </pre>
+  
+  <p>この例では、購入リクエストは最初にマネージャーに送られ、マネージャーの権限（1,000円）を超える場合は、ディレクター、副社長、社長と順に転送されます。各承認者は自分の権限内のリクエストのみを処理し、それ以外はチェーンの次のハンドラーに渡します。</p>
+
+  <h2>9. まとめ</h2>
+  <p>Chain of Responsibilityパターンは、リクエストの送信者から受信者を分離し、複数のオブジェクトにリクエスト処理の機会を与えるデザインパターンです。リクエストは処理オブジェクトのチェーンに沿って転送され、適切なハンドラーによって処理されます。</p>
+
+  <p>このパターンは、ヘルプシステム、イベント処理、例外処理、承認ワークフローなど、様々な状況で役立ちます。ただし、リクエストが処理されない可能性やデバッグの難しさなどのデメリットもあるため、適切な状況で使用することが重要です。</p>
+
+  <div style="background-color: #f0f8ff; border: 1px solid #b0c4de; padding: 15px; margin: 20px 0; border-radius: 5px;">
+    <h3>覚えておきたいポイント</h3>
+    <ul>
+      <li>Chain of Responsibilityは「責任のリレー」を行うパターン</li>
+      <li>リクエストの送信者と受信者を分離し、結合度を下げる</li>
+      <li>各ハンドラーは自分の責任範囲内のリクエストのみを処理する</li>
+      <li>処理できないリクエストは次のハンドラーに転送される</li>
+      <li>チェーンの終端には必ずデフォルトハンドラーを配置するのが良い</li>
+    </ul>
+  </div>
+
+  <h2>10. 用語集</h2>
+  <dl>
+    <dt><strong>ハンドラー（Handler）</strong></dt>
+    <dd>リクエストを処理するインターフェースを定義し、後続のハンドラーへの参照を持つオブジェクト。</dd>
+    
+    <dt><strong>具体的なハンドラー（ConcreteHandler）</strong></dt>
+    <dd>特定の種類のリクエストを処理する実装。自分で処理できないリクエストは次のハンドラーに転送する。</dd>
+    
+    <dt><strong>クライアント（Client）</strong></dt>
+    <dd>リクエストをチェーンの最初のハンドラーに送信するオブジェクト。</dd>
+    
+    <dt><strong>責任の分散（Responsibility Distribution）</strong></dt>
+    <dd>複雑な処理を複数の小さなオブジェクトに分割して、各オブジェクトが特定の責任を持つようにすること。</dd>
+    
+    <dt><strong>チェーン（Chain）</strong></dt>
+    <dd>ハンドラーオブジェクトを一列に繋いだもの。リクエストはこのチェーンに沿って転送される。</dd>
+  </dl>
+</body>

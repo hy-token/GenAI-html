@@ -1,0 +1,283 @@
+<body>
+  <h1>Mediatorパターン</h1>
+
+  <div style="background-color: #e6f7ff; border-left: 5px solid #1890ff; padding: 15px; margin: 20px 0;">
+    <h3>問題：</h3>
+    <p>オブジェクト間の複雑な相互作用を管理したい。オブジェクト同士が密接に結合していると、変更が難しくなる。</p>
+    <h3>例えば：</h3>
+    <p>GUIアプリケーションで多数のコンポーネント（ボタン、テキストフィールド、リストなど）が相互に通信する必要がある場合、個々のコンポーネント同士が直接やり取りすると複雑になりすぎる。</p>
+  </div>
+
+  <h2>1. Mediatorパターンとは</h2>
+  <p>Mediatorパターンは、オブジェクト間の通信をカプセル化するデザインパターンです。オブジェクト間の直接的な参照を減らし、それらの相互作用を仲介役（メディエーター）を通じて行わせることで、結合度を下げます。</p>
+  
+  <p>簡単に言うと、「複数のオブジェクト間の通信を仲介役に任せて、シンプルにする」パターンです。</p>
+
+  <h2>2. どんなときに使うの？</h2>
+  <p>以下のような場合にMediatorパターンが役立ちます：</p>
+  <ul>
+    <li><strong>多数のオブジェクトが複雑に相互作用する場合</strong>：GUIコンポーネント、航空管制システムなど</li>
+    <li><strong>オブジェクト間の結合度を下げたい場合</strong>：変更や再利用がしやすくなる</li>
+    <li><strong>複数のクラスに分散した振る舞いを一元管理したい場合</strong>：ビジネスロジックを集中管理できる</li>
+    <li><strong>サブクラス化による振る舞いの拡張が難しい場合</strong>：振る舞いをメディエーターに移動することで柔軟性が増す</li>
+    <li><strong>多対多の関係を簡潔に表現したい場合</strong>：各オブジェクトは自分のメディエーターだけを知ればよい</li>
+  </ul>
+
+  <h2>3. 仕組み</h2>
+  <p>Mediatorパターンは以下の要素から構成されます：</p>
+  <ol>
+    <li><strong>Mediator（メディエーター）</strong>：コリーグ間の相互作用を定義するインターフェース</li>
+    <li><strong>ConcreteMediator（具体的なメディエーター）</strong>：Mediatorを実装し、コリーグ間の調整を行うクラス</li>
+    <li><strong>Colleague（コリーグ）</strong>：他のコリーグと通信するためのメディエーターを知っているクラス</li>
+    <li><strong>ConcreteColleague（具体的なコリーグ）</strong>：Colleagueを実装し、他のコリーグとメディエーターを通じて通信するクラス</li>
+  </ol>
+
+  <svg width="100%" height="500" viewBox="0 0 700 500">
+    <!-- Mediator -->
+    <rect x="250" y="50" width="200" height="80" rx="10" ry="10" fill="#b3e2cd" stroke="#333" stroke-width="2" />
+    <text x="350" y="80" font-family="Arial" font-size="16" text-anchor="middle">Mediator</text>
+    <text x="350" y="105" font-family="Arial" font-size="12" text-anchor="middle">+ notify(sender, event)</text>
+    
+    <!-- ConcreteMediator -->
+    <rect x="250" y="200" width="200" height="100" rx="10" ry="10" fill="#cbd5e8" stroke="#333" stroke-width="2" />
+    <text x="350" y="230" font-family="Arial" font-size="16" text-anchor="middle">ConcreteMediator</text>
+    <text x="350" y="255" font-family="Arial" font-size="12" text-anchor="middle">- colleagues</text>
+    <text x="350" y="275" font-family="Arial" font-size="12" text-anchor="middle">+ notify(sender, event)</text>
+    
+    <!-- Colleague -->
+    <rect x="50" y="350" width="200" height="80" rx="10" ry="10" fill="#fdcdac" stroke="#333" stroke-width="2" />
+    <text x="150" y="380" font-family="Arial" font-size="16" text-anchor="middle">Colleague</text>
+    <text x="150" y="405" font-family="Arial" font-size="12" text-anchor="middle">- mediator</text>
+    
+    <!-- ConcreteColleagueA -->
+    <rect x="450" y="350" width="200" height="80" rx="10" ry="10" fill="#f4cae4" stroke="#333" stroke-width="2" />
+    <text x="550" y="380" font-family="Arial" font-size="16" text-anchor="middle">ConcreteColleague</text>
+    <text x="550" y="405" font-family="Arial" font-size="12" text-anchor="middle">+ send(event)</text>
+    
+    <!-- 関係を表す線 -->
+    <line x1="350" y1="200" x2="350" y2="130" stroke="#333" stroke-width="1.5" />
+    <line x1="150" y1="350" x2="250" y2="300" stroke="#333" stroke-width="1.5" />
+    <line x1="550" y1="350" x2="450" y2="300" stroke="#333" stroke-width="1.5" />
+    <line x1="550" y1="350" x2="150" y2="350" stroke="#333" stroke-width="1.5" stroke-dasharray="5,5" />
+    
+    <text x="350" y="25" font-family="Arial" font-size="16" text-anchor="middle" font-weight="bold">Mediatorパターン</text>
+    
+    <!-- 説明文 -->
+    <rect x="50" y="450" width="600" height="30" rx="5" ry="5" fill="#f8f9fa" stroke="#ccc" stroke-width="1" />
+    <text x="350" y="470" font-family="Arial" font-size="14" text-anchor="middle">コリーグはメディエーターを介して通信し、直接の依存関係がない</text>
+  </svg>
+
+  <h2>4. 具体例で理解する</h2>
+  
+  <h3>例1: チャットルーム</h3>
+  <p>チャットルームの例を考えてみましょう：</p>
+  <ul>
+    <li><strong>Mediator</strong>：ChatRoom（チャットルーム）- ユーザー間のメッセージを仲介</li>
+    <li><strong>ConcreteMediator</strong>：ChatRoomImpl - 実際のチャットルームの実装</li>
+    <li><strong>Colleague</strong>：User（ユーザー）- チャットルームを介して他のユーザーと通信</li>
+    <li><strong>ConcreteColleague</strong>：ChatUser - 実際のチャットユーザーの実装</li>
+  </ul>
+  
+  <p>この例では、各ユーザーは他のユーザーを直接知る必要はなく、メッセージをチャットルーム（メディエーター）に送信するだけです。チャットルームが適切な宛先にメッセージを配信します。新しいユーザーが追加されても、既存のユーザーに変更は必要ありません。</p>
+
+  <h3>例2: フォームのコンポーネント制御</h3>
+  <p>登録フォームのUIコンポーネントを考えてみましょう：</p>
+  <ul>
+    <li><strong>Mediator</strong>：FormMediator - フォームコンポーネント間の相互作用を管理</li>
+    <li><strong>ConcreteMediator</strong>：RegistrationFormMediator - 登録フォームの具体的な実装</li>
+    <li><strong>Colleague</strong>：FormComponent - すべてのフォームコンポーネントの基底クラス</li>
+    <li><strong>ConcreteColleague</strong>：チェックボックス、ラジオボタン、テキストフィールド、送信ボタンなど</li>
+  </ul>
+  
+  <p>例えば、以下のような相互作用があります：</p>
+  <ul>
+    <li>「企業アカウント」チェックボックスがチェックされると、追加の企業情報フィールドが表示される</li>
+    <li>「パスワード」と「パスワード確認」フィールドが一致しない場合、送信ボタンが無効になる</li>
+    <li>すべての必須フィールドが入力されるまで、送信ボタンは無効のままになる</li>
+  </ul>
+  
+  <p>これらの複雑な相互作用をメディエーターが管理することで、各コンポーネントは独立して機能し、他のコンポーネントについて知る必要がなくなります。</p>
+
+  <div style="background-color: #fff7e6; border: 1px solid #ffd591; padding: 15px; margin: 20px 0; border-radius: 5px;">
+    <h3>中学生向け説明</h3>
+    <p>空港の航空管制官を想像してみてください。飛行機同士が直接通信するよりも、管制官が間に入って調整する方が安全で効率的です。Mediatorパターンは、このように「管制官」の役割をするオブジェクトを作って、他のオブジェクト同士の通信を整理するパターンです。例えば、たくさんのボタンやテキストボックスがあるアプリで、ある項目を選ぶと関連する項目が変わるような場合、それぞれが直接やり取りするとごちゃごちゃになりますが、真ん中に「調整役」を置くことでシンプルになります。</p>
+  </div>
+
+  <h2>5. メリットとデメリット</h2>
+  
+  <h3>メリット</h3>
+  <ul>
+    <li><strong>オブジェクト間の結合度の低減</strong>：各コリーグはメディエーターだけを知っていればよい</li>
+    <li><strong>単一責任の原則</strong>：オブジェクト間の通信ロジックをメディエーターに集中させることができる</li>
+    <li><strong>オープン・クローズドの原則</strong>：既存のコンポーネントを変更せずに新しいメディエーターを追加できる</li>
+    <li><strong>コードの再利用性の向上</strong>：コリーグを他のメディエーターと組み合わせて再利用できる</li>
+    <li><strong>複雑な相互作用の管理が容易になる</strong>：多対多の関係が単純化される</li>
+  </ul>
+
+  <h3>デメリット</h3>
+  <ul>
+    <li><strong>メディエーターの肥大化</strong>：システムの複雑さがメディエーターに集中し、「神クラス」になる恐れがある</li>
+    <li><strong>メンテナンスの複雑さ</strong>：メディエーターが複雑になると、保守が難しくなる</li>
+    <li><strong>間接的な通信によるオーバーヘッド</strong>：直接通信より若干のパフォーマンス低下がある場合も</li>
+    <li><strong>設計の複雑さ</strong>：シンプルなケースでは過剰設計になる可能性がある</li>
+  </ul>
+
+  <h2>6. 類似パターンとの違い</h2>
+  <table border="1" style="border-collapse: collapse; width: 100%;">
+    <tr style="background-color: #f2f2f2;">
+      <th style="padding: 10px;">パターン</th>
+      <th style="padding: 10px;">主な目的</th>
+      <th style="padding: 10px;">Mediatorとの違い</th>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Observer</strong></td>
+      <td style="padding: 10px;">オブジェクトの状態変化を他のオブジェクトに通知する</td>
+      <td style="padding: 10px;">Observerは一対多の通信、Mediatorは多対多の通信に焦点を当てる</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Facade</strong></td>
+      <td style="padding: 10px;">複雑なサブシステムにシンプルなインターフェースを提供する</td>
+      <td style="padding: 10px;">Facadeは一方向の通信、Mediatorは双方向の通信を行う</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Command</strong></td>
+      <td style="padding: 10px;">要求をオブジェクトとしてカプセル化する</td>
+      <td style="padding: 10px;">Commandは操作をカプセル化、Mediatorは通信を仲介する</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Proxy</strong></td>
+      <td style="padding: 10px;">オブジェクトへのアクセスを制御する</td>
+      <td style="padding: 10px;">Proxyは一つのオブジェクトへのアクセスを制御、Mediatorは複数のオブジェクト間の通信を調整</td>
+    </tr>
+  </table>
+
+  <h2>7. 実践的なアドバイス</h2>
+  <ol>
+    <li><strong>メディエーターの責任を明確にする</strong>：メディエーターは通信の仲介に集中し、ビジネスロジックはコリーグに残すべきです。</li>
+    <li><strong>メディエーターが複雑になりすぎないよう注意する</strong>：必要に応じて複数のメディエーターに分割することを検討しましょう。</li>
+    <li><strong>イベント駆動アーキテクチャと組み合わせる</strong>：メディエーターはイベント駆動アーキテクチャと相性が良いです。</li>
+    <li><strong>インターフェースを使う</strong>：メディエーターとコリーグはインターフェースを使って定義すると、柔軟性が高まります。</li>
+    <li><strong>テスト容易性を確保する</strong>：メディエーターをモック化することで、コリーグを単独でテストしやすくなります。</li>
+  </ol>
+
+  <h2>8. 実装例</h2>
+  <p>チャットルームの実装例を疑似コードで示します：</p>
+  
+  <pre style="background-color: #f5f5f5; padding: 10px; border-radius: 5px;">
+// メディエーターのインターフェース
+interface ChatRoomMediator {
+    void sendMessage(String message, User user);
+    void addUser(User user);
+}
+
+// コリーグの抽象クラス
+abstract class User {
+    protected ChatRoomMediator mediator;
+    protected String name;
+    
+    public User(ChatRoomMediator mediator, String name) {
+        this.mediator = mediator;
+        this.name = name;
+    }
+    
+    public abstract void send(String message);
+    public abstract void receive(String message);
+}
+
+// 具体的なメディエーター
+class ChatRoomImpl implements ChatRoomMediator {
+    private List&lt;User&gt; users;
+    
+    public ChatRoomImpl() {
+        this.users = new ArrayList&lt;&gt;();
+    }
+    
+    @Override
+    public void addUser(User user) {
+        this.users.add(user);
+    }
+    
+    @Override
+    public void sendMessage(String message, User user) {
+        // メッセージを送信したユーザー以外の全員にメッセージを配信
+        for (User u : users) {
+            if (u != user) {
+                u.receive(message);
+            }
+        }
+    }
+}
+
+// 具体的なコリーグ
+class ChatUser extends User {
+    public ChatUser(ChatRoomMediator mediator, String name) {
+        super(mediator, name);
+    }
+    
+    @Override
+    public void send(String message) {
+        System.out.println(this.name + " sends: " + message);
+        mediator.sendMessage(message, this);
+    }
+    
+    @Override
+    public void receive(String message) {
+        System.out.println(this.name + " receives: " + message);
+    }
+}
+
+// クライアント
+public class MediatorExample {
+    public static void main(String[] args) {
+        ChatRoomMediator chatRoom = new ChatRoomImpl();
+        
+        User john = new ChatUser(chatRoom, "John");
+        User robert = new ChatUser(chatRoom, "Robert");
+        User jane = new ChatUser(chatRoom, "Jane");
+        
+        chatRoom.addUser(john);
+        chatRoom.addUser(robert);
+        chatRoom.addUser(jane);
+        
+        john.send("Hi everyone!");
+        // Robertとjaneが受信します
+    }
+}
+  </pre>
+  
+  <p>この例では、各ユーザーは他のユーザーを直接知らず、メディエーター（チャットルーム）を通じてのみ通信します。新しいユーザーが追加されても、既存のユーザーのコードを変更する必要はありません。</p>
+
+  <h2>9. まとめ</h2>
+  <p>Mediatorパターンは、オブジェクト間の通信を仲介役を通じて行わせることで、オブジェクト間の結合度を下げ、システムの保守性と拡張性を高めるデザインパターンです。複雑な相互作用を持つシステムで特に有効です。</p>
+
+  <p>このパターンは、チャットシステム、GUIアプリケーション、航空管制システムなど、多数のオブジェクトが相互に通信する必要がある場合に適しています。ただし、メディエーターが複雑になりすぎないよう注意することが重要です。</p>
+
+  <div style="background-color: #f0f8ff; border: 1px solid #b0c4de; padding: 15px; margin: 20px 0; border-radius: 5px;">
+    <h3>覚えておきたいポイント</h3>
+    <ul>
+      <li>Mediatorは「複数のオブジェクト間の通信を仲介役に任せてシンプルにする」パターン</li>
+      <li>オブジェクト間の直接の依存関係を減らし、結合度を下げる</li>
+      <li>各オブジェクトはメディエーターだけを知っていればよい</li>
+      <li>多対多の複雑な関係を管理するのに適している</li>
+      <li>メディエーターが複雑になりすぎないよう注意する</li>
+    </ul>
+  </div>
+
+  <h2>10. 用語集</h2>
+  <dl>
+    <dt><strong>メディエーター（Mediator）</strong></dt>
+    <dd>複数のオブジェクト間の通信を仲介するオブジェクト。コリーグ同士の直接的な参照を減らす。</dd>
+    
+    <dt><strong>コリーグ（Colleague）</strong></dt>
+    <dd>メディエーターを介して他のオブジェクトと通信するオブジェクト。</dd>
+    
+    <dt><strong>結合度（Coupling）</strong></dt>
+    <dd>ソフトウェアの構成要素間の相互依存性の度合い。低い結合度が望ましい。</dd>
+    
+    <dt><strong>神クラス（God Class）</strong></dt>
+    <dd>あまりにも多くの責任を持ちすぎたクラス。メディエーターが複雑になりすぎると神クラスになる恐れがある。</dd>
+    
+    <dt><strong>イベント駆動アーキテクチャ（Event-Driven Architecture）</strong></dt>
+    <dd>イベントの生成と処理に基づくソフトウェアアーキテクチャ。Mediatorパターンとの相性が良い。</dd>
+  </dl>
+</body>

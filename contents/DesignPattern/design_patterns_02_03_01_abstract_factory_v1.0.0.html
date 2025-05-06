@@ -1,0 +1,176 @@
+<body>
+  <h1>Abstract Factoryパターン</h1>
+
+  <div style="background-color: #e6f7ff; border-left: 5px solid #1890ff; padding: 15px; margin: 20px 0;">
+    <h3>問題：</h3>
+    <p>関連するオブジェクトの家族（一揃い）を、具体的なクラスを指定せずに作りたい。</p>
+    <h3>例えば：</h3>
+    <p>ゲームのUIを、「ダークモード」と「ライトモード」で切り替えられるようにしたい。ボタン、テキスト、背景など、すべてが一貫したデザインになる必要がある。</p>
+  </div>
+
+  <h2>1. Abstract Factoryパターンとは</h2>
+  <p>Abstract Factoryパターンは、関連する一連のオブジェクト（製品のファミリー）を作成するためのインターフェースを提供するデザインパターンです。具体的にどの製品を作るかを指定せずに、関連する製品群を一貫して作成できます。</p>
+  
+  <p>簡単に言うと、「互いに関連する複数の製品を、一貫したテーマで作る工場」を提供するパターンです。</p>
+
+  <h2>2. どんなときに使うの？</h2>
+  <p>以下のような場合にAbstract Factoryパターンが役立ちます：</p>
+  <ul>
+    <li><strong>異なるOS向けのGUI部品セット</strong>：Windows用、Mac用、Linux用など、環境に応じた適切なボタン、テキストボックス、メニューなどを一貫して作りたい</li>
+    <li><strong>ゲームのテーマ</strong>：「中世」「未来」「ファンタジー」など、テーマごとにキャラクター、アイテム、背景などを一貫したデザインで作りたい</li>
+    <li><strong>家具セット</strong>：「モダン」「クラシック」「ミニマリスト」など、スタイルごとに椅子、テーブル、ベッドなどを一貫したデザインで作りたい</li>
+    <li><strong>データベースのコンポーネント</strong>：MySQL、PostgreSQL、SQLiteなど、データベースの種類に応じた接続、コマンド、リーダーなどを一貫して提供したい</li>
+  </ul>
+
+  <h2>3. 仕組み</h2>
+  <p>Abstract Factoryパターンは以下の要素から構成されます：</p>
+  <ol>
+    <li><strong>AbstractFactory（抽象工場）</strong>：製品を作るためのインターフェースを定義する</li>
+    <li><strong>ConcreteFactory（具体的な工場）</strong>：AbstractFactoryを実装し、具体的な製品を作る</li>
+    <li><strong>AbstractProduct（抽象製品）</strong>：製品のインターフェースを定義する</li>
+    <li><strong>ConcreteProduct（具体的な製品）</strong>：AbstractProductを実装し、ConcreteFactoryによって作られる</li>
+    <li><strong>Client（クライアント）</strong>：AbstractFactoryとAbstractProductのインターフェースを使用する</li>
+  </ol>
+
+  <svg width="100%" height="450" viewBox="0 0 800 450">
+    <!-- 抽象工場 -->
+    <rect x="300" y="30" width="200" height="60" rx="10" ry="10" fill="#b3e2cd" stroke="#333" stroke-width="2" />
+    <text x="400" y="65" font-family="Arial" font-size="16" text-anchor="middle">AbstractFactory</text>
+    
+    <!-- 具体的な工場A -->
+    <rect x="150" y="150" width="200" height="60" rx="10" ry="10" fill="#cbd5e8" stroke="#333" stroke-width="2" />
+    <text x="250" y="185" font-family="Arial" font-size="16" text-anchor="middle">ConcreteFactoryA</text>
+    
+    <!-- 具体的な工場B -->
+    <rect x="450" y="150" width="200" height="60" rx="10" ry="10" fill="#cbd5e8" stroke="#333" stroke-width="2" />
+    <text x="550" y="185" font-family="Arial" font-size="16" text-anchor="middle">ConcreteFactoryB</text>
+    
+    <!-- 抽象製品1 -->
+    <rect x="150" y="270" width="180" height="60" rx="10" ry="10" fill="#fdcdac" stroke="#333" stroke-width="2" />
+    <text x="240" y="305" font-family="Arial" font-size="16" text-anchor="middle">AbstractProductA</text>
+    
+    <!-- 抽象製品2 -->
+    <rect x="470" y="270" width="180" height="60" rx="10" ry="10" fill="#fdcdac" stroke="#333" stroke-width="2" />
+    <text x="560" y="305" font-family="Arial" font-size="16" text-anchor="middle">AbstractProductB</text>
+    
+    <!-- 具体的な製品A1 -->
+    <rect x="50" y="380" width="180" height="60" rx="10" ry="10" fill="#f4cae4" stroke="#333" stroke-width="2" />
+    <text x="140" y="415" font-family="Arial" font-size="14" text-anchor="middle">ConcreteProductA1</text>
+    
+    <!-- 具体的な製品A2 -->
+    <rect x="250" y="380" width="180" height="60" rx="10" ry="10" fill="#f4cae4" stroke="#333" stroke-width="2" />
+    <text x="340" y="415" font-family="Arial" font-size="14" text-anchor="middle">ConcreteProductA2</text>
+    
+    <!-- 具体的な製品B1 -->
+    <rect x="450" y="380" width="180" height="60" rx="10" ry="10" fill="#f4cae4" stroke="#333" stroke-width="2" />
+    <text x="540" y="415" font-family="Arial" font-size="14" text-anchor="middle">ConcreteProductB1</text>
+    
+    <!-- 具体的な製品B2 -->
+    <rect x="650" y="380" width="180" height="60" rx="10" ry="10" fill="#f4cae4" stroke="#333" stroke-width="2" />
+    <text x="740" y="415" font-family="Arial" font-size="14" text-anchor="middle">ConcreteProductB2</text>
+    
+    <!-- 継承関係 -->
+    <line x1="250" y1="150" x2="380" y2="90" stroke="#333" stroke-width="1.5" />
+    <line x1="550" y1="150" x2="420" y2="90" stroke="#333" stroke-width="1.5" />
+    
+    <line x1="140" y1="380" x2="220" y2="330" stroke="#333" stroke-width="1.5" />
+    <line x1="340" y1="380" x2="260" y2="330" stroke="#333" stroke-width="1.5" />
+    <line x1="540" y1="380" x2="540" y2="330" stroke="#333" stroke-width="1.5" />
+    <line x1="740" y1="380" x2="580" y2="330" stroke="#333" stroke-width="1.5" />
+    
+    <!-- 作成関係 -->
+    <line x1="150" y1="180" x2="50" y2="380" stroke="#333" stroke-width="1" stroke-dasharray="5,5" />
+    <line x1="250" y1="210" x2="250" y2="380" stroke="#333" stroke-width="1" stroke-dasharray="5,5" />
+    <line x1="650" y1="180" x2="740" y2="380" stroke="#333" stroke-width="1" stroke-dasharray="5,5" />
+    <line x1="550" y1="210" x2="550" y2="380" stroke="#333" stroke-width="1" stroke-dasharray="5,5" />
+    
+    <text x="400" y="15" font-family="Arial" font-size="16" text-anchor="middle" font-weight="bold">Abstract Factoryパターン</text>
+  </svg>
+
+  <h2>4. 具体例で理解する</h2>
+  
+  <h3>例1: 文房具セット</h3>
+  <p>文房具セットを想像してみてください。「かわいい系文房具セット」と「シンプル系文房具セット」があります。どちらにも鉛筆、消しゴム、定規などが含まれますが、デザインが異なります。</p>
+  <p>これをプログラムで表すと：</p>
+  <ul>
+    <li><strong>文房具工場</strong>（AbstractFactory）：鉛筆、消しゴム、定規を作る方法を定義</li>
+    <li><strong>かわいい系文房具工場</strong>、<strong>シンプル系文房具工場</strong>（ConcreteFactory）：それぞれのスタイルに合った文房具を作る</li>
+    <li><strong>鉛筆</strong>、<strong>消しゴム</strong>、<strong>定規</strong>（AbstractProduct）：文房具の基本的な機能を定義</li>
+    <li><strong>かわいい系鉛筆</strong>、<strong>シンプル系鉛筆</strong>など（ConcreteProduct）：実際の文房具</li>
+  </ul>
+
+  <h3>例2: ゲームのUI</h3>
+  <p>ゲームのUIでダークモードとライトモードを切り替える例を考えてみましょう：</p>
+  <ul>
+    <li><strong>UIファクトリー</strong>（AbstractFactory）：ボタン、テキスト、背景などを作る方法を定義</li>
+    <li><strong>ダークモードUIファクトリー</strong>、<strong>ライトモードUIファクトリー</strong>（ConcreteFactory）：それぞれのモードに合ったUI要素を作る</li>
+    <li><strong>ボタン</strong>、<strong>テキスト</strong>、<strong>背景</strong>（AbstractProduct）：UI要素の基本的な機能を定義</li>
+    <li><strong>ダークモードボタン</strong>、<strong>ライトモードボタン</strong>など（ConcreteProduct）：実際のUI要素</li>
+  </ul>
+
+  <p>このようにすると、「モード変更」というたった一つの変更で、すべてのUI要素が一貫して切り替わります。また、新しいモード（例：セピアモード）を追加する場合も、既存のコードを変更せずに拡張できます。</p>
+
+  <div style="background-color: #fff7e6; border: 1px solid #ffd591; padding: 15px; margin: 20px 0; border-radius: 5px;">
+    <h3>中学生向け説明</h3>
+    <p>遊園地のアトラクションを想像してみてください。「西部開拓時代エリア」と「未来都市エリア」があるとします。どちらのエリアにも、乗り物、食べ物、お土産などがありますが、テーマが異なります。西部開拓時代エリアではカウボーイ帽やサルーンがあり、未来都市エリアではロボットやSF的なデザインがあります。Abstract Factoryパターンは、このように「関連するものをまとめて、一貫したテーマで作る」ためのパターンです。</p>
+  </div>
+
+  <h2>5. Factory Methodパターンとの違い</h2>
+  <p>Factory Methodパターンとの主な違いは以下の通りです：</p>
+  <table border="1" style="border-collapse: collapse; width: 100%;">
+    <tr style="background-color: #f2f2f2;">
+      <th style="padding: 10px;">Factory Method</th>
+      <th style="padding: 10px;">Abstract Factory</th>
+    </tr>
+    <tr>
+      <td style="padding: 10px;">単一の製品を作る</td>
+      <td style="padding: 10px;">関連する複数の製品を作る</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px;">継承によって拡張する（サブクラスを作る）</td>
+      <td style="padding: 10px;">組み合わせによって拡張する（新しい工場を作る）</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px;">メソッドに焦点を当てている</td>
+      <td style="padding: 10px;">オブジェクトに焦点を当てている</td>
+    </tr>
+  </table>
+
+  <h2>6. メリットとデメリット</h2>
+  
+  <h3>メリット</h3>
+  <ul>
+    <li><strong>製品の一貫性を保証</strong>：関連する製品が同じテーマや設計になることを保証できる</li>
+    <li><strong>具体的なクラスとの結合を避ける</strong>：クライアントは抽象インターフェースだけを使用するので、具体的なクラスを知る必要がない</li>
+    <li><strong>製品ファミリーの切り替えが容易</strong>：工場オブジェクトを切り替えるだけで、すべての製品が切り替わる</li>
+    <li><strong>単一責任の原則</strong>：製品の作成ロジックを一箇所にまとめられる</li>
+  </ul>
+
+  <h3>デメリット</h3>
+  <ul>
+    <li><strong>コードが複雑になる</strong>：多くのインターフェースとクラスが必要になる</li>
+    <li><strong>新しい種類の製品を追加するのが難しい</strong>：すべての工場に新しい製品を作るメソッドを追加する必要がある</li>
+    <li><strong>すべての製品が同じインターフェースを持つ必要がある</strong>：製品間の違いが大きい場合、共通のインターフェースを作るのが難しいことがある</li>
+  </ul>
+
+  <h2>7. 実践的なアドバイス</h2>
+  <ol>
+    <li><strong>製品ファミリーを明確に定義する</strong>：どの製品が互いに関連しているのか、そしてどのような共通のテーマや設計を持つべきかを明確にしましょう。</li>
+    <li><strong>拡張性を考慮する</strong>：将来、新しい製品ファミリーを追加する可能性がある場合は、それを簡単に追加できるように設計しましょう。</li>
+    <li><strong>過剰に複雑にしない</strong>：製品ファミリーが少なく、変更の可能性も低い場合は、シンプルな方法でも十分かもしれません。</li>
+    <li><strong>Factory Methodパターンと組み合わせる</strong>：Abstract FactoryをFactory Methodパターンで実装することで、より柔軟な設計が可能になることがあります。</li>
+  </ol>
+
+  <h2>8. まとめ</h2>
+  <p>Abstract Factoryパターンは、関連する一連の製品を一貫して作成するためのデザインパターンです。製品ファミリーを簡単に切り替えられるため、テーマやスタイルの変更が必要なシステムで特に役立ちます。ただし、新しい種類の製品を追加するのが難しいという制約もあるため、システムの要件によって適切かどうかを判断する必要があります。</p>
+
+  <div style="background-color: #f0f8ff; border: 1px solid #b0c4de; padding: 15px; margin: 20px 0; border-radius: 5px;">
+    <h3>覚えておきたいポイント</h3>
+    <ul>
+      <li>Abstract Factoryは「関連する製品群をまとめて、一貫したテーマで作る工場」を提供するパターン</li>
+      <li>テーマやスタイルの切り替えが必要なシステムに適している</li>
+      <li>製品ファミリー全体を簡単に切り替えられる</li>
+      <li>新しい種類の製品を追加するのは難しい場合がある</li>
+    </ul>
+  </div>
+</body>

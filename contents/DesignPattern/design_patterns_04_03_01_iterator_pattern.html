@@ -1,0 +1,198 @@
+<body>
+  <h1>Iteratorパターン</h1>
+
+  <div style="background-color: #e6f7ff; border-left: 5px solid #1890ff; padding: 15px; margin: 20px 0;">
+    <h3>問題：</h3>
+    <p>コレクション（リスト、ツリー、グラフなど）の内部構造を公開せずに、その要素に順番にアクセスしたい。</p>
+    <h3>例えば：</h3>
+    <p>配列、リスト、ツリー、グラフなど様々なデータ構造に対して、統一された方法で要素を走査したい。</p>
+  </div>
+
+  <h2>1. Iteratorパターンとは</h2>
+  <p>Iteratorパターンは、コレクションの内部構造を公開せずに、コレクションの要素に順番にアクセスする方法を提供するデザインパターンです。イテレーターはコレクションの内部構造から走査のメカニズムを分離し、同じインターフェースを使ってさまざまなコレクションを走査できるようにします。</p>
+  
+  <p>簡単に言うと、「コレクションの内部を知らなくても、その中身を一つずつ取り出せるようにする」パターンです。</p>
+
+  <h2>2. どんなときに使うの？</h2>
+  <p>以下のような場合にIteratorパターンが役立ちます：</p>
+  <ul>
+    <li><strong>コレクションの内部構造を隠蔽したい場合</strong>：クライアントにコレクションの内部構造を公開したくない</li>
+    <li><strong>コレクションの走査方法を統一したい場合</strong>：様々なコレクションに対して同じ方法で要素にアクセスしたい</li>
+    <li><strong>複数の走査方法を提供したい場合</strong>：前から、後ろから、特定の条件でなど、複数の走査方法が必要</li>
+    <li><strong>クライアントコードとコレクションを分離したい場合</strong>：コレクションの実装を変更してもクライアントコードに影響を与えたくない</li>
+    <li><strong>並行して複数の走査をサポートしたい場合</strong>：同じコレクションを複数のクライアントが同時に走査する</li>
+  </ul>
+
+  <h2>3. 仕組み</h2>
+  <p>Iteratorパターンは以下の要素から構成されます：</p>
+  <ol>
+    <li><strong>Iterator（イテレーター）</strong>：コレクションの要素にアクセスするインターフェース</li>
+    <li><strong>ConcreteIterator（具体的なイテレーター）</strong>：Iteratorインターフェースを実装し、特定のコレクションを走査する</li>
+    <li><strong>Aggregate（集約体）</strong>：Iteratorを作成するインターフェース</li>
+    <li><strong>ConcreteAggregate（具体的な集約体）</strong>：Aggregateインターフェースを実装し、対応するConcreteIteratorを作成する</li>
+  </ol>
+
+  <svg width="100%" height="450" viewBox="0 0 700 450">
+    <!-- Iterator -->
+    <rect x="50" y="50" width="200" height="100" rx="10" ry="10" fill="#b3e2cd" stroke="#333" stroke-width="2" />
+    <text x="150" y="80" font-family="Arial" font-size="16" text-anchor="middle">Iterator</text>
+    <text x="150" y="105" font-family="Arial" font-size="12" text-anchor="middle">+ hasNext()</text>
+    <text x="150" y="125" font-family="Arial" font-size="12" text-anchor="middle">+ next()</text>
+    
+    <!-- ConcreteIterator -->
+    <rect x="50" y="200" width="200" height="120" rx="10" ry="10" fill="#cbd5e8" stroke="#333" stroke-width="2" />
+    <text x="150" y="230" font-family="Arial" font-size="16" text-anchor="middle">ConcreteIterator</text>
+    <text x="150" y="255" font-family="Arial" font-size="12" text-anchor="middle">- collection</text>
+    <text x="150" y="275" font-family="Arial" font-size="12" text-anchor="middle">- position</text>
+    <text x="150" y="295" font-family="Arial" font-size="12" text-anchor="middle">+ hasNext()</text>
+    <text x="150" y="315" font-family="Arial" font-size="12" text-anchor="middle">+ next()</text>
+    
+    <!-- Aggregate -->
+    <rect x="450" y="50" width="200" height="80" rx="10" ry="10" fill="#fdcdac" stroke="#333" stroke-width="2" />
+    <text x="550" y="80" font-family="Arial" font-size="16" text-anchor="middle">Aggregate</text>
+    <text x="550" y="105" font-family="Arial" font-size="12" text-anchor="middle">+ createIterator()</text>
+    
+    <!-- ConcreteAggregate -->
+    <rect x="450" y="200" width="200" height="100" rx="10" ry="10" fill="#f4cae4" stroke="#333" stroke-width="2" />
+    <text x="550" y="230" font-family="Arial" font-size="16" text-anchor="middle">ConcreteAggregate</text>
+    <text x="550" y="255" font-family="Arial" font-size="12" text-anchor="middle">- items</text>
+    <text x="550" y="275" font-family="Arial" font-size="12" text-anchor="middle">+ createIterator()</text>
+    
+    <!-- Client -->
+    <rect x="250" y="350" width="200" height="80" rx="10" ry="10" fill="#e6f5c9" stroke="#333" stroke-width="2" />
+    <text x="350" y="380" font-family="Arial" font-size="16" text-anchor="middle">Client</text>
+    <text x="350" y="405" font-family="Arial" font-size="12" text-anchor="middle">uses</text>
+    
+    <!-- 関係を表す線 -->
+    <line x1="150" y1="200" x2="150" y2="150" stroke="#333" stroke-width="1.5" />
+    <line x1="550" y1="200" x2="550" y2="130" stroke="#333" stroke-width="1.5" />
+    <line x1="250" y1="250" x2="450" y2="250" stroke="#333" stroke-width="1.5" stroke-dasharray="5,5" />
+    <line x1="350" y1="350" x2="150" y2="320" stroke="#333" stroke-width="1.5" stroke-dasharray="5,5" />
+    <line x1="350" y1="350" x2="550" y2="300" stroke="#333" stroke-width="1.5" stroke-dasharray="5,5" />
+    
+    <text x="350" y="25" font-family="Arial" font-size="16" text-anchor="middle" font-weight="bold">Iteratorパターン</text>
+    
+    <!-- 説明文 -->
+    <rect x="50" y="350" width="600" height="30" rx="5" ry="5" fill="#f8f9fa" stroke="#ccc" stroke-width="1" visibility="hidden" />
+  </svg>
+
+  <h2>4. 具体例で理解する</h2>
+  
+  <h3>例1: 図書館の蔵書管理</h3>
+  <p>図書館の蔵書管理システムを考えてみましょう：</p>
+  <ul>
+    <li><strong>Iterator</strong>：BookIterator - 本にアクセスするためのインターフェース</li>
+    <li><strong>ConcreteIterator</strong>：AuthorIterator, GenreIterator - 著者別や、ジャンル別に本を走査するイテレーター</li>
+    <li><strong>Aggregate</strong>：BookCollection - イテレーターを作成するインターフェース</li>
+    <li><strong>ConcreteAggregate</strong>：Library - 図書館の本のコレクション</li>
+  </ul>
+  
+  <p>この例では、図書館の本のコレクション（Library）に対して、著者別（AuthorIterator）やジャンル別（GenreIterator）など、様々な方法で本を走査することができます。クライアントは本がどのように保存されているか（配列、リスト、データベースなど）を知る必要はなく、統一されたインターフェース（hasNext(), next()）を使って本にアクセスできます。</p>
+
+  <h3>例2: メニュー項目の走査</h3>
+  <p>レストランのメニュー項目を走査する例も考えてみましょう：</p>
+  <ul>
+    <li><strong>Iterator</strong>：MenuIterator - メニュー項目にアクセスするためのインターフェース</li>
+    <li><strong>ConcreteIterator</strong>：BreakfastMenuIterator, LunchMenuIterator, DinnerMenuIterator - 朝食、昼食、夕食のメニューを走査するイテレーター</li>
+    <li><strong>Aggregate</strong>：Menu - イテレーターを作成するインターフェース</li>
+    <li><strong>ConcreteAggregate</strong>：BreakfastMenu, LunchMenu, DinnerMenu - 具体的なメニュー</li>
+  </ul>
+  
+  <p>この例では、朝食メニュー（BreakfastMenu）が配列で実装され、昼食メニュー（LunchMenu）がリストで実装され、夕食メニュー（DinnerMenu）がハッシュマップで実装されていても、ウェイターは同じ方法（hasNext(), next()）ですべてのメニュー項目にアクセスできます。</p>
+
+  <div style="background-color: #fff7e6; border: 1px solid #ffd591; padding: 15px; margin: 20px 0; border-radius: 5px;">
+    <h3>中学生向け説明</h3>
+    <p>図書館で本を探す時のことを想像してみてください。本の並べ方は図書館によって異なります（著者名順、タイトル順、ジャンル別など）。でも、あなたは本の並べ方を気にせず、次々と本を見ていきますよね。Iteratorパターンは、このように「中身がどう整理されているかを気にせずに、順番に取り出す」仕組みです。例えば、お菓子の詰め合わせを考えてみましょう。箱の中にチョコレート、クッキー、キャンディーなどがどう並んでいるかを知らなくても、「次のお菓子をください」と言えば、一つずつ取り出せます。プログラムでも同じように、データがどう保存されているかを知らなくても、「次のデータをください」と言える仕組みがIteratorパターンです。</p>
+  </div>
+
+  <h2>5. メリットとデメリット</h2>
+  
+  <h3>メリット</h3>
+  <ul>
+    <li><strong>単一責任の原則</strong>：コレクションの走査ロジックをコレクション自体から分離できる</li>
+    <li><strong>開放/閉鎖の原則</strong>：新しい走査方法を追加しても、コレクションのコードを変更する必要がない</li>
+    <li><strong>カプセル化</strong>：コレクションの内部構造を隠蔽し、クライアントにシンプルなインターフェースを提供</li>
+    <li><strong>並行走査</strong>：同じコレクションに対して複数のイテレーターを使用して並行して走査できる</li>
+    <li><strong>統一されたインターフェース</strong>：様々なコレクションに対して同じ方法でアクセスできる</li>
+  </ul>
+
+  <h3>デメリット</h3>
+  <ul>
+    <li><strong>単純なケースでの過剰設計</strong>：小さなコレクションや単純なケースでは導入コストが高い</li>
+    <li><strong>性能オーバーヘッド</strong>：直接アクセスと比較して若干のオーバーヘッドが発生する</li>
+    <li><strong>状態管理の複雑さ</strong>：コレクションが変更されると、イテレーターが無効になる可能性がある</li>
+    <li><strong>実装の複雑さ</strong>：複雑なデータ構造（グラフなど）のイテレーターは実装が難しい</li>
+  </ul>
+
+  <h2>6. 類似パターンとの違い</h2>
+  <table border="1" style="border-collapse: collapse; width: 100%;">
+    <tr style="background-color: #f2f2f2;">
+      <th style="padding: 10px;">パターン</th>
+      <th style="padding: 10px;">主な目的</th>
+      <th style="padding: 10px;">Iteratorとの違い</th>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Visitor</strong></td>
+      <td style="padding: 10px;">オブジェクトに新しい操作を追加する</td>
+      <td style="padding: 10px;">Visitorは操作を追加し、Iteratorはコレクションの走査方法を提供する</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Composite</strong></td>
+      <td style="padding: 10px;">部分-全体の階層構造を表現する</td>
+      <td style="padding: 10px;">CompositeはツリーをIteratorと組み合わせて走査できる</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Factory Method</strong></td>
+      <td style="padding: 10px;">オブジェクトの生成を専用のメソッドに委ねる</td>
+      <td style="padding: 10px;">AggregateのcreateIterator()はFactory Methodの一例</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px;"><strong>Memento</strong></td>
+      <td style="padding: 10px;">オブジェクトの内部状態を保存・復元する</td>
+      <td style="padding: 10px;">Mementoは状態を保存し、Iteratorは要素にアクセスする</td>
+    </tr>
+  </table>
+
+  <h2>7. 実践的なアドバイス</h2>
+  <ol>
+    <li><strong>言語の標準ライブラリを活用する</strong>：多くのプログラミング言語には標準的なイテレーターの実装があります。これらを活用しましょう。</li>
+    <li><strong>不変のコレクションを考慮する</strong>：イテレーター使用中にコレクションが変更されると問題が発生します。不変のコレクションか、変更を検出する仕組みを導入しましょう。</li>
+    <li><strong>複数の走査方法を提供する</strong>：必要に応じて順方向、逆方向、特定の条件での走査など、複数のイテレーターを提供しましょう。</li>
+    <li><strong>イテレーターの状態に注意する</strong>：イテレーターは内部状態を持っています。複数のクライアントで共有すると予期せぬ動作の原因になります。</li>
+    <li><strong>遅延評価を検討する</strong>：大きなコレクションの場合、必要に応じて要素を生成する遅延イテレーターが効率的です。</li>
+  </ol>
+
+  <h2>8. まとめ</h2>
+  <p>Iteratorパターンは、コレクションの内部構造を隠蔽しながら、その要素に順番にアクセスするための統一的な方法を提供するデザインパターンです。このパターンにより、コレクションとその走査のメカニズムを分離し、様々なコレクションに対して同じインターフェースで要素にアクセスできるようになります。</p>
+
+  <p>このパターンは、コレクションの種類が多様で、それらに対する統一的なアクセス方法が必要な場合や、コレクションの内部構造を隠蔽したい場合に特に有効です。現代のプログラミング言語の多くは、イテレーターの概念を標準ライブラリとして提供しているため、これらを活用するとよいでしょう。</p>
+
+  <div style="background-color: #f0f8ff; border: 1px solid #b0c4de; padding: 15px; margin: 20px 0; border-radius: 5px;">
+    <h3>覚えておきたいポイント</h3>
+    <ul>
+      <li>Iteratorは「コレクションの内部を知らなくても、その中身を一つずつ取り出せるようにする」パターン</li>
+      <li>コレクションと走査のメカニズムを分離し、単一責任の原則を満たす</li>
+      <li>様々なコレクションに対して統一されたアクセス方法を提供する</li>
+      <li>複数の走査方法や並行走査をサポートできる</li>
+      <li>現代のプログラミング言語には標準的なイテレーターの実装がある</li>
+    </ul>
+  </div>
+
+  <h2>9. 用語集</h2>
+  <dl>
+    <dt><strong>イテレーター（Iterator）</strong></dt>
+    <dd>コレクションの要素に順番にアクセスするためのインターフェース。主にhasNext()とnext()メソッドを提供する。</dd>
+    
+    <dt><strong>集約体（Aggregate）</strong></dt>
+    <dd>イテレーターを作成するためのインターフェース。コレクションを表す。</dd>
+    
+    <dt><strong>内部イテレーター（Internal Iterator）</strong></dt>
+    <dd>イテレーター自身が走査を制御するタイプのイテレーター。クライアントはコールバック関数を提供する。</dd>
+    
+    <dt><strong>外部イテレーター（External Iterator）</strong></dt>
+    <dd>クライアントが走査を制御するタイプのイテレーター。クライアントがnext()を呼び出して次の要素を取得する。</dd>
+    
+    <dt><strong>遅延イテレーター（Lazy Iterator）</strong></dt>
+    <dd>要素にアクセスする際に初めて計算や生成を行うイテレーター。大きなコレクションや無限シーケンスに適している。</dd>
+  </dl>
+</body>
