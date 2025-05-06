@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4.3 型レベルプログラミングとの連携 - Template Haskell 学習ガイド</title>
+    <link rel="stylesheet" href="../styles/main.css">
+</head>
+<body>
+    <header>
+        <h1>4.3 型レベルプログラミングとの連携 - Template Haskell 学習ガイド</h1>
+    </header>
+    
+    <nav>
+        <a href="../chapter0_2_toc.html">目次</a>
+        <div>
+            <a href="4.2_DSLの実装.html">前へ</a>
+            <a href="4.4_パフォーマンス最適化.html">次へ</a>
+        </div>
+    </nav>
+    
+    <main>
+        <h1>4.3 型レベルプログラミングとの連携</h1>
+        
+        <p>Template Haskellと型レベルプログラミングは、Haskellの高度な機能の中でも特に強力な組み合わせです。この章では、両者を連携させて使用する方法と、それによって実現できる高度な型安全性について説明します。</p>
+
+        <h2>型レベルプログラミングの基本</h2>
+        
+        <p>型レベルプログラミングとは、型自体をプログラミングの対象として扱い、コンパイル時に型による制約や計算を行う手法です。Haskellでは、DataKinds、TypeFamilies、GADTs（Generalized Algebraic Data Types）などの拡張機能によって、型レベルプログラミングが可能になっています。</p>
+        
+        <p>例えば、自然数を型レベルで表現する方法は次のようになります：</p>
+        
+        <pre><code>{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE UndecidableInstances #-}
+
+-- 自然数の定義
+data Nat = Zero | Succ Nat
+
+-- 型レベルの加算
+type family Add (n :: Nat) (m :: Nat) :: Nat where
+  Add 'Zero m = m
+  Add ('Succ n) m = 'Succ (Add n m)
+
+-- 型レベルの乗算
+type family Mul (n :: Nat) (m :: Nat) :: Nat where
+  Mul 'Zero m = 'Zero
+  Mul ('Succ n) m = Add m (Mul n m)</code></pre>
+        
+        <p>この例では、<code>Nat</code>型と、その上での加算と乗算を型レベルで定義しています。</p>
+        
+        <h2>Template Haskellによる型レベルコードの生成</h2>
+        
+        <p>Template Haskellを使用すると、型レベルのコードを動的に生成することができます。これは特に、型レベルのコードが複雑な場合や、外部の情報から型レベルのコードを生成する場合に役立ちます。</p>
+        
+        <p>例えば、与えられた最大値までの型レベルの自然数と、それらの間の関係を定義するコードを生成する関数を考えてみましょう：</p>
+        
+        <pre><code>{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE GADTs #-}
+import Language.Haskell.TH
+
+-- 型レベルの自然数を表す型クラス
+class Nat n where
+  natVal :: proxy n -> Integer
+
+-- 最大値までの型レベル自然数を生成する関数
+genNats :: Int -> Q [Dec]
+genNats maxVal = do
+  -- 各自然数に対応する型の定義
+  types <- forM [0..maxVal] $ \i -> do
+    let typeName = mkName $ "N" ++ show i
+    return $ DataD [] typeName [] Nothing [] []
+    
+  -- 各型に対するNatインスタンスの定義
+  instances <- forM [0..maxVal] $ \i -> do
+    let typeName = mkName $ "N" ++ show i
+    [d|
+      instance Nat $(conT typeName) where
+        natVal _ = $(litE $ integerL $ fromIntegral i)
+    |]
+    
+  -- 型レベルの後者関係を定義
+  succs <- forM [0..maxVal-1] $ \i -> do
+    let from = mkName $ "N" ++ show i
+        to = mkName $ "N" ++ show (i + 1)
+    [d|
+      type family Succ $(conT from) where
+        Succ $(conT from) = $(conT to)
+    |]
+    
+  return $ concat [types, concat instances, concat succs]
+
+-- 使用例
+$(genNats 10)</code></pre>
+        
+        <p>この例では、<code>genNats</code>関数が0から指定された最大値までの型レベルの自然数を表す型と、それらの間の後者関係を定義するコードを生成しています。</p>
+        
+        <div class="note">
+            <h4>注意</h4>
+            <p>Template Haskellでは、<code>Q [Dec]</code>型の値を返すことで、複数の宣言を生成することができます。<code>Dec</code>型は、データ型宣言、関数宣言、型クラスインスタンス宣言などを表します。</p>
+        </div>
+        
+        <h2>型安全な次元解析の実装</h2>
+        
+        <p>Template Haskellと型レベルプログラミングの連携の実践的な例として、型安全な次元解析を実装してみましょう。</p>
+        
+        <pre><code>{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE UndecidableInstances #-}
+import Language.Haskell.TH
+import GHC.TypeLits
+
+-- 基本次元
+data Dim = Length | Mass | Time
+
+-- 次元を持つ数値型
+newtype Quantity (dims :: [(Dim, Nat)]) = Quantity Double
+  deriving (Show, Eq)
+
+-- 次元の加算（単位の掛け算に対応）
+type family AddDim (dim :: Dim) (n :: Nat) (dims :: [(Dim, Nat)]) :: [(Dim, Nat)] where
+  AddDim dim n '[] = '[(dim, n)]
+  AddDim dim n ('(dim', n') ': dims) =
+    If (dim == dim')
+       ('(dim, n + n') ': dims)
+       ('(dim', n') ': AddDim dim n dims)
+
+-- 条件分岐のための型族
+type family If (cond :: Bool) (then' :: k) (else' :: k) :: k where
+  If 'True  then' else' = then'
+  If 'False then' else' = else'
+
+-- 次元同士の掛け算
+type family MulDims (dims1 :: [(Dim, Nat)]) (dims2 :: [(Dim, Nat)]) :: [(Dim, Nat)] where
+  MulDims '[] dims2 = dims2
+  MulDims ('(dim, n) ': dims1) dims2 = AddDim dim n (MulDims dims1 dims2)
+
+-- 単位の掛け算
+instance Num (Quantity dims) where
+  (Quantity x) * (Quantity y) = Quantity (x * y)
+  -- 他のNumインスタンスメソッドの実装...
+
+-- 各次元の型レベル定数
+type Length = '[(Length, 1)]
+type Mass = '[(Mass, 1)]
+type Time = '[(Time, 1)]
+
+-- よく使われる単位の定義
+meter :: Quantity Length
+meter = Quantity 1.0
+
+kilogram :: Quantity Mass
+kilogram = Quantity 1.0
+
+second :: Quantity Time
+second = Quantity 1.0
+
+-- Template Haskellを使用して複合単位を生成
+genDerivedUnits :: Q [Dec]
+genDerivedUnits = do
+  -- 速度 (m/s)
+  velocity <- [d|
+    type Velocity = '[(Length, 1), (Time, 1)]
+    
+    meterPerSecond :: Quantity Velocity
+    meterPerSecond = Quantity 1.0
+  |]
+  
+  -- 加速度 (m/s^2)
+  acceleration <- [d|
+    type Acceleration = '[(Length, 1), (Time, 2)]
+    
+    meterPerSecondSquared :: Quantity Acceleration
+    meterPerSecondSquared = Quantity 1.0
+  |]
+  
+  -- 力 (kg·m/s^2)
+  force <- [d|
+    type Force = MulDims Mass Acceleration
+    
+    newton :: Quantity Force
+    newton = Quantity 1.0
+  |]
+  
+  return $ concat [velocity, acceleration, force]
+
+-- 使用例
+$(genDerivedUnits)
+
+-- 物理計算
+mass :: Quantity Mass
+mass = Quantity 2.0
+
+acceleration :: Quantity Acceleration
+acceleration = Quantity 9.8
+
+force :: Quantity Force
+force = mass * acceleration</code></pre>
+        
+        <p>この例では、Template Haskellを使用して、物理量の次元を型レベルで表現し、それらの間の関係を定義しています。これにより、物理計算において次元の不一致があるとコンパイルエラーになるため、単位の誤りを防ぐことができます。</p>
+        
+        <h2>列挙型の拡張</h2>
+        
+        <p>もう一つの例として、列挙型を拡張して、各コンストラクタに関連する情報を型レベルで保持する方法を見てみましょう。</p>
+        
+        <pre><code>{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE TypeFamilies #-}
+import Language.Haskell.TH
+import Data.Proxy
+
+-- 列挙型のコンストラクタと関連情報を表す型
+data EnumInfo = EnumInfo
+  { enumName :: String
+  , enumValue :: Integer
+  , enumDescription :: String
+  }
+
+-- 型レベルで情報を保持する列挙型の生成
+genEnum :: String -> [EnumInfo] -> Q [Dec]
+genEnum typeName enumInfos = do
+  -- データ型の定義
+  let enumType = mkName typeName
+  dataDecl <- dataD (cxt []) enumType [] Nothing
+    [forM enumInfos $ \info ->
+      normalC (mkName (enumName info)) []]
+    [derivClause Nothing [conT ''Eq, conT ''Show, conT ''Ord]]
+    
+  -- 型レベルの情報
+  infoType <- forM enumInfos $ \info -> do
+    let conName = mkName (enumName info)
+    [d|
+      type instance EnumValue $(conT enumType) $(conT conName) = $(litT . numTyLit $ enumValue info)
+      type instance EnumDescription $(conT enumType) $(conT conName) = $(litT . strTyLit $ enumDescription info)
+    |]
+    
+  -- 値レベルの関数
+  valueFuncDecl <- funD (mkName $ "valueOf" ++ typeName)
+    [forM enumInfos $ \info -> do
+      let conName = mkName (enumName info)
+      clause [conP conName []]
+        (normalB [|$(litE . integerL $ enumValue info)|]) []]
+    
+  descFuncDecl <- funD (mkName $ "descriptionOf" ++ typeName)
+    [forM enumInfos $ \info -> do
+      let conName = mkName (enumName info)
+      clause [conP conName []]
+        (normalB [|$(stringE $ enumDescription info)|]) []]
+        
+  return $ concat [dataDecl, concat infoType, valueFuncDecl, descFuncDecl]
+
+-- 使用例
+$(genEnum "Color"
+  [ EnumInfo "Red" 0 "The color red"
+  , EnumInfo "Green" 1 "The color green"
+  , EnumInfo "Blue" 2 "The color blue"
+  ])</code></pre>
+        
+        <p>この例では、Template Haskellを使用して、列挙型とその各コンストラクタに関連する情報（値と説明）を型レベルと値レベルの両方で保持する仕組みを実装しています。</p>
+        
+        <div class="warning">
+            <h4>警告</h4>
+            <p>型レベルプログラミングとTemplate Haskellを組み合わせると非常に強力ですが、コードの複雑性も増します。そのため、適切なドキュメントを提供し、可能な限りシンプルな実装を心がけましょう。</p>
+        </div>
+        
+        <h2>型安全なデータベースアクセス</h2>
+        
+        <p>最後の例として、型レベルプログラミングとTemplate Haskellを使用して、型安全なデータベースアクセスを実装する方法を見てみましょう。</p>
+        
+        <pre><code>{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE OverloadedStrings #-}
+import Language.Haskell.TH
+import Data.Text (Text)
+import qualified Data.Text as T
+import Database.SQLite.Simple
+
+-- テーブル定義の型
+data TableDef = TableDef
+  { tableName :: String
+  , tableColumns :: [(String, String)] -- (列名, 型)
+  }
+
+-- テーブルの列を表す型
+data Column (table :: Symbol) (name :: Symbol) (ty :: *) = Column
+
+-- テーブルレコードの型
+newtype TableRecord (table :: Symbol) = TableRecord [(String, Dynamic)]
+
+-- SQLクエリビルダー
+data SQLQuery (result :: *) where
+  Select :: Column table name ty -> SQLQuery [ty]
+  Where :: SQLQuery [record] -> (record -> Bool) -> SQLQuery [record]
+  -- 他のクエリ操作...
+
+-- テーブル定義からの型生成
+genTable :: TableDef -> Q [Dec]
+genTable (TableDef name columns) = do
+  -- テーブルの型定義
+  let tableTy = mkName name
+  tableDecl <- dataD (cxt []) tableTy [] Nothing [] []
+  
+  -- 列の型定義
+  columnDecls <- forM columns $ \(colName, colType) -> do
+    let colTy = mkName $ name ++ "_" ++ colName
+    let colHs = case colType of
+          "INTEGER" -> [t|Int|]
+          "TEXT" -> [t|Text|]
+          "REAL" -> [t|Double|]
+          _ -> [t|Text|] -- デフォルト
+    
+    colDecl <- [d|
+      $(varP $ mkName colName) :: Column $(conT tableTy) $(litT $ strTyLit colName) $(colHs)
+      $(varP $ mkName colName) = Column
+    |]
+    
+    return colDecl
+    
+  -- テーブルから行を取得する関数
+  queryFunc <- [d|

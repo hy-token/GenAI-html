@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5.4 GHCの拡張機能との連携 - Template Haskell 学習ガイド</title>
+    <link rel="stylesheet" href="../styles/main.css">
+</head>
+<body>
+    <header>
+        <h1>5.4 GHCの拡張機能との連携 - Template Haskell 学習ガイド</h1>
+    </header>
+    
+    <nav>
+        <a href="../chapter0_2_toc.html">目次</a>
+        <div>
+            <a href="5.3_エラー処理とデバッグ.html">前へ</a>
+            <a href="../chapter6/6.1_JSONパーサーの自動生成.html">次へ</a>
+        </div>
+    </nav>
+    
+    <main>
+        <h1>5.4 GHCの拡張機能との連携</h1>
+        
+        <p>Template Haskellの真の力は、GHCの他の拡張機能と組み合わせたときに発揮されます。この章では、Template HaskellとGHCの他の拡張機能との連携について説明し、それによって実現できる高度なプログラミングテクニックを紹介します。</p>
+
+        <h2>DataKindsとの連携</h2>
+        
+        <p>DataKinds拡張を使用すると、データ型のコンストラクタを型レベルで使用できるようになります。Template Haskellと組み合わせることで、型レベルでのプログラミングがより強力になります。</p>
+        
+        <pre><code>-- 必要な拡張機能とインポート
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE TypeFamilies #-}
+import Language.Haskell.TH
+import GHC.TypeLits
+
+-- 自然数を表す型レベルリスト
+data Nat = Zero | Succ Nat
+
+-- 型レベルの加算
+type family Add (n :: Nat) (m :: Nat) :: Nat where
+  Add 'Zero m = m
+  Add ('Succ n) m = 'Succ (Add n m)
+
+-- 型レベルの自然数と対応する値レベルの自然数を生成するマクロ
+genNats :: Int -> Q [Dec]
+genNats maxVal = do
+  -- 型レベルの自然数を定義
+  typeDecls <- forM [0..maxVal] $ \i -> do
+    let typeName = mkName $ "T" ++ show i
+    dataD (cxt []) typeName [] Nothing [] []
+  
+  -- 値レベルの自然数を定義
+  valueDecls <- forM [0..maxVal] $ \i -> do
+    let valName = mkName $ "v" ++ show i
+        typeName = mkName $ "T" ++ show i
+    sigD valName [t| $(conT typeName) |] >>= \sig ->
+      return [sig, valD (varP valName) (normalB [| undefined |]) []]
+  
+  -- 型レベルと値レベルの対応を示す型クラスインスタンス
+  instDecls <- forM [0..maxVal] $ \i -> do
+    let typeName = mkName $ "T" ++ show i
+    [d|
+      instance SNat $(conT typeName) where
+        toInt _ = $(litE (integerL (toInteger i)))
+    |]
+  
+  return $ concat [typeDecls, concat valueDecls, concat instDecls]
+
+-- 型から整数への変換を行う型クラス
+class SNat a where
+  toInt :: a -> Int
+
+-- 使用例
+$(genNats 10)
+
+-- 型レベルの計算例
+type Five = Add T3 T2  -- T5に相当
+val :: Five
+val = undefined
+
+result :: Int
+result = toInt val  -- 5に評価される</code></pre>
+        
+        <p>この例では、DataKindsとTemplate Haskellを組み合わせて、型レベルの自然数とそれに対応する値レベルの自然数を生成しています。型レベルの加算も定義されており、型レベルでの計算結果を値レベルで取得できます。</p>
+        
+        <div class="note">
+            <h4>注意</h4>
+            <p>DataKinds拡張を使用する際は、型レベルのコンストラクタには「'」（シングルクォート）が付くことに注意してください。例えば、<code>'Zero</code>や<code>'Succ</code>のように記述します。ただし、種の推論が可能な場合は省略することもできます。</p>
+        </div>
+        
+        <h2>TypeFamiliesとの連携</h2>
+        
+        <p>TypeFamilies拡張は、型レベルの関数を定義できる強力な機能です。Template Haskellと組み合わせることで、型レベルの関数を動的に生成できます。</p>
+        
+        <pre><code>-- 必要な拡張機能とインポート
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE KindSignatures #-}
+import Language.Haskell.TH
+import GHC.TypeLits
+
+-- 型レベルの関数を生成するマクロ
+genTypeFamilies :: Q [Dec]
+genTypeFamilies = do
+  -- 型レベルのMax関数
+  maxFamily <- [d|
+    type family Max (n :: Nat) (m :: Nat) :: Nat where
+      Max n m = If (n <=? m) m n
+  |]
+  
+  -- 型レベルのMin関数
+  minFamily <- [d|
+    type family Min (n :: Nat) (m :: Nat) :: Nat where
+      Min n m = If (n <=? m) n m
+  |]
+  
+  -- 型レベルのEven関数
+  evenFamily <- [d|
+    type family Even (n :: Nat) :: Bool where
+      Even 0 = 'True
+      Even 1 = 'False
+      Even n = Even (n - 2)
+  |]
+  
+  -- 型レベルのOdd関数
+  oddFamily <- [d|
+    type family Odd (n :: Nat) :: Bool where
+      Odd n = Not (Even n)
+  |]
+  
+  return $ concat [maxFamily, minFamily, evenFamily, oddFamily]
+
+-- 値レベルの証明を生成するマクロ
+genProofs :: Q [Dec]
+genProofs = do
+  -- Max 3 5 = 5の証明
+  max3_5 <- [d|
+    proof_max_3_5 :: (Max 3 5 ~ 5) => ()
+    proof_max_3_5 = ()
+  |]
+  
+  -- Min 3 5 = 3の証明
+  min3_5 <- [d|
+    proof_min_3_5 :: (Min 3 5 ~ 3) => ()
+    proof_min_3_5 = ()
+  |]
+  
+  -- Even 4 = Trueの証明
+  even4 <- [d|
+    proof_even_4 :: (Even 4 ~ 'True) => ()
+    proof_even_4 = ()
+  |]
+  
+  -- Odd 5 = Trueの証明
+  odd5 <- [d|
+    proof_odd_5 :: (Odd 5 ~ 'True) => ()
+    proof_odd_5 = ()
+  |]
+  
+  return $ concat [max3_5, min3_5, even4, odd5]
+
+-- 使用例
+$(genTypeFamilies)
+$(genProofs)</code></pre>
+        
+        <p>この例では、TypeFamiliesとTemplate Haskellを組み合わせて、型レベルの関数（Max、Min、Even、Odd）とその証明を生成しています。これにより、型レベルでの計算が静的に検証されます。</p>
+        
+        <h2>GADTsとの連携</h2>
+        
+        <p>一般化代数データ型（GADTs）は、より制約のある型構造を持つデータ型を定義できる機能です。Template Haskellと組み合わせることで、GADTsを動的に生成できます。</p>
+        
+        <pre><code>-- 必要な拡張機能とインポート
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE KindSignatures #-}
+import Language.Haskell.TH
+
+-- GADTを生成するマクロ
+genExprGADT :: Q [Dec]
+genExprGAD

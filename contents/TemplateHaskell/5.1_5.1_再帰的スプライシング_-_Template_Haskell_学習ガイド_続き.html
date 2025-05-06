@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5.1 再帰的スプライシング - Template Haskell 学習ガイド</title>
+    <link rel="stylesheet" href="../styles/main.css">
+</head>
+<body>
+    <header>
+        <h1>5.1 再帰的スプライシング - Template Haskell 学習ガイド</h1>
+    </header>
+    
+    <nav>
+        <a href="../chapter0_2_toc.html">目次</a>
+        <div>
+            <a href="../chapter4/4.4_パフォーマンス最適化.html">前へ</a>
+            <a href="5.2_複雑なマクロの作成.html">次へ</a>
+        </div>
+    </nav>
+    
+    <main>
+        <h1>5.1 再帰的スプライシング</h1>
+        
+        <p>Template Haskellの高度なテクニックとして、再帰的スプライシング（Recursive Splicing）があります。再帰的スプライシングとは、Template Haskellのスプライス内で、さらに別のスプライシングを行うテクニックです。この章では、再帰的スプライシングの仕組みと使用方法、そして注意点について説明します。</p>
+
+        <h2>再帰的スプライシングの基本</h2>
+        
+        <p>再帰的スプライシングを理解するには、まずTemplate Haskellのステージ（Stage）の概念を理解する必要があります。Template Haskellは、コード生成の過程をステージに分けて管理しています。</p>
+        
+        <ul>
+            <li><strong>ステージ0</strong>: コンパイル時に実行されるコード</li>
+            <li><strong>ステージ1</strong>: 生成された後、コンパイルされるコード</li>
+            <li><strong>ステージn+1</strong>: ステージnで生成されるコード</li>
+        </ul>
+        
+        <p>再帰的スプライシングでは、ステージ0のコードが生成するステージ1のコードの中に、さらにTemplate Haskellのスプライスを含めることができます。</p>
+        
+        <pre><code>-- 必要な拡張機能とインポート
+{-# LANGUAGE TemplateHaskell #-}
+import Language.Haskell.TH
+
+-- 基本的なスプライシング
+basic :: Q Exp
+basic = [| 1 + 2 |]  -- ステージ0で実行され、ステージ1のコード「1 + 2」を生成
+
+-- 再帰的なスプライシング
+recursive :: Q Exp
+recursive = [| 
+  let x = $(basic)  -- ここでbasicをスプライス
+  in x * 2
+|]
+
+-- 使用例
+result :: Int
+result = $(recursive)  -- 最終的に「let x = 1 + 2 in x * 2」が生成される</code></pre>
+        
+        <p>この例では、<code>recursive</code>の中で<code>basic</code>をスプライスしています。<code>recursive</code>がスプライスされると、その中の<code>$(basic)</code>も評価され、最終的に「let x = 1 + 2 in x * 2」というコードが生成されます。</p>
+        
+        <div class="note">
+            <h4>注意</h4>
+            <p>再帰的スプライシングでは、内側のスプライスが先に評価され、その結果が外側のスプライスに組み込まれます。このため、スプライスの順序に注意する必要があります。</p>
+        </div>
+        
+        <h2>動的なコード生成</h2>
+        
+        <p>再帰的スプライシングの主な利点の一つは、実行時の情報に基づいて動的にコードを生成できることです。以下は、リスト内の要素に対して任意の操作を適用する関数を生成する例です。</p>
+        
+        <pre><code>-- 必要な拡張機能とインポート
+{-# LANGUAGE TemplateHaskell #-}
+import Language.Haskell.TH
+import Control.Monad (forM)
+
+-- リスト内の各要素に操作を適用する関数を生成
+genMapFunc :: [Int] -> Q Exp
+genMapFunc xs = do
+  -- 入力リストの要素ごとに式を生成
+  exprs <- forM xs $ \x -> [| $(varE 'f) $(litE (integerL (toInteger x))) |]
+  
+  -- リスト式の生成
+  listExpr <- listE exprs
+  
+  -- 関数の生成
+  [| \f -> $(listExpr) |]
+
+-- 使用例
+mapFunc :: (Int -> a) -> [a]
+mapFunc = $(genMapFunc [1, 2, 3, 4, 5])
+
+-- 上記のコードは以下のように展開される：
+-- mapFunc f = [f 1, f 2, f 3, f 4, f 5]</code></pre>
+        
+        <p>この例では、<code>genMapFunc</code>がリストの各要素に対して<code>f</code>を適用する式を生成し、それらをリストにまとめています。この生成されたコードは、通常の<code>map f [1, 2, 3, 4, 5]</code>よりも効率的です。なぜなら、リストの構築と関数適用がコンパイル時に行われるからです。</p>
+        
+        <h2>複雑な例: 再帰的なデータ構造の生成</h2>
+        
+        <p>再帰的スプライシングは、再帰的なデータ構造の生成にも役立ちます。以下は、二分木を生成する例です。</p>
+        
+        <pre><code>-- 必要な拡張機能とインポート
+{-# LANGUAGE TemplateHaskell #-}
+import Language.Haskell.TH
+
+-- 二分木データ型
+data Tree a = Leaf a | Node (Tree a) (Tree a)
+  deriving Show
+
+-- 完全二分木を生成する関数
+genCompleteTree :: Int -> Q Exp
+genCompleteTree depth = go depth
+  where
+    go :: Int -> Q Exp
+    go 0 = [| Leaf 0 |]  -- 葉ノード
+    go n = [| Node $(go (n-1)) $(go (n-1)) |]  -- 内部ノード
+
+-- 使用例
+completeTree3 :: Tree Int
+completeTree3 = $(genCompleteTree 3)
+
+-- 上記のコードは以下のように展開される：
+-- completeTree3 = Node (Node (Node (Leaf 0) (Leaf 0)) (Node (Leaf 0) (Leaf 0))) 
+--                      (Node (Node (Leaf 0) (Leaf 0)) (Node (Leaf 0) (Leaf 0)))</code></pre>
+        
+        <p>この例では、<code>genCompleteTree</code>が指定された深さの完全二分木を生成しています。再帰的スプライシングにより、深さに応じた木構造がコンパイル時に構築されます。</p>
+        
+        <h2>ステージ制限とその回避方法</h2>
+        
+        <p>Template Haskellには「ステージ制限」（Stage Restriction）と呼ばれる制約があります。これは、スプライス内で参照できるのは、そのスプライスが定義されているモジュールで定義された関数や型だけに制限されるというものです。</p>
+        
+        <p>例えば、以下のコードはステージ制限によりコンパイルエラーになります：</p>
+        
+        <pre><code>-- モジュールA
+module A where
+
+import Language.Haskell.TH
+
+f :: Int -> Int
+f x = x + 1
+
+g :: Q Exp
+g = [| f 5 |]  -- これはOK
+
+-- モジュールB
+module B where
+
+import Language.Haskell.TH
+import A (g)
+
+h :: Q Exp
+h = [| f 10 |]  -- エラー: fはモジュールAで定義されているため</code></pre>
+        
+        <p>このステージ制限を回避するための一般的な方法は、クロススプライシング（Cross-stage Persistence）を使用することです。クロススプライシングとは、ステージ間で値を共有する仕組みです。</p>
+        
+        <pre><code>-- モジュールA
+module A where
+
+import Language.Haskell.TH
+
+f :: Int -> Int
+f x = x + 1
+
+g :: Q Exp
+g = [| f 5 |]  -- これはOK
+
+-- fをエクスポートする
+fAsExp :: Q Exp
+fAsExp = [| f |]  -- fの値をクォートしてエクスポート
+
+-- モジュールB
+module B where
+
+import Language.Haskell.TH
+import A (fAsExp)
+
+h :: Q Exp
+h = [| $(fAsExp) 10 |]  -- OK: fAsFuncがfの値を提供</code></pre>
+        
+        <p>この例では、モジュールAで<code>fAsExp</code>という関数を定義し、それを通じて<code>f</code>の値をエクスポートしています。モジュールBでは、<code>fAsExp</code>をスプライスすることで<code>f</code>の値を得ています。</p>
+        
+        <div class="warning">
+            <h4>警告</h4>
+            <p>クロススプライシングは便利ですが、使用するとコードの理解が難しくなる可能性があります。可能な限り、モジュール構造を見直して、ステージ制限が問題にならないようにすることをお勧めします。</p>
+        </div>
+        
+        <h2>多段階スプライシング</h2>
+        
+        <p>再帰的スプライシングをさらに発展させた概念として、多段階スプライシング（Multi-stage Splicing）があります。これは、3つ以上のステージにわたるスプライシングを行うテクニックです。</p>
+        
+        <pre><code>-- 必要な拡張機能とインポート
+{-# LANGUAGE TemplateHaskell #-}
+import Language.Haskell.TH
+
+-- 3段階のスプライシング
+stage1 :: Q Exp
+stage1 = [| 1 + 2 |]  -- ステージ0で実行され、「1 + 2」を生成
+
+stage2 :: Q Exp
+stage2 = [| let x = $(stage1) in x * 3 |]  -- 「let x = 1 + 2 in x * 3」を生成
+
+stage3 :: Q Exp
+stage3 = [| let y = $(stage2) in y - 4 |]  -- 「let y = (let x = 1 + 2 in x * 3) in y - 4」を生成
+
+-- 使用例
+result :: Int
+result = $(stage3)</code></pre>
+        
+        <p>この例では、<code>stage1</code>、<code>stage2</code>、<code>stage3</code>の3つのステージにわたるスプライシングを行っています。各ステージの出力が次のステージの入力となり、最終的に「let y = (let x = 1 + 2 in x * 3) in y - 4」というコードが生成されます。</p>
+        
+        <h2>コード生成とコード実行の分離</h2>
+        
+        <p>再帰的スプライシングを使用する際の重要な考え方の一つは、コード生成とコード実行を明確に分離することです。以下は、その原則を示す例です。</p>
+        
+        <pre><code>-- 必要な拡張機能とインポート
+{-# LANGUAGE TemplateHaskell #-}
+import Language.Haskell.TH
+
+-- コード生成関数
+genCode :: Int -> Q Exp
+genCode n = do
+  -- nが正の場合とそうでない場合で異なるコードを生成
+  if n > 0
+    then [| $(genPositive n) |]
+    else [| $(genNonPositive n) |]
+
+-- 正の数に対するコード生成
+genPositive :: Int -> Q Exp
+genPositive n = [| sum [1..$(litE (integerL (toInteger n)))] |]
+
+-- 非正の数に対するコード生成
+genNonPositive :: Int -> Q Exp
+genNonPositive n = [| $(litE (integerL 0)) |]
+
+-- 使用例
+sumTo10 :: Int
+sumTo10 = $(genCode 10)  -- sum [1..10]に展開される
+
+sumToMinus5 :: Int
+sumToMinus5 = $(genCode (-5))  -- 0に展開される</code></pre>
+        
+        <p>この例では、<code>genCode</code>が入力値に応じて異なるコードを生成しています。コード生成のロジック（ifステートメント）はコンパイル時に実行され、生成されたコードのみが実行時に残ります。</p>
+        
+        <div class="column">
+            <h4>コラム: メタプログラミングのパワーと責任</h4>
+            <p>再帰的スプライシングに代表されるTemplate Haskellのメタプログラミング機能は、非常に強力なツールです。これにより、通常のプログラミングでは難しい問題を解決したり、ボイラープレートコードを削減したりすることができます。しかし、強力なツールには責任も伴います。複雑なメタプログラミングは、コードの理解を難しくし、デバッグを困難にする可能性があります。そのため、メタプログラミングは、本当に必要な場合に限って使用し、適切なドキュメントを提供することが重要です。また、生成されたコードを<code>-ddump-splices</code>オプションで確認し、期待通りのコードが生成されているかを検証することも良い習慣です。</p>
+        </div>
+        
+        <h2>実践的な例: カスタム派生</h2>
+        
+        <p>再帰的スプライシングの実践的な例として、カスタム派生（Custom Deriving）機能の実装を見てみましょう。</p>
+        
+        <pre><code>-- 必要な拡張機能とインポート
+{-# LANGUAGE TemplateHaskell #-}
+import Language.Haskell.TH
+import Control.Monad (forM)
+
+-- カスタム派生関数: データ型に対してShow, Eq, Ordのインスタンスを自動生成
+deriveBasicInstances :: Name -> Q [Dec]
+deriveBasicInstances name = do
+  -- 型情報の取得
+  info <- reify name
+  case info of
+    TyConI (DataD _ _ tyVars _ cons _) -> do
+      -- Show インスタンス
+      showInst <- deriveShow name tyVars cons
+      
+      -- Eq インスタンス
+      eqInst <- deriveEq name tyVars cons
+      
+      -- Ord インスタンス
+      ordInst <- deriveOrd name tyVars cons
+      
+      return $ showInst ++ eqInst ++ ordInst
+    _ -> error "deriveBasicInstances: Not a data type"
+
+-- Show インスタンスの生成（簡略化）
+deriveShow :: Name -> [TyVarBndr] -> [Con] -> Q [Dec]
+deriveShow name tyVars cons = do
+  -- 実装は省略
+  [d|instance Show $(appT (conT name) (varT (mkName "a"))) where
+       show _ = $(stringE (nameBase name))|]
+
+-- Eq インスタンスの生成（簡略化）
+deriveEq :: Name -> [TyVarBndr] -> [Con] -> Q [Dec]
+deriveEq name tyVars cons = do
+  -- 実装は省略
+  [d|instance Eq $(appT (conT name) (varT (mkName "a"))) where
+       x == y = True|]
+
+-- Ord インスタンスの生成（簡略化）
+deriveOrd :: Name -> [TyVarBndr] -> [Con] -> Q [Dec]
+deriveOrd name tyVars cons = do
+  -- 実装は省略
+  [d|instance Ord $(appT (conT name) (varT (mkName "a"))) where
+       compare _ _ = EQ|]
+
+-- 使用例
+data MyData a = MyData a | MyDataList [a]
+
+$(deriveBasicInstances ''MyData)</code></pre>
+        
+        <p>この例では、<code>deriveBasicInstances</code>関数がデータ型に対して<code>Show</code>、<code>Eq</code>、<code>Ord</code>のインスタンスを自動生成しています。各インスタンスの生成関数内で再帰的スプライシングを使用しています。</p>
+        
+        <h2>まとめ</h2>
+        
+        <p>再帰的スプライシングは、Template Haskellの高度なテクニックの一つです。これにより、複雑なコード生成や、動的な情報に基づいたコード生成が可能になります。ただし、ステージ制限やコードの複雑化といった課題もあるため、適切に使用することが重要です。</p>
+        
+        <p>再帰的スプライシングを使用する際は、以下の点に注意しましょう：</p>
+        
+        <ul>
+            <li>スプライスの順序に注意する</li>
+            <li>ステージ制限に気をつけ、必要に応じてクロススプライシングを使用する</li>
+            <li>コード生成とコード実行を明確に分離する</li>
+            <li>生成されたコードを確認し、期待通りのコードが生成されているか検証する</li>
+            <li>適切なドキュメントを提供し、コードの理解を助ける</li>
+        </ul>
+        
+        <div class="nav-links">
+            <a href="../chapter4/4.4_パフォーマンス最適化.html">← 前のページ</a>
+            <a href="../chapter0_2_toc.html">目次</a>
+            <a href="5.2_複雑なマクロの作成.html">次のページ →</a>
+        </div>
+    </main>
+    
+    <footer>
+        <p>© 2025 Template Haskell 学習ガイド</p>
+    </footer>
+</body>
+</html>

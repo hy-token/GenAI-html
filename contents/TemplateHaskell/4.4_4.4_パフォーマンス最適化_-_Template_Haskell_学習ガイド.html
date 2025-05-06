@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4.4 パフォーマンス最適化 - Template Haskell 学習ガイド</title>
+    <link rel="stylesheet" href="../styles/main.css">
+</head>
+<body>
+    <header>
+        <h1>4.4 パフォーマンス最適化 - Template Haskell 学習ガイド</h1>
+    </header>
+    
+    <nav>
+        <a href="../chapter0_2_toc.html">目次</a>
+        <div>
+            <a href="4.3_型レベルプログラミングとの連携.html">前へ</a>
+            <a href="../chapter5/5.1_再帰的スプライシング.html">次へ</a>
+        </div>
+    </nav>
+    
+    <main>
+        <h1>4.4 パフォーマンス最適化</h1>
+        
+        <p>Template Haskellはコンパイル時にコードを生成するため、実行時のパフォーマンスを改善するための強力なツールとなります。この章では、Template Haskellを使用してパフォーマンスを最適化する方法について説明します。</p>
+
+        <h2>コンパイル時計算</h2>
+        
+        <p>Template Haskellの最も基本的なパフォーマンス最適化の一つは、コンパイル時に計算を行うことです。これにより、実行時のオーバーヘッドを削減できます。</p>
+        
+        <pre><code>-- 必要な拡張機能とインポート
+{-# LANGUAGE TemplateHaskell #-}
+import Language.Haskell.TH
+
+-- コンパイル時に計算される定数
+fibConst :: Int -> Q Exp
+fibConst n = [| $(litE (integerL (toInteger (fib n)))) |]
+  where
+    fib :: Int -> Int
+    fib 0 = 0
+    fib 1 = 1
+    fib n = fib (n - 1) + fib (n - 2)
+
+-- 使用例
+fibonacci40 :: Integer
+fibonacci40 = $(fibConst 40)  -- コンパイル時に計算される
+
+-- 上記のコードは以下のように展開される：
+-- fibonacci40 :: Integer
+-- fibonacci40 = 102334155</code></pre>
+        
+        <p>この例では、フィボナッチ数列の40番目の値がコンパイル時に計算され、その結果が直接コードに埋め込まれます。これにより、実行時にこの計算を行う必要がなくなります。</p>
+        
+        <div class="note">
+            <h4>注意</h4>
+            <p>コンパイル時計算はコンパイル時間を増加させるため、本当に必要な場合にのみ使用することをお勧めします。特に、非常に複雑な計算や、大量のデータに対する計算は、コンパイル時間を大幅に増加させる可能性があります。</p>
+        </div>
+        
+        <h2>特殊化されたインスタンスの生成</h2>
+        
+        <p>Template Haskellを使用して、特定の型に対して最適化されたインスタンスや関数を生成することができます。</p>
+        
+        <pre><code>-- 必要な拡張機能とインポート
+{-# LANGUAGE TemplateHaskell #-}
+import Language.Haskell.TH
+
+-- 整数のベクトルに対する最適化された内積計算
+genOptimizedDot :: Int -> Q [Dec]
+genOptimizedDot n = do
+  let xs = [varE (mkName ("x" ++ show i)) | i <- [1..n]]
+      ys = [varE (mkName ("y" ++ show i)) | i <- [1..n]]
+      products = [infixE (Just x) (varE '(*)) (Just y) | (x, y) <- zip xs ys]
+      sum = foldr (\p acc -> infixE (Just p) (varE '(+)) (Just acc)) (last products) (init products)
+      
+  funcName <- newName "dotProduct"
+  params <- sequence [newName ("x" ++ show i) | i <- [1..n]] ++
+            sequence [newName ("y" ++ show i) | i <- [1..n]]
+  
+  func <- funD funcName
+    [clause (map varP params)
+      (normalB sum) []]
+      
+  return [func]
+
+-- 使用例
+$(genOptimizedDot 3)
+
+-- 上記のコードは以下のように展開される：
+-- dotProduct x1 x2 x3 y1 y2 y3 = x1 * y1 + x2 * y2 + x3 * y3</code></pre>
+        
+        <p>この例では、特定の次元のベクトルに対する内積計算を行う関数を生成しています。生成された関数は、ループや再帰を使用せず、直接的な計算を行うため、一般的な内積計算関数よりも効率的です。</p>
+        
+        <h2>ループの展開</h2>
+        
+        <p>Template Haskellを使用して、ループを展開（アンロール）することで、ループのオーバーヘッドを削減できます。</p>
+        
+        <pre><code>-- 必要な拡張機能とインポート
+{-# LANGUAGE TemplateHaskell #-}
+import Language.Haskell.TH
+
+-- ループ展開関数
+unrollLoop :: Int -> (ExpQ -> ExpQ) -> ExpQ -> ExpQ
+unrollLoop n body initial = foldr (\_ acc -> body acc) initial [1..n]
+
+-- 使用例
+sumUnrolled :: [Int] -> Int
+sumUnrolled xs = $(unrollLoop 5 (\acc -> [| 1 + $(acc) |]) [| 0 |])
+
+-- 上記のコードは以下のように展開される：
+-- sumUnrolled xs = 1 + (1 + (1 + (1 + (1 + 0))))
+
+-- より実用的な例
+genSumFirstN :: Int -> Q Exp
+genSumFirstN n = do
+  x <- newName "x"
+  let sumExpr = unrollLoop n (\acc -> [| $(varE x) !! $(litE (integerL (toInteger (n - 1)))) + $(acc) |])
+                  [| 0 |]
+  
+  lamE [varP x] sumExpr
+
+-- 使用例
+sumFirst10 :: [Int] -> Int
+sumFirst10 = $(genSumFirstN 10)
+
+-- 上記のコードは以下のように展開される（簡略化）：
+-- sumFirst10 x = x !! 9 + (x !! 8 + (... + (x !! 0 + 0)))</code></pre>
+        
+        <p>この例では、リストの最初のN個の要素の和を計算する関数を生成しています。生成された関数は、ループを使用せず、直接的な計算を行うため、一般的なsum関数よりも効率的です。</p>
+        
+        <h2>データ構造の最適化</h2>
+        
+        <p>Template Haskellを使用して、特定のデータに対して最適化されたデータ構造を生成することができます。</p>
+        
+        <pre><code>-- 必要な拡張機能とインポート
+{-# LANGUAGE TemplateHaskell #-}
+import Language.Haskell.TH
+import Data.Map (Map)
+import qualified Data.Map as Map
+
+-- 固定キーセットのマップ型
+genOptimizedMap :: [String] -> Q [Dec]
+genOptimizedMap keys = do
+  -- データ型の定義
+  let typeName = mkName "OptimizedMap"
+      fields = [(mkName (key ++ "Val"), NotStrict, [t|Maybe String|]) | key <- keys]
+  
+  dataDecl <- dataD (cxt []) typeName [] Nothing
+    [recC typeName fields]
+    [derivClause Nothing [conT ''Show, conT ''Eq]]
+    
+  -- 空のマップを生成する関数
+  emptyFunc <- [d|
+    empty :: $(conT typeName)
+    empty = $(recConE typeName [(mkName (key ++ "Val"), [|Nothing|]) | key <- keys])
+  |]
+  
+  -- キーによる値の取得関数
+  lookupFunc <- funD (mkName "lookup")
+    [clause [litP (stringL key), varP (mkName "m")]
+      (normalB [|$(varE (mkName (key ++ "Val"))) m|]) []
+    | key <- keys]
+    
+  -- キーによる値の設定関数
+  let insertClauses = 
+        [clause [litP (stringL key), varP (mkName "v"), varP (mkName "m")]
+          (normalB [|m { $(varE (mkName (key ++ "Val"))) = Just $(varE (mkName "v")) }|]) []
+        | key <- keys]
+  
+  insertFunc <- funD (mkName "insert") insertClauses
+  
+  -- 通常のMapに変換する関数
+  toMapFunc <- [d|
+    toMap :: $(conT typeName) -> Map String String
+    toMap m = Map.fromList
+      $(listE [tupE [[|$(stringE key)|], 
+                     [|case $(varE (mkName (key ++ "Val"))) m of
+                         Just v -> v
+                         Nothing -> error $(stringE ("Key not found: " ++ key))|]]
+              | key <- keys])
+  |]
+  
+  return $ concat [dataDecl, emptyFunc, [lookupFunc], [insertFunc], toMapFunc]
+
+-- 使用例
+$(genOptimizedMap ["name", "email", "phone"])
+
+-- 使用例
+userMap :: OptimizedMap
+userMap = insert "name" "John" $ insert "email" "john@example.com" empty</code></pre>
+        
+        <p>この例では、固定されたキーセットに対して最適化されたマップデータ構造を生成しています。生成されたデータ構造は、各キーに対応するフィールドを持つレコードとして実装されており、通常のMapよりも効率的にキーの検索や値の設定を行うことができます。</p>
+        
+        <div class="warning">
+            <h4>警告</h4>
+            <p>最適化されたデータ構造は、特定のユースケースに対しては効率的ですが、汎用性が低くなる可能性があります。実際のアプリケーションでは、最適化の必要性とコードの保守性のバランスを考慮することが重要です。</p>
+        </div>
+        
+        <h2>パターンマッチの最適化</h2>
+        
+        <p>Template Haskellを使用して、複雑なパターンマッチを最適化することができます。</p>
+        
+        <pre><code>-- 必要な拡張機能とインポート
+{-# LANGUAGE TemplateHaskell #-}
+import Language.Haskell.TH
+
+-- 効率的なパターンマッチ関数の生成
+genOptimizedMatch :: [(String, String)] -> Q [Dec]
+genOptimizedMatch patterns = do
+  funcName <- newName "match"
+  x <- newName "x"
+  
+  let clauses = [clause [litP (stringL pat)] (normalB (stringE val)) []
+                | (pat, val) <- patterns]
+      defaultClause = clause [wildP] (normalB [|"No match"|]) []
+  
+  func <- funD funcName (clauses ++ [defaultClause])
+  
+  return [func]
+
+-- 使用例
+$(genOptimizedMatch
+  [ ("hello", "こんにちは")
+  , ("goodbye", "さようなら")
+  , ("thanks", "ありがとう")
+  , ("please", "お願いします")
+  ])
+
+-- 上記のコードは以下のように展開される：
+-- match "hello" = "こんにちは"
+-- match "goodbye" = "さようなら"
+-- match "thanks" = "ありがとう"
+-- match "please" = "お願いします"
+-- match _ = "No match"</code></pre>
+        
+        <p>この例では、文字列のパターンマッチを行う関数を生成しています。生成された関数は、各パターンに対する個別の節を持ち、一般的なパターンマッチよりも効率的です。</p>
+        
+        <h2>部分評価</h2>
+        
+        <p>Template Haskellを使用して、関数の部分評価（partial evaluation）を行うことができます。部分評価とは、関数の一部の引数を固定して、より特化した関数を生成することです。</p>
+        
+        <pre><code>-- 必要な拡張機能とインポート
+{-# LANGUAGE TemplateHaskell #-}
+import Language.Haskell.TH
+
+-- 部分評価関数
+partialEval :: (Show a, Lift a) => (a -> b -> c) -> a -> Q Exp
+partialEval f x = [| \y -> $(lift (f x)) y |]
+
+-- 使用例
+add :: Int -> Int -> Int
+add x y = x + y
+
+-- 特化した関数の生成
+add5 :: Int -> Int
+add5 = $(partialEval add 5)
+
+-- 上記のコードは以下のように展開される：
+-- add5 = \y -> 5 + y
+
+-- より複雑な例
+genSpecializedFuncs :: Q [Dec]
+genSpecializedFuncs = do
+  -- add1, add2, ..., add10の生成
+  addFuncs <- forM [1..10] $ \i -> do
+    let funcName = mkName ("add" ++ show i)
+    func <- valD (varP funcName)
+             (normalB [|\y -> $(litE (integerL (toInteger i))) + y|])
+             []
+    return func
+    
+  -- mul2, mul4, mul8, mul16の生成
+  mulFuncs <- forM [2, 4, 8, 16] $ \i -> do
+    let funcName = mkName ("mul" ++ show i)
+    func <- valD (varP funcName)
+             (normalB [|\y -> $(litE (integerL (toInteger i))) * y|])
+             []
+    return func
+    
+  return (addFuncs ++ mulFuncs)
+
+-- 使用例
+$(genSpecializedFuncs)
+
+-- 上記のコードは以下のように展開される：
+-- add1 = \y -> 1 + y
+-- add2 = \y -> 2 + y
+-- ...
+-- mul2 = \y -> 2 * y
+-- mul4 = \y -> 4 * y
+-- ...</code></pre>
+        
+        <p>この例では、加算と乗算の特化した関数を生成しています。生成された関数は、一部の引数が固定されているため、一般的な関数よりも効率的です。</p>
+        
+        <div class="column">
+            <h4>コラム: コンパイル時最適化とJIT最適化</h4>
+            <p>Template Haskellによるコンパイル時最適化と、JIT（Just-In-Time）コンパイラによる実行時最適化は、異なるアプローチですが、どちらもコードのパフォーマンスを向上させるために使用されます。Template Haskellはコンパイル時に静的なコードを生成するのに対し、JIT最適化は実行時に動的な情報を利用してコードを最適化します。両者の使い分けは、アプリケーションの特性によります。静的な情報が既知で、コンパイル時に最適化できる部分にはTemplate Haskellが適しています。一方、実行時にのみわかる情報に基づいて最適化する必要がある場合は、JIT最適化の方が適しています。Haskellでは、GHCのSTG（Spineless Tagless G-machine）がある程度のJIT最適化を提供しています。</p>
+        </div>
+        
+        <h2>まとめ</h2>
+        
+        <p>Template Haskellは、コンパイル時にコードを生成することで、実行時のパフォーマンスを改善するための強力なツールです。コンパイル時計算、特殊化されたインスタンスの生成、ループの展開、データ構造の最適化、パターンマッチの最適化、部分評価など、さまざまな最適化テクニックを適用できます。</p>
+        
+        <p>ただし、これらの最適化はコンパイル時間を増加させるため、本当に必要な場合にのみ使用することをお勧めします。また、最適化されたコードは汎用性が低くなる可能性があるため、実際のアプリケーションでは、最適化の必要性とコードの保守性のバランスを考慮することが重要です。</p>
+        
+        <div class="nav-links">
+            <a href="4.3_型レベルプログラミングとの連携.html">← 前のページ</a>
+            <a href="../chapter0_2_toc.html">目次</a>
+            <a href="../chapter5/5.1_再帰的スプライシング.html">次のページ →</a>
+        </div>
+    </main>
+    
+    <footer>
+        <p>© 2025 Template Haskell 学習ガイド</p>
+    </footer>
+</body>
+</html>

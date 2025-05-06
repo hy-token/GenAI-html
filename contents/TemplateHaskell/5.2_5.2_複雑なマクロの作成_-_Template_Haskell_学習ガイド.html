@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5.2 複雑なマクロの作成 - Template Haskell 学習ガイド</title>
+    <link rel="stylesheet" href="../styles/main.css">
+</head>
+<body>
+    <header>
+        <h1>5.2 複雑なマクロの作成 - Template Haskell 学習ガイド</h1>
+    </header>
+    
+    <nav>
+        <a href="../chapter0_2_toc.html">目次</a>
+        <div>
+            <a href="5.1_再帰的スプライシング.html">前へ</a>
+            <a href="5.3_エラー処理とデバッグ.html">次へ</a>
+        </div>
+    </nav>
+    
+    <main>
+        <h1>5.2 複雑なマクロの作成</h1>
+        
+        <p>Template Haskellを使用すると、単純なコード生成を超えて、複雑で柔軟なマクロを作成することができます。この章では、複雑なマクロの設計と実装について説明し、実践的な例を通じてその活用方法を紹介します。</p>
+
+        <h2>マクロとは</h2>
+        
+        <p>プログラミングにおけるマクロとは、コードを生成するコードのことを指します。Template Haskellでは、マクロはQ型を返す関数として実装され、コンパイル時に実行されてコードを生成します。</p>
+        
+        <p>単純なマクロの例：</p>
+        
+        <pre><code>-- 必要な拡張機能とインポート
+{-# LANGUAGE TemplateHaskell #-}
+import Language.Haskell.TH
+
+-- 2倍にする単純なマクロ
+double :: Int -> Q Exp
+double n = [| $(litE (integerL (toInteger n))) * 2 |]
+
+-- 使用例
+result :: Int
+result = $(double 5)  -- 10に展開される</code></pre>
+        
+        <p>この例では、<code>double</code>マクロが数値を受け取り、その2倍の値を計算する式を生成しています。しかし、実際のアプリケーションでは、より複雑なマクロが必要になることがあります。</p>
+        
+        <h2>複雑なマクロの設計原則</h2>
+        
+        <p>複雑なマクロを設計する際に考慮すべき原則について説明します。</p>
+        
+        <h3>1. 明確なインターフェース</h3>
+        
+        <p>マクロは複雑なコードを生成しますが、そのインターフェースはシンプルで理解しやすいものであるべきです。ユーザーがマクロの内部実装を理解しなくても使用できるように設計しましょう。</p>
+        
+        <h3>2. エラー処理</h3>
+        
+        <p>マクロは入力を検証し、不正な入力に対しては適切なエラーメッセージを提供するべきです。コンパイル時に発見できるエラーは、実行時に発見するよりも修正コストが低いです。</p>
+        
+        <h3>3. モジュール性</h3>
+        
+        <p>複雑なマクロは複数の小さな関数に分割し、それぞれが単一の責任を持つようにしましょう。これにより、コードの理解と保守が容易になります。</p>
+        
+        <h3>4. ドキュメンテーション</h3>
+        
+        <p>マクロの使用方法、入力の制約、生成されるコードの構造など、詳細なドキュメントを提供しましょう。特に、生成されるコードの例を示すことが重要です。</p>
+        
+        <h2>複雑なマクロの実装例</h2>
+        
+        <p>以下に、複雑なマクロの実装例を示します。この例では、状態機械を定義するためのDSL（ドメイン特化言語）を実装します。</p>
+        
+        <pre><code>-- 必要な拡張機能とインポート
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE QuasiQuotes #-}
+import Language.Haskell.TH
+import Language.Haskell.TH.Quote
+import Text.Parsec
+import Text.Parsec.String
+import Control.Monad (forM)
+import Data.List (nub)
+
+-- 状態機械の定義
+data StateMachine = StateMachine
+  { states :: [String]
+  , initialState :: String
+  , transitions :: [(String, String, String)]  -- (from, event, to)
+  } deriving Show
+
+-- 状態機械のパーサー
+stateMachineParser :: Parser StateMachine
+stateMachineParser = do
+  -- 状態の定義
+  string "states:" >> spaces
+  statesList <- identifier `sepBy` (char ',' >> spaces)
+  spaces
+  
+  -- 初期状態の定義
+  string "initial:" >> spaces
+  initial <- identifier
+  spaces
+  
+  -- 遷移の定義
+  string "transitions:" >> spaces
+  trans <- transition `sepBy` (char ';' >> spaces)
+  
+  -- パース結果の検証
+  if initial `notElem` statesList
+    then fail $ "Initial state " ++ initial ++ " not in states list"
+    else return $ StateMachine statesList initial trans
+    
+  where
+    identifier = many1 alphaNum
+    
+    transition = do
+      from <- identifier
+      spaces >> string "->" >> spaces
+      to <- identifier
+      spaces >> string "on" >> spaces
+      event <- identifier
+      return (from, event, to)
+
+-- 状態機械からコードを生成するマクロ
+genStateMachine :: StateMachine -> Q [Dec]
+genStateMachine (StateMachine states initial transitions) = do
+  -- 状態型の定義
+  stateTy <- dataD (cxt []) (mkName "State") []
+    Nothing
+    [normalC (mkName s) [] | s <- states]
+    [derivClause Nothing [conT ''Show, conT ''Eq]]
+    
+  -- イベント型の定義
+  let events = nub [e | (_, e, _) <- transitions]
+  eventTy <- dataD (cxt []) (mkName "Event") []
+    Nothing
+    [normalC (mkName e) [] | e <- events]
+    [derivClause Nothing [conT ''Show, conT ''Eq]]
+    
+  -- 遷移関数の定義
+  let transFunc = funD (mkName "transition")
+        [clause [varP (mkName "state"), varP (mkName "event")]
+          (normalB (caseE (tupE [varE (mkName "state"), varE (mkName "event")])
+            ([ match (tupP [conP (mkName from) [], conP (mkName event) []])
+                (normalB (appE (conE (mkName to)) (tupE []))) []
+              | (from, event, to) <- transitions
+            ] ++
+            [match wildP (normalB (varE (mkName "state"))) []]  -- デフォルトケース
+          ))) []]
+          
+  -- 初期状態の定義
+  let initFunc = valD (varP (mkName "initialState"))
+        (normalB (appE (conE (mkName initial)) (tupE []))) []
+        
+  -- 実行関数の定義
+  let runFunc = funD (mkName "runStateMachine")
+        [clause [varP (mkName "events")]
+          (normalB (foldlE
+            (\state event -> appE (appE (varE (mkName "transition")) state) event)
+            (varE (mkName "initialState"))
+            (varE (mkName "events")))) []]
+            
+  -- フォールド関数のヘルパー
+  foldlE :: (ExpQ -> ExpQ -> ExpQ) -> ExpQ -> ExpQ -> ExpQ
+  foldlE f initial list = do
+    x <- newName "x"
+    xs <- newName "xs"
+    let patt = conP '(:) [varP x, varP xs]
+    [| case $(list) of
+         [] -> $(initial)
+         $(patt) -> $(foldlE f) ($(f) $(initial) $(varE x)) $(varE xs) |]
+    
+  return [stateTy, eventTy, transFunc, initFunc, runFunc]
+
+-- 準クォートの定義
+stateMachine :: QuasiQuoter
+stateMachine = QuasiQuoter
+  { quoteExp = error "Cannot use stateMachine as an expression"
+  , quotePat = error "Cannot use stateMachine as a pattern"
+  , quoteType = error "Cannot use stateMachine as a type"
+  , quoteDec = \s -> case parse stateMachineParser "" s of
+      Left err -> error $ "Parse error: " ++ show err
+      Right sm -> genStateMachine sm
+  }
+
+-- 使用例
+[stateMachine|
+states: Off, On, Blinking
+initial: Off
+transitions:
+  Off -> On on TurnOn;
+  On -> Off on TurnOff;
+  On -> Bl

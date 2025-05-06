@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2.3 クォート</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.1.0/github-markdown.min.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #24292e;
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .container {
+            background-color: #fff;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        h1, h2, h3 {
+            border-bottom: 1px solid #eaecef;
+            padding-bottom: 0.3em;
+        }
+        code {
+            font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+            background-color: rgba(27, 31, 35, 0.05);
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-size: 85%;
+        }
+        pre {
+            background-color: #f6f8fa;
+            border-radius: 3px;
+            padding: 16px;
+            overflow: auto;
+            line-height: 1.45;
+        }
+        pre code {
+            background-color: transparent;
+            padding: 0;
+        }
+        .column {
+            border: 1px solid #dfe2e5;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+        }
+        .column h4 {
+            margin-top: 0;
+            color: #0366d6;
+        }
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eaecef;
+        }
+        .nav-links a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+        .note {
+            background-color: #e7f7fe;
+            border-left: 4px solid #1976d2;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        .warning {
+            background-color: #fff8e1;
+            border-left: 4px solid #ffa000;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        .example {
+            background-color: #f1f8e9;
+            border-left: 4px solid #7cb342;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 1rem 0;
+        }
+        th, td {
+            border: 1px solid #dfe2e5;
+            padding: 8px 12px;
+        }
+        th {
+            background-color: #f6f8fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>2.3 クォート</h1>
+
+        <h2>2.3.1 式のクォート [|e|]</h2>
+        <p><strong>クォート</strong>は、Template Haskellで通常のHaskellコードを抽象構文木（AST）に変換するための機能です。前節で説明した<strong>スプライシング</strong>がASTからコードを生成するのに対し、クォートはコードからASTを生成します。</p>
+        
+        <p>式をクォートするには、<code>[|...|]</code>構文を使用します：</p>
+        
+        <pre><code>-- 式 1 + 2 をクォートしてASTを取得
+exprAST :: Q Exp
+exprAST = [| 1 + 2 |]</code></pre>
+        
+        <p>これは、<code>1 + 2</code>という式に対応するASTを生成します。このASTは<code>InfixE (Just (LitE (IntegerL 1))) (VarE '(+)) (Just (LitE (IntegerL 2)))</code>のような構造になります。</p>
+        
+        <p>式のクォートは以下のような場合に特に便利です：</p>
+        
+        <ul>
+            <li>複雑な式をプログラムで構築する代わりに、直接Haskellの構文で書く</li>
+            <li>変数のキャプチャ（クォート内で外部スコープの変数を参照）</li>
+            <li>既存のコードを抽象化し、テンプレートとして再利用する</li>
+        </ul>
+        
+        <div class="example">
+            <h4>式のクォートの実用例</h4>
+            <pre><code>-- パラメータ化された式を生成する関数
+makeAdder :: Int -> Q Exp
+makeAdder n = [| \x -> x + $(lift n) |]
+
+-- 使用例
+add5 :: Int -> Int
+add5 = $(makeAdder 5)  -- add5 = \x -> x + 5 と同等</code></pre>
+        </div>
+        
+        <p>上記の例では、<code>makeAdder</code>関数が整数<code>n</code>を受け取り、<code>n</code>を加算するラムダ式を生成します。<code>lift</code>関数は通常の値（この場合は<code>Int</code>型の<code>n</code>）をTemplate Haskellの式に変換します。</p>
+        
+        <div class="column">
+            <h4>コラム：liftとLift型クラス</h4>
+            <p><code>lift</code>関数はTemplate Haskellの重要な機能です。この関数を使用すると、通常のHaskellの値をTemplate Haskellの式に変換できます。例えば、<code>lift 5</code>は整数5に対応するAST（<code>LitE (IntegerL 5)</code>）を生成します。</p>
+            <p><code>Lift</code>型クラスのインスタンスである型は<code>lift</code>関数で扱うことができます。基本的な型（数値、文字列、ブールなど）はすでにインスタンスが定義されています。独自の型を<code>lift</code>で使うには、<code>Lift</code>型クラスのインスタンスを定義する必要があります。</p>
+        </div>
+
+        <h2>2.3.2 型のクォート [t|t|]</h2>
+        <p>型をクォートするには、<code>[t|...|]</code>構文を使用します：</p>
+        
+        <pre><code>-- 型 Maybe Int をクォートしてASTを取得
+typeAST :: Q Type
+typeAST = [t| Maybe Int |]</code></pre>
+        
+        <p>これは、<code>Maybe Int</code>という型に対応するASTを生成します。このASTは<code>AppT (ConT ''Maybe) (ConT ''Int)</code>のような構造になります。</p>
+        
+        <p>型のクォートは以下のような場合に便利です：</p>
+        
+        <ul>
+            <li>複雑な型をプログラムで構築する代わりに、直接Haskellの型構文で書く</li>
+            <li>型の抽象化と再利用</li>
+            <li>型レベルプログラミングとの連携</li>
+        </ul>
+        
+        <div class="example">
+            <h4>型のクォートの実用例</h4>
+            <pre><code>-- パラメータ化されたリスト型を生成する関数
+makeListType :: Q Type -> Q Type
+makeListType elemType = [t| [ $elemType ] |]
+
+-- 使用例
+intListType :: Q Type
+intListType = makeListType [t| Int |]  -- [t| [Int] |] と同等</code></pre>
+        </div>
+        
+        <p>上記の例では、<code>makeListType</code>関数が要素の型を受け取り、その型のリスト型を生成します。</p>
+
+        <h2>2.3.3 パターンのクォート [p|p|]</h2>
+        <p>パターンをクォートするには、<code>[p|...|]</code>構文を使用します：</p>
+        
+        <pre><code>-- パターン (x:xs) をクォートしてASTを取得
+patternAST :: Q Pat
+patternAST = [p| (x:xs) |]</code></pre>
+        
+        <p>これは、<code>(x:xs)</code>というパターンに対応するASTを生成します。このASTは<code>ConP '(:) [VarP 'x, VarP 'xs]</code>のような構造になります。</p>
+        
+        <p>パターンのクォートは以下のような場合に便利です：</p>
+        
+        <ul>
+            <li>複雑なパターンマッチングをプログラムで構築する</li>
+            <li>パターンの抽象化と再利用</li>
+            <li>カスタムパターンマッチング関数の生成</li>
+        </ul>
+        
+        <div class="example">
+            <h4>パターンのクォートの実用例</h4>
+            <pre><code>-- パターンマッチング関数を生成する
+makeMatcher :: Q Pat -> Q Exp -> Q Dec
+makeMatcher pat expr = do
+    name <- newName "matcher"
+    return $ FunD name [Clause [pat] (NormalB expr) []]
+
+-- 使用例
+$(makeMatcher [p| (x:_) |] [| x * 2 |])  -- matcher (x:_) = x * 2 と同等</code></pre>
+        </div>
+        
+        <p>上記の例では、<code>makeMatcher</code>関数がパターンと式を受け取り、そのパターンにマッチした時に式を評価する関数を生成します。</p>
+
+        <h2>2.3.4 宣言のクォート [d|d|]</h2>
+        <p>宣言をクォートするには、<code>[d|...|]</code>構文を使用します：</p>
+        
+        <pre><code>-- 宣言をクォートしてASTを取得
+declsAST :: Q [Dec]
+declsAST = [d|
+    data Point = Point { x :: Int, y :: Int }
+    
+    distance :: Point -> Point -> Double
+    distance p1 p2 = sqrt $ fromIntegral $ (x p2 - x p1)^2 + (y p2 - y p1)^2
+    |]</code></pre>
+        
+        <p>これは、<code>Point</code>データ型と<code>distance</code>関数の宣言に対応するASTのリストを生成します。</p>
+        
+        <p>宣言のクォートは以下のような場合に特に有用です：</p>
+        
+        <ul>
+            <li>複数の関連する宣言をまとめて生成</li>
+            <li>テンプレートからカスタマイズされた型や関数を生成</li>
+            <li>既存のコードをメタプログラミングで拡張</li>
+        </ul>
+        
+        <div class="example">
+            <h4>宣言のクォートの実用例</h4>
+            <pre><code>-- データ型名を受け取り、Show と Eq のインスタンスを自動生成
+deriveInstances :: Name -> Q [Dec]
+deriveInstances typeName = [d|
+    instance Show $(conT typeName) where
+        show _ = $(stringE $ "A " ++ nameBase typeName)
+    
+    instance Eq $(conT typeName) where
+        _ == _ = True
+    |]
+
+-- 使用例
+data MyType = MyType
+
+$(deriveInstances ''MyType)  -- Show と Eq のインスタンスが生成される</code></pre>
+        </div>
+        
+        <p>上記の例では、<code>deriveInstances</code>関数が型名を受け取り、その型に対する<code>Show</code>と<code>Eq</code>のインスタンス宣言を生成します。これは単純化した例ですが、実際にはこのような手法で複雑なインスタンスの自動導出が可能です。</p>
+        
+        <h2>クォートとスプライスの組み合わせ</h2>
+        <p>クォートとスプライスは互いに補完し合う機能であり、頻繁に組み合わせて使用されます：</p>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>操作</th>
+                    <th>構文</th>
+                    <th>変換</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>クォート</td>
+                    <td><code>[|...|]</code>, <code>[t|...|]</code>, <code>[p|...|]</code>, <code>[d|...|]</code></td>
+                    <td>コード → AST</td>
+                </tr>
+                <tr>
+                    <td>スプライス</td>
+                    <td><code>$(...)</code></td>
+                    <td>AST → コード</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <p>クォートとスプライスの組み合わせにより、AST操作を抽象化し、より読みやすく保守しやすいTemplate Haskellコードを書くことができます。以下に典型的な組み合わせパターンを示します：</p>
+        
+        <pre><code>-- 関数名を受け取り、その関数を2回適用する関数を生成
+makeDoubleApply :: Name -> Q [Dec]
+makeDoubleApply funcName = do
+    x <- newName "x"
+    let func = varE funcName
+    
+    return [FunD (mkName $ "double" ++ nameBase funcName) 
+            [Clause [VarP x] 
+                   (NormalB [| $func ($func $(varE x)) |]) 
+                   []]]
+
+-- 使用例
+increment :: Int -> Int
+increment x = x + 1
+
+$(makeDoubleApply 'increment)  -- doubleincrement x = increment (increment x)</code></pre>
+        
+        <p>上記の例では、クォート<code>[| ... |]</code>の中でスプライス<code>$(...)</code>を使用して動的に式を構築しています。</p>
+        
+        <div class="warning">
+            <p><strong>注意</strong>: クォートとスプライスをネストする場合は、スコープとステージングに注意が必要です。特に、クォート内でスプライスを使用する場合、そのスプライスの評価タイミングを正確に理解することが重要です。</p>
+        </div>
+        
+        <div class="nav-links">
+            <a href="2.2_スプライシング.html">前へ：2.2 スプライシング</a>
+            <a href="2.4_準クォート.html">次へ：2.4 準クォート</a>
+        </div>
+    </div>
+</body>
+</html>

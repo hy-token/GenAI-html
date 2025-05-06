@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4.2 DSLの実装 - Template Haskell 学習ガイド</title>
+    <link rel="stylesheet" href="../styles/main.css">
+</head>
+<body>
+    <header>
+        <h1>4.2 DSLの実装 - Template Haskell 学習ガイド</h1>
+    </header>
+    
+    <nav>
+        <a href="../chapter0_2_toc.html">目次</a>
+        <div>
+            <a href="4.1_ボイラープレートコードの削減.html">前へ</a>
+            <a href="4.3_型レベルプログラミングとの連携.html">次へ</a>
+        </div>
+    </nav>
+    
+    <main>
+        <h1>4.2 DSLの実装</h1>
+        
+        <p>ドメイン特化言語（Domain-Specific Language、DSL）は、特定の問題領域に特化したプログラミング言語です。Template Haskellは、Haskell内でDSLを実装するための強力なツールを提供します。この章では、Template Haskellを使用したDSLの実装方法について説明します。</p>
+
+        <h2>DSLとTemplate Haskell</h2>
+        
+        <p>DSLの実装には、主に2つのアプローチがあります：</p>
+        
+        <ol>
+            <li><strong>埋め込みDSL (Embedded DSL, EDSL)</strong>: ホスト言語（この場合はHaskell）の構文や機能を使用して、特定のドメインのための抽象化を提供します。</li>
+            <li><strong>外部DSL (External DSL)</strong>: 独自の構文を持ち、専用のパーサーとインタプリタ/コンパイラが必要です。</li>
+        </ol>
+        
+        <p>Template Haskellは、両方のアプローチでDSLを実装する際に役立ちます。特に準クォート（Quasi-quotes）機能は、外部DSLの構文をHaskellコード内に埋め込むのに非常に有用です。</p>
+        
+        <h2>準クォートを使用したDSLの実装</h2>
+        
+        <p>準クォートを使用すると、カスタム構文をHaskellコード内に埋め込み、コンパイル時に処理することができます。以下は、シンプルな数式DSLの例です。</p>
+        
+        <pre><code>-- 必要な拡張機能とインポート
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE QuasiQuotes #-}
+import Language.Haskell.TH
+import Language.Haskell.TH.Quote
+import Text.Parsec
+import Text.Parsec.String
+import Control.Applicative ((&lt;$&gt;), (&lt;*&gt;))
+
+-- 数式を表す抽象構文木（AST）
+data Expr
+  = Lit Integer
+  | Add Expr Expr
+  | Sub Expr Expr
+  | Mul Expr Expr
+  | Div Expr Expr
+  deriving Show
+
+-- 数式を評価する関数
+eval :: Expr -> Integer
+eval (Lit n) = n
+eval (Add e1 e2) = eval e1 + eval e2
+eval (Sub e1 e2) = eval e1 - eval e2
+eval (Mul e1 e2) = eval e1 * eval e2
+eval (Div e1 e2) = eval e1 `div` eval e2
+
+-- パーサー
+integer :: Parser Integer
+integer = read &lt;$&gt; many1 digit
+
+factor :: Parser Expr
+factor = (Lit &lt;$&gt; integer)
+     &lt;|&gt; between (char '(') (char ')') expr
+
+term :: Parser Expr
+term = chainl1 factor $ do
+  op &lt;- char '*' &lt;|&gt; char '/'
+  return $ case op of
+    '*' -> Mul
+    '/' -> Div
+
+expr :: Parser Expr
+expr = chainl1 term $ do
+  op &lt;- char '+' &lt;|&gt; char '-'
+  return $ case op of
+    '+' -> Add
+    '-' -> Sub
+
+-- 準クォートの定義
+math :: QuasiQuoter
+math = QuasiQuoter
+  { quoteExp = \s -> case parse expr "" s of
+      Left err -> error $ show err
+      Right e -> [|eval $(dataToExpQ (const Nothing) e)|]
+  , quotePat = error "Cannot use math as a pattern"
+  , quoteType = error "Cannot use math as a type"
+  , quoteDec = error "Cannot use math as a declaration"
+  }
+
+-- 使用例
+result :: Integer
+result = [math|1 + 2 * (3 + 4)|]</code></pre>
+        
+        <p>この例では、<code>math</code>という準クォーターを定義しています。この準クォーターは、数式の文字列をパースして抽象構文木（AST）に変換し、それを評価する式を生成します。これにより、Haskellコード内に数式を直接記述することができます。</p>
+        
+        <div class="note">
+            <h4>注意</h4>
+            <p>この例のパーサーは簡略化されており、実際のアプリケーションではより堅牢なパーサーが必要です。また、<code>dataToExpQ</code>は抽象構文木をTemplate Haskellの式に変換するヘルパー関数です。</p>
+        </div>
+        
+        <h2>SQL DSLの実装</h2>
+        
+        <p>より実践的な例として、SQLクエリを表現するためのDSLを実装してみましょう。</p>
+        
+        <pre><code>-- 必要な拡張機能とインポート
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE QuasiQuotes #-}
+import Language.Haskell.TH
+import Language.Haskell.TH.Quote
+import Text.Parsec
+import Text.Parsec.String
+import Control.Applicative ((&lt;$&gt;), (&lt;*&gt;))
+import Data.List (intercalate)
+
+-- SQLクエリのAST
+data SqlQuery
+  = Select [String] String [WhereClause]
+  deriving Show
+
+data WhereClause
+  = Equals String String
+  | GreaterThan String String
+  | LessThan String String
+  deriving Show
+
+-- SQLクエリに変換する関数
+toSql :: SqlQuery -> String
+toSql (Select cols table wheres) =
+  "SELECT " ++ intercalate ", " cols ++
+  " FROM " ++ table ++
+  (if null wheres then "" else " WHERE " ++ whereClausesToSql wheres)
+
+whereClausesToSql :: [WhereClause] -> String
+whereClausesToSql [] = ""
+whereClausesToSql [w] = whereClauseToSql w
+whereClausesToSql (w:ws) = whereClauseToSql w ++ " AND " ++ whereClausesToSql ws
+
+whereClauseToSql :: WhereClause -> String
+whereClauseToSql (Equals col val) = col ++ " = '" ++ val ++ "'"
+whereClauseToSql (GreaterThan col val) = col ++ " > '" ++ val ++ "'"
+whereClauseToSql (LessThan col val) = col ++ " < '" ++ val ++ "'"
+
+-- パーサー（簡略化）
+identifier :: Parser String
+identifier = many1 (alphaNum &lt;|&gt; char '_')
+
+column :: Parser String
+column = identifier
+
+columns :: Parser [String]
+columns = column `sepBy` (char ',' &gt;&gt; spaces)
+
+table :: Parser String
+table = identifier
+
+equals :: Parser WhereClause
+equals = do
+  col &lt;- identifier
+  spaces &gt;&gt; char '=' &gt;&gt; spaces
+  val &lt;- identifier
+  return $ Equals col val
+
+whereClause :: Parser [WhereClause]
+whereClause = equals `sepBy` (string "AND" &gt;&gt; spaces)
+
+selectQuery :: Parser SqlQuery
+selectQuery = do
+  string "SELECT" &gt;&gt; spaces
+  cols &lt;- columns
+  spaces &gt;&gt; string "FROM" &gt;&gt; spaces
+  t &lt;- table
+  w &lt;- option [] (spaces &gt;&gt; string "WHERE" &gt;&gt; spaces &gt;&gt; whereClause)
+  return $ Select cols t w
+
+-- 準クォートの定義
+sql :: QuasiQuoter
+sql = QuasiQuoter
+  { quoteExp = \s -> case parse selectQuery "" s of
+      Left err -> error $ show err
+      Right q -> [|toSql $(dataToExpQ (const Nothing) q)|]
+  , quotePat = error "Cannot use sql as a pattern"
+  , quoteType = error "Cannot use sql as a type"
+  , quoteDec = error "Cannot use sql as a declaration"
+  }
+
+-- 使用例
+query :: String
+query = [sql|SELECT id, name, age FROM users WHERE age = 30|]</code></pre>
+        
+        <p>この例では、簡単なSQLクエリを表現するためのDSLを実装しています。準クォーターを使用することで、SQLクエリをほぼそのままの形式でHaskellコード内に埋め込むことができます。</p>
+        
+        <h2>HTML DSLの実装</h2>
+        
+        <p>もう一つの例として、HTMLを生成するためのDSLを実装してみましょう。</p>
+        
+        <pre><code>-- 必要な拡張機能とインポート
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE QuasiQuotes #-}
+import Language.Haskell.TH
+import Language.Haskell.TH.Quote
+import Text.Parsec
+import Text.Parsec.String
+import Control.Applicative ((&lt;$&gt;), (&lt;*&gt;))
+import Data.List (intercalate)
+
+-- HTML要素のAST
+data Element
+  = Element String [(String, String)] [Element]  -- タグ、属性、子要素
+  | TextNode String
+  deriving Show
+
+-- HTML文字列に変換する関数
+render :: Element -> String
+render (TextNode text) = text
+render (Element tag attrs children) =
+  "&lt;" ++ tag ++ renderAttrs attrs ++ "&gt;" ++
+  concatMap render children ++
+  "&lt;/" ++ tag ++ "&gt;"
+
+renderAttrs :: [(String, String)] -> String
+renderAttrs [] = ""
+renderAttrs attrs = " " ++ intercalate " " [k ++ "=\"" ++ v ++ "\"" | (k, v) &lt;- attrs]
+
+-- パーサー（非常に簡略化）
+htmlParser :: Parser Element
+htmlParser = elementParser &lt;|&gt; textNodeParser
+
+textNodeParser :: Parser Element
+textNodeParser = TextNode &lt;$&gt; many1 (noneOf "&lt;")
+
+elementParser :: Parser Element
+elementParser = do
+  char '&lt;'
+  tag &lt;- many1 letter
+  attrs &lt;- many attrParser
+  string "&gt;"
+  children &lt;- many htmlParser
+  string "&lt;/"
+  string tag
+  char '&gt;'
+  return $ Element tag attrs children
+
+attrParser :: Parser (String, String)
+attrParser = do
+  spaces
+  key &lt;- many1 letter
+  char '='
+  value &lt;- between (char '"') (char '"') (many (noneOf "\""))
+  return (key, value)
+
+-- 準クォートの定義
+html :: QuasiQuoter
+html = QuasiQuoter
+  { quoteExp = \s -> case parse htmlParser "" s of
+      Left err -> error $ show err
+      Right e -> [|render $(dataToExpQ (const Nothing) e)|]
+  , quotePat = error "Cannot use html as a pattern"
+  , quoteType = error "Cannot use html as a type"
+  , quoteDec = error "Cannot use html as a declaration"
+  }
+
+-- 使用例
+page :: String
+page = [html|&lt;div class="container"&gt;&lt;h1&gt;Hello, World!&lt;/h1&gt;&lt;/div&gt;|]</code></pre>
+        
+        <p>この例では、HTMLを表現するためのDSLを実装しています。準クォーターを使用することで、HTMLをほぼそのままの形式でHaskellコード内に埋め込むことができます。</p>
+        
+        <div class="warning">
+            <h4>警告</h4>
+            <p>この例のパーサーは非常に簡略化されており、実際のHTMLパーサーはより複雑です。実用的なHTMLのDSLを実装する場合は、<code>blaze-html</code>や<code>lucid</code>などの既存のライブラリを検討してください。</p>
+        </div>
+        
+        <h2>DSL実装のベストプラクティス</h2>
+        
+        <ol>
+            <li><strong>明確なAST設計</strong>: DSLの抽象構文木（AST）を明確に設計しましょう。これはDSLの基盤となります。</li>
+            <li><strong>エラー処理の充実</strong>: パース時のエラーメッセージを分かりや

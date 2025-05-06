@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1.1 Template Haskellとは</title>
+</head>
+
+<body>
+    <div>
+        <h1>1.1 Template Haskellとは</h1>
+
+        <h2>1.1.1 Template Haskellの歴史</h2>
+        <p>Template Haskell（テンプレート・ハスケル）は、2002年にSimon Peyton Jones氏とTim Sheard氏によって提案された、Haskellのための強力なメタプログラミングシステムです。GHC（Glasgow Haskell Compiler）バージョン6.0から実装され、以来Haskellエコシステムの重要な機能として発展してきました。</p>
+
+        <p>元々は学術的な論文「Template Meta-programming for Haskell」として発表され、その後の実用的なフィードバックを通じて進化してきました。初期のバージョンから現在まで、機能と安定性が徐々に向上し、多くの実用的なライブラリやアプリケーションで活用されています。</p>
+
+        <div>
+            <h4>コラム：名前の由来</h4>
+            <p>「Template」という名前は、この機能がC++のテンプレートメタプログラミングにインスピレーションを受けていることを示しています。しかし、C++のテンプレートと異なり、Template Haskellはより直接的で表現力豊かなAPIを提供し、型安全性を保ちながらもメタプログラミングを行うことができます。また、Lispのマクロシステムからもアイデアを取り入れています。</p>
+        </div>
+
+        <h2>1.1.2 コンパイル時メタプログラミング</h2>
+        <p>Template Haskellは<strong>コンパイル時メタプログラミング</strong>のための機能です。これは、コンパイル時に実行されるコードを書き、そのコードによって別のコードを生成する技術です。つまり、「コードを書くコード」を作成する能力を提供します。</p>
+
+        <p>コンパイルの流れは以下のようになります：</p>
+        <ol>
+            <li>ソースコードが解析される</li>
+            <li>Template Haskellのコードが実行される</li>
+            <li>実行結果として生成されたコードがソースに挿入される</li>
+            <li>拡張されたソースコードがコンパイルされる</li>
+        </ol>
+
+        <p>この仕組みにより、プログラマは反復的なコードパターンを抽象化し、自動生成することが可能になります。</p>
+
+        <pre><code>-- 簡単なTemplate Haskellの例
+{-# LANGUAGE TemplateHaskell #-}
+module Example where
+
+import Language.Haskell.TH
+
+-- 「hello, world!」を出力する関数を生成
+helloWorldFunc :: Q [Dec]
+helloWorldFunc = [d|
+  sayHello :: IO ()
+  sayHello = putStrLn "hello, world!"
+  |]
+
+-- 生成した関数をモジュールに追加
+$(helloWorldFunc)
+</code></pre>
+
+        <h2>1.1.3 他言語のメタプログラミングとの比較</h2>
+        <p>Template Haskellの特徴を理解するために、他の言語のメタプログラミング機能と比較してみましょう：</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>言語</th>
+                    <th>メタプログラミング機能</th>
+                    <th>特徴</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Lisp/Scheme</td>
+                    <td>マクロ</td>
+                    <td>シンボルベースで、完全な構文変換が可能</td>
+                </tr>
+                <tr>
+                    <td>C/C++</td>
+                    <td>プリプロセッサ、テンプレート</td>
+                    <td>テキスト置換やテンプレート展開による静的コード生成</td>
+                </tr>
+                <tr>
+                    <td>Ruby/Python</td>
+                    <td>リフレクション、eval</td>
+                    <td>動的言語の特性を活かした実行時メタプログラミング</td>
+                </tr>
+                <tr>
+                    <td>Rust</td>
+                    <td>マクロ</td>
+                    <td>衛生的なマクロシステムで型安全な変換を提供</td>
+                </tr>
+                <tr>
+                    <td>Template Haskell</td>
+                    <td>クォート、スプライス</td>
+                    <td>型安全な抽象構文木操作と静的検証</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p>Template Haskellの際立った特徴は：</p>
+        <ol>
+            <li><strong>型安全性</strong>: 生成されるコードは型検査を通過する必要があります</li>
+            <li><strong>衛生性</strong>: 変数の名前衝突を避ける仕組みがあります</li>
+            <li><strong>表現力</strong>: 関数、型、クラス、インスタンスなど幅広いHaskell構造を生成できます</li>
+            <li><strong>静的検証</strong>: コンパイル時に検証されるため、実行時エラーが発生しません</li>
+        </ol>
+
+        <div>
+            <h4>コラム：衛生的マクロとは</h4>
+            <p>「衛生的」(hygienic)とは、メタプログラミングシステムがマクロ展開時の名前衝突を自動的に回避する性質を指します。例えば、マクロ内で定義された変数名がマクロを使用する側の変数名と衝突しないよう、自動的に名前を変更したり、スコープを適切に管理したりする機能です。Template Haskellは部分的に衛生的であり、名前の衝突に関する問題を減らすための機能を提供しています。</p>
+        </div>
+
+        <p>Template Haskellはライブラリの作者や枠組みの設計者にとって特に有用です。ボイラープレートコードの削減、型安全なDSL（ドメイン特化言語）の構築、高度な最適化などに活用されています。次の章では、Template Haskellの基本的な構文と使い方について詳しく見ていきましょう。</p>
+
+        <div>
+            <a href="目次.html">目次に戻る</a>
+            <a href="1.1.2_1.2_メタプログラミングの基本概念.html">次へ：1.2 メタプログラミングの基本概念</a>
+        </div>
+    </div>
+</body>
+
+</html>

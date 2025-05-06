@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5.3 エラー処理とデバッグ - Template Haskell 学習ガイド</title>
+    <link rel="stylesheet" href="../styles/main.css">
+</head>
+<body>
+    <header>
+        <h1>5.3 エラー処理とデバッグ - Template Haskell 学習ガイド</h1>
+    </header>
+    
+    <nav>
+        <a href="../chapter0_2_toc.html">目次</a>
+        <div>
+            <a href="5.2_複雑なマクロの作成.html">前へ</a>
+            <a href="5.4_GHCの拡張機能との連携.html">次へ</a>
+        </div>
+    </nav>
+    
+    <main>
+        <h1>5.3 エラー処理とデバッグ</h1>
+        
+        <p>Template Haskellは強力なメタプログラミングツールですが、コンパイル時に動作するという性質上、エラー処理とデバッグが特に重要になります。この章では、Template Haskellのコードにおけるエラー処理の方法と、効果的なデバッグ技術について説明します。</p>
+
+        <h2>Template Haskellにおけるエラー処理</h2>
+        
+        <p>Template Haskellのコードでエラーが発生した場合、コンパイル時にエラーメッセージが表示されます。ここでは、Template Haskellのコードで適切にエラーを処理する方法について説明します。</p>
+        
+        <h3>エラーの報告</h3>
+        
+        <p>Template Haskellでは、<code>reportError</code>、<code>reportWarning</code>、<code>fail</code>関数を使用してエラーや警告を報告できます。</p>
+        
+        <pre><code>-- 必要な拡張機能とインポート
+{-# LANGUAGE TemplateHaskell #-}
+import Language.Haskell.TH
+
+-- エラーを報告する例
+validateAndGenerate :: String -> Q Exp
+validateAndGenerate s = do
+  -- 入力の検証
+  if null s
+    then reportError "Empty string is not allowed" >> [| () |]
+    else if length s > 100
+      then reportWarning "String is too long, might cause performance issues" >> genExp s
+      else genExp s
+  where
+    genExp s = [| s ++ "!" |]
+    
+-- 使用例
+result :: String
+result = $(validateAndGenerate "Hello")</code></pre>
+        
+        <p>この例では、空の文字列が渡された場合にエラーを報告し、長すぎる文字列が渡された場合に警告を報告しています。エラーの場合はダミーの式<code>() :: ()</code>を返していますが、コンパイルは失敗します。</p>
+        
+        <div class="note">
+            <h4>注意</h4>
+            <p><code>reportError</code>を呼び出してもQ型の値を返す必要があります。これは、GHCのエラー報告メカニズムがエラーの報告と式の評価を分離しているためです。また、エラーが報告されても、その後の処理は実行される可能性があります。</p>
+        </div>
+        
+        <h3>エラーの捕捉と処理</h3>
+        
+        <p>Template Haskellでは、<code>recover</code>関数を使用してエラーを捕捉し、代替のアクションを実行できます。</p>
+        
+        <pre><code>-- 必要な拡張機能とインポート
+{-# LANGUAGE TemplateHaskell #-}
+import Language.Haskell.TH
+
+-- エラーを捕捉する例
+tryGenerate :: String -> Q Exp
+tryGenerate s = recover
+  (do
+    reportWarning $ "Failed to generate code for: " ++ s
+    [| "Default value" |])
+  (do
+    if null s
+      then fail "Empty string is not allowed"
+      else [| s ++ "!" |])
+    
+-- 使用例
+result1 :: String
+result1 = $(tryGenerate "Hello")  -- "Hello!"に展開される
+
+result2 :: String
+result2 = $(tryGenerate "")  -- "Default value"に展開される</code></pre>
+        
+        <p>この例では、<code>recover</code>関数を使用して、エラーが発生した場合に代替のアクションを実行しています。空の文字列が渡された場合、エラーが発生しますが、<code>recover</code>によって捕捉され、デフォルト値が返されます。</p>
+        
+        <h3>エラーメッセージの改善</h3>
+        
+        <p>適切なエラーメッセージは、Template Haskellのコードをデバッグする上で非常に重要です。エラーメッセージは具体的で、問題の原因と解決策を明確に示すべきです。</p>
+        
+        <pre><code>-- 必要な拡張機能とインポート
+{-# LANGUAGE TemplateHaskell #-}
+import Language.Haskell.TH
+
+-- 詳細なエラーメッセージの例
+generateEnum :: String -> [String] -> Q [Dec]
+generateEnum typeName values = do
+  -- 型名の検証
+  if null typeName
+    then reportError "Type name cannot be empty"
+    else if not (isUpper (head typeName))
+      then reportError $ "Type name '" ++ typeName ++ "' must start with an uppercase letter"
+      else do
+        -- 値の検証
+        forM_ values $ \value -> do
+          if null value
+            then reportError "Enum value cannot be empty"
+            else if not (isUpper (head value))
+              then reportError $ "Enum value '" ++ value ++ "' must start with an uppercase letter"
+              else return ()
+              
+        -- 値の重複チェック
+        let duplicates = values \\ nub values
+        unless (null duplicates) $
+          reportError $ "Duplicate enum values: " ++ intercalate ", " duplicates
+          
+        -- ここで実際のコード生成
+        -- ...</code></pre>
+        
+        <p

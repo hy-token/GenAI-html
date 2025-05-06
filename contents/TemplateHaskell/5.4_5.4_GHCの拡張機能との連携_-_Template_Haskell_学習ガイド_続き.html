@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5.4 GHCの拡張機能との連携 - Template Haskell 学習ガイド</title>
+    <link rel="stylesheet" href="../styles/main.css">
+</head>
+<body>
+    <header>
+        <h1>5.4 GHCの拡張機能との連携 - Template Haskell 学習ガイド</h1>
+    </header>
+    
+    <nav>
+        <a href="../chapter0_2_toc.html">目次</a>
+        <div>
+            <a href="5.3_エラー処理とデバッグ.html">前へ</a>
+            <a href="../chapter6/6.1_JSONパーサーの自動生成.html">次へ</a>
+        </div>
+    </nav>
+    
+    <main>
+        <h2>GADTsとの連携</h2>
+        
+        <pre><code>-- 必要な拡張機能とインポート
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE KindSignatures #-}
+import Language.Haskell.TH
+
+-- GADTを生成するマクロ
+genExprGADT :: Q [Dec]
+genExprGADT = do
+  -- 式を表すGADT
+  exprGADT <- [d|
+    data Expr a where
+      LitInt :: Int -> Expr Int
+      LitBool :: Bool -> Expr Bool
+      Add :: Expr Int -> Expr Int -> Expr Int
+      Mul :: Expr Int -> Expr Int -> Expr Int
+      Eq :: Expr Int -> Expr Int -> Expr Bool
+      If :: Expr Bool -> Expr a -> Expr a -> Expr a
+  |]
+  
+  -- 式を評価する関数
+  evalFunc <- [d|
+    eval :: Expr a -> a
+    eval (LitInt n) = n
+    eval (LitBool b) = b
+    eval (Add e1 e2) = eval e1 + eval e2
+    eval (Mul e1 e2) = eval e1 * eval e2
+    eval (Eq e1 e2) = eval e1 == eval e2
+    eval (If c t e) = if eval c then eval t else eval e
+  |]
+  
+  return $ exprGADT ++ evalFunc
+
+-- 式を解析するマクロ
+genParser :: Q [Dec]
+genParser = do
+  -- トークン型
+  tokenType <- [d|
+    data Token = TInt Int | TBool Bool | TAdd | TMul | TEq | TIf | TThen | TElse | TLParen | TRParen
+      deriving Show
+  |]
+  
+  -- パーサー関数
+  parseFunc <- [d|
+    parse :: [Token] -> Maybe (Expr a, [Token])
+    parse (TInt n : rest) = Just (LitInt n, rest)
+    parse (TBool b : rest) = Just (LitBool b, rest)
+    parse (TLParen : TAdd : rest) = case parse rest of
+      Just (e1, TRParen : rest') -> Just (e1, rest')
+      _ -> Nothing
+    -- 他のパターンも同様に実装
+    parse _ = Nothing
+  |]
+  
+  return $ tokenType ++ parseFunc
+
+-- 使用例
+$(genExprGADT)
+$(genParser)
+
+-- 式の例
+exprExample :: Expr Int
+exprExample = If (Eq (LitInt 10) (Add (LitInt 7) (LitInt 3)))
+                (Mul (LitInt 2) (LitInt 3))
+                (LitInt 0)
+
+result :: Int
+result = eval exprExample  -- 6に評価される</code></pre>
+        
+        <p>この例では、GADTsとTemplate Haskellを組み合わせて、型安全な式言語を実装しています。生成されたGADTにより、評価時の型エラーがコンパイル時に検出されます。</p>
+        
+        <h2>QuasiQuotesとの連携</h2>
+        
+        <p>QuasiQuotes拡張を使用すると、カスタム構文をHaskellコード内に埋め込むことができます。Template Haskellと組み合わせることで、DSL（ドメイン特化言語）の構築が容易になります。</p>
+        
+        <pre><code>-- 必要な拡張機能とインポート
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE QuasiQuotes #-}
+import Language.Haskell.TH
+import Language.Haskell.TH.Quote
+import Text.Parsec
+import Text.Parsec.String
+import Control.Monad (void)
+
+-- 正規表現DSLのデータ型
+data Regex = Literal String
+           | AnyChar
+           | Sequence [Regex]
+           | Choice [Regex]
+           | ZeroOrMore Regex
+           | OneOrMore Regex
+           | Optional Regex
+           deriving Show
+
+-- 正規表現DSLのパーサー
+regexParser :: Parser Regex
+regexParser = choice' <|> sequence'
+  where
+    choice' = do
+      void $ char '('
+      void $ spaces
+      r1 <- regexParser
+      void $ spaces
+      void $ char '|'
+      void $ spaces
+      r2 <- regexParser
+      void $ spaces
+      void $ char ')'
+      return $ Choice [r1, r2]
+      
+    sequence' = do
+      exprs <- many1 term
+      return $ if length exprs == 1 then head exprs else Sequence exprs
+      
+    term = choice [
+        literal,
+        anyChar,
+        zeroOrMore,
+        oneOrMore,
+        optional,
+        between (char '(') (char ')') regexParser
+      ]
+      
+    literal = do
+      chars <- many1 (noneOf ".|*+?()[]{}")
+      return $ Literal chars
+      
+    anyChar = char '.' >> return AnyChar
+    
+    zeroOrMore = do
+      r <- term
+      void $ char '*'
+      return $ ZeroOrMore r
+      
+    oneOrMore = do
+      r <- term
+      void $ char '+'
+      return $ OneOrMore r
+      
+    optional = do
+      r <- term
+      void $ char '?'
+      return $ Optional r
+
+-- 正規表現からマッチング関数を生成するマクロ
+genRegexMatcher :: Regex -> Q Exp
+genRegexMatcher regex = case regex of
+  Literal s -> [| \str -> if take (length s) str == s then Just (drop (length s) str) else Nothing |]
+  AnyChar -> [| \str -> if null str then Nothing else Just (tail str) |]
+  Sequence rs -> do
+    matcherName <- newName "matcher"
+    matchers <- mapM genRegexMatcher rs
+    let appliedMatchers = foldr (\m acc -> [| \str -> $(m) str >>= $(acc) |])
+                               [| \str -> Just str |]
+                               matchers
+    return appliedMatchers
+  Choice rs -> do
+    matcherName <- newName "matcher"
+    matchers <- mapM genRegexMatcher rs
+    let appliedMatchers = foldr (\m acc -> [| \str -> case $(m) str of
+                                                  Just rest -> Just rest
+                                                  Nothing -> $(acc) str |])
+                               [| \_ -> Nothing |]
+                               matchers
+    return appliedMatchers
+  ZeroOrMore r -> do
+    matcherR <- genRegexMatcher r
+    [| let f str = case $(matcherR) str of
+                     Just rest -> if rest == str then Just str else f rest
+                     Nothing -> Just str
+       in f |]
+  OneOrMore r -> do
+    matcherR <- genRegexMatcher r
+    [| \str -> $(matcherR) str >>= \rest ->
+                  let f s = case $(matcherR) s of
+                              Just r -> if r == s then Just s else f r
+                              Nothing -> Just s
+                  in f rest |]
+  Optional r -> do
+    matcherR <- genRegexMatcher r
+    [| \str -> case $(matcherR) str of
+                 Just rest -> Just rest
+                 Nothing -> Just str |]
+
+-- 準クォートの定義
+regex :: QuasiQuoter
+regex = QuasiQuoter
+  { quoteExp = \s -> case parse regexParser "" s of
+      Left err -> error $ "Parse error: " ++ show err
+      Right r -> genRegexMatcher r
+  , quotePat = error "Cannot use regex as a pattern"
+  , quoteType = error "Cannot use regex as a type"
+  , quoteDec = error "Cannot use regex as a declaration"
+  }
+
+-- 使用例
+matchDigits :: String -> Maybe String
+matchDigits = [regex|[0-9]+|]
+
+matchIdentifier :: String -> Maybe String
+matchIdentifier = [regex|[a-zA-Z_][a-zA-Z0-9_]*|]</code></pre>
+        
+        <p>この例では、QuasiQuotesとTemplate Haskellを組み合わせて、正規表現DSLを実装しています。正規表現はコンパイル時に解析され、効率的なマッチング関数に変換されます。</p>
+        
+        <div class="warning">
+            <h4>警告</h4>
+            <p>この例の正規表現パーサーは非常に簡略化されており、実際の正規表現の機能の一部しかサポートしていません。実用的な正規表現エンジンを実装するには、より複雑なパーサーと評価関数が必要です。</p>
+        </div>
+        
+        <h2>DeriveGenericとの連携</h2>
+        
+        <p>DeriveGeneric拡張を使用すると、Generic型クラスのインスタンスを自動的に導出できます。Template Haskellと組み合わせることで、Generic型クラスを活用した汎用的な関数を生成できます。</p>
+        
+        <pre><code>-- 必要な拡張機能とインポート
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE DefaultSignatures #-}
+import Language.Haskell.TH
+import GHC.Generics
+import Data.Aeson (ToJSON, FromJSON)
+import qualified Data.Aeson as JSON
+
+-- 汎用的なデータ型変換関数を生成するマクロ
+genConverters :: Name -> Q [Dec]
+genConverters name = do
+  info <- reify name
+  case info of
+    TyConI (DataD _ _ tyVars _ _ _) -> do
+      -- ToJSON, FromJSONインスタンス
+      jsonInst <- [d|
+        instance ToJSON $(conT name) where
+          toJSON = JSON.genericToJSON JSON.defaultOptions
+        
+        instance FromJSON $(conT name) where
+          parseJSON = JSON.genericParseJSON JSON.defaultOptions
+      |]
+      
+      -- カスタムシリアライズ関数
+      serializeFunc <- funD (mkName ("serialize" ++ nameBase name))
+        [clause []
+          (normalB [| JSON.encode |]) []]
+          
+      -- カスタムデシリアライズ関数
+      deserializeFunc <- funD (mkName ("deserialize" ++ nameBase name))
+        [clause []
+          (normalB [| JSON.decode |]) []]
+          
+      -- 型変換関数
+      convertToFunc <- do
+        targetName <- newName "target"
+        sigD (mkName ("convertTo" ++ nameBase name))
+          [t| forall a. (Generic a, GTo $(conT name) (Rep a)) => a -> $(conT name) |] >>= \sig ->
+          return [sig, valD (varP (mkName ("convertTo" ++ nameBase name)))
+                      (normalB [| \x -> gto (from x) |]) []]
+                      
+      convertFromFunc <- do
+        targetName <- newName "target"
+        sigD (mkName ("convertFrom" ++ nameBase name))
+          [t| forall a. (Generic a, GFrom $(conT name) (Rep a)) => $(conT name) -> a |] >>= \sig ->
+          return [sig, valD (varP (mkName ("convertFrom" ++ nameBase name)))
+                      (normalB [| \x -> to (gfrom x) |]) []]
+      
+      return $ jsonInst ++ [serializeFunc, deserializeFunc] ++ convertToFunc ++ convertFromFunc
+    _ -> error $ nameBase name ++ " is not a data type"
+
+-- 型変換のための型クラス
+class GTo a f where
+  gto :: f p -> a
+
+class GFrom a f where
+  gfrom :: a -> f p
+
+-- 使用例
+data Person = Person
+  { name :: String
+  , age :: Int
+  } deriving (Show, Generic)
+
+data User = User
+  { name :: String
+  , age :: Int
+  , email :: String
+  } deriving (Show, Generic)
+
+$(genConverters ''Person)
+$(genConverters ''User)
+
+-- PersonをUserに変換（email欄はデフォルト値）
+instance GTo Person (D1 d (C1 c (S1 s1 (K1 r1 String) :*: S1 s2 (K1 r2 Int)))) where
+  gto (M1 (M1 (M1 (K1 name) :*: M1 (K1 age)))) = Person name age
+
+-- UserをPersonに変換（email欄は無視）
+instance GFrom Person (D1 d (C1 c (S1 s1 (K1 r1 String) :*: S1 s2 (K1 r2 Int) :*: S1 s3 (K1 r3 String)))) where
+  gfrom (Person name age) = M1 (M1 (M1 (K1 name) :*: M1 (K1 age) :*: M1 (K1 "")))
+
+-- 使用例
+person :: Person
+person = Person "John" 30
+
+user :: User
+user = convertFrom person  -- User {name = "John", age = 30, email = ""}</code></pre>
+        
+        <p>この例では、DeriveGenericとTemplate Haskellを組み合わせて、Generic型クラスを活用した汎用的なデータ型変換関数を生成しています。これにより、構造的に類似したデータ型間の変換が容易になります。</p>
+        
+        <h2>TypeApplicationsとの連携</h2>
+        
+        <p>TypeApplications拡張を使用すると、型引数を明示的に指定できます。Template Haskellと組み合わせることで、型引数に基づいた関数を生成できます。</p>
+        
+        <pre><code>-- 必要な拡張機能とインポート
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE AllowAmbiguousTypes #-}
+import Language.Haskell.TH
+import Data.Proxy
+
+-- 型引数に基づいた関数を生成するマクロ
+genTypeFunctions :: Q [Dec]
+genTypeFunctions = do
+  -- 型のサイズを取得する関数
+  sizeOfFunc <- [d|
+    sizeOf :: forall a. Typeable a => Proxy a -> Int
+    sizeOf _ = typeSize @a
+  |]
+  
+  -- 特定の型に対するサイズの実装
+  intSize <- [d|
+    typeSize @Int = 8
+  |]
+  
+  doubleSize <- [d|
+    typeSize @Double = 8
+  |]
+  
+  boolSize <- [d|
+    typeSize @Bool = 1
+  |]
+  
+  charSize <- [d|
+    typeSize @Char = 4
+  |]
+  
+  -- リストに対するサイズの実装
+  listSize <- [d|
+    typeSize @[a] = undefined  -- 実装省略
+  |]
+  
+  return $ concat [sizeOfFunc, intSize, doubleSize, boolSize, charSize, listSize]
+
+-- 型に基づいたデフォルト値を生成するマクロ
+genTypeDefaults :: Q [Dec]
+genTypeDefaults = do
+  -- 型のデフォルト値を取得する関数
+  defaultFunc <- [d|
+    defaultValue :: forall a. Typeable a => a
+    defaultValue = typeDefault @a
+  |]
+  
+  -- 特定の型に対するデフォルト値の実装
+  intDefault <- [d|
+    typeDefault @Int = 0
+  |]
+  
+  doubleDefault <- [d|
+    typeDefault @Double = 0.0
+  |]
+  
+  boolDefault <- [d|
+    typeDefault @Bool = False
+  |]
+  
+  charDefault <- [d|
+    typeDefault @Char = '\0'
+  |]
+  
+  -- リストに対するデフォルト値の実装
+  listDefault <- [d|
+    typeDefault @[a] = []
+  |]
+  
+  return $ concat [defaultFunc, intDefault, doubleDefault, boolDefault, charDefault, listDefault]
+
+-- 使用例
+$(genTypeFunctions)
+$(genTypeDefaults)
+
+intSize :: Int
+intSize = sizeOf (Proxy @Int)  -- 8
+
+doubleDefault :: Double
+doubleDefault = defaultValue @Double  -- 0.0</code></pre>
+        
+        <p>この例では、TypeApplicationsとTemplate Haskellを組み合わせて、型に基づいた関数（サイズ取得関数とデフォルト値関数）を生成しています。TypeApplicationsを使用することで、型引数を明示的に指定できます。</p>
+        
+        <div class="column">
+            <h4>コラム: Template Haskellとメモリ効率</h4>
+            <p>Template HaskellとGHCの拡張機能を組み合わせることで、メモリ効率の高いコードを生成できます。例えば、GADTsとTemplate Haskellを組み合わせて、特定のデータ構造に最適化されたアルゴリズムを生成したり、DataKindsとTemplate Haskellを組み合わせて、コンパイル時に計算を行うことでランタイムのオーバーヘッドを削減したりできます。これらのテクニックは、リソースが制限された環境（組み込みシステムなど）で特に有用です。一方で、過度な最適化はコードの複雑性を増す可能性があるため、必要に応じて適切なバランスを取ることが重要です。</p>
+        </div>
+        
+        <h2>まとめ</h2>
+        
+        <p>この章では、Template HaskellとGHCの他の拡張機能との連携について説明しました。主なポイントは次のとおりです：</p>
+        
+        <ul>
+            <li>DataKindsとの連携：型レベルでのプログラミングを強化</li>
+            <li>TypeFamiliesとの連携：型レベルの関数を動的に生成</li>
+            <li>GADTsとの連携：型安全なデータ構造を動的に生成</li>
+            <li>QuasiQuotesとの連携：カスタム構文でDSLを構築</li>
+            <li>DeriveGenericとの連携：Generic型クラスを活用した汎用的な関数を生成</li>
+            <li>TypeApplicationsとの連携：型引数に基づいた関数を生成</li>
+        </ul>
+        
+        <p>これらの組み合わせにより、Template Haskellの可能性が大きく広がります。特に、型レベルプログラミングとの組み合わせは、強力な静的検証を持つコードを生成するのに役立ちます。</p>
+        
+        <p>ただし、これらの高度な機能を使用する際は、コードの複雑性とのバランスを考慮することが重要です。適切な場面で適切な機能を選択し、必要に応じてドキュメントを提供することで、保守性の高いコードを実現できます。</p>
+        
+        <div class="nav-links">
+            <a href="5.3_エラー処理とデバッグ.html">← 前のページ</a>
+            <a href="../chapter0_2_toc.html">目次</a>
+            <a href="../chapter6/6.1_JSONパーサーの自動生成.html">次のページ →</a>
+        </div>
+    </main>
+    
+    <footer>
+        <p>© 2025 Template Haskell 学習ガイド</p>
+    </footer>
+</body>
+</html>

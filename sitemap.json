@@ -19,5 +19,136 @@
         "href": "contents/html/tags.html"
       }
     ]
+  },
+  {
+    "icon": "fab fa-haskell",
+    "text": "TemplateHaskell",
+    "children": [
+      {
+        "icon": "fas fa-info-circle",
+        "text": "1. 基礎知識",
+        "children": [
+          {
+            "icon": "fas fa-question-circle",
+            "text": "1.1 TemplateHaskellとは",
+            "href": "contents/TemplateHaskell/1.1.1_1.1_Template_Haskellとは.html"
+          },
+          {
+            "icon": "fas fa-cogs",
+            "text": "1.2 メタプログラミングの基本概念",
+            "href": "contents/TemplateHaskell/1.1.2_1.2_メタプログラミングの基本概念.html"
+          },
+          {
+            "icon": "fas fa-lightbulb",
+            "text": "1.3 なぜTemplateHaskellを学ぶべきか",
+            "href": "contents/TemplateHaskell/1.1.3_1.3_なぜTemplate_Haskellを学ぶべきか.html"
+          }
+        ]
+      },
+      {
+        "icon": "fas fa-code",
+        "text": "2. 基本機能",
+        "children": [
+          {
+            "icon": "fas fa-terminal",
+            "text": "2.1 基本的な構文と機能",
+            "href": "contents/TemplateHaskell/2.2.1_2.1_基本的な構文と機能.html"
+          },
+          {
+            "icon": "fas fa-code-branch",
+            "text": "2.2 スプライシング",
+            "href": "contents/TemplateHaskell/2.2.2_2.2_スプライシング.html"
+          },
+          {
+            "icon": "fas fa-quote-right",
+            "text": "2.3 クォート",
+            "href": "contents/TemplateHaskell/2.2.3_2.3_クォート.html"
+          },
+          {
+            "icon": "fas fa-code",
+            "text": "2.4 準クォート",
+            "href": "contents/TemplateHaskell/2.2.4_2.4_準クォート.html"
+          }
+        ]
+      },
+      {
+        "icon": "fas fa-magic",
+        "text": "3. コード生成",
+        "children": [
+          {
+            "icon": "fas fa-brackets-curly",
+            "text": "3.1 式の生成",
+            "href": "contents/TemplateHaskell/3.3.1_3.1_式の生成.html"
+          },
+          {
+            "icon": "fas fa-function",
+            "text": "3.2 関数の生成",
+            "href": "contents/TemplateHaskell/3.3.2_3.2_関数の生成.html"
+          },
+          {
+            "icon": "fas fa-shapes",
+            "text": "3.3 型の生成",
+            "href": "contents/TemplateHaskell/3.3.3_3.3_型の生成.html"
+          },
+          {
+            "icon": "fas fa-copy",
+            "text": "3.4 インスタンスの自動導出",
+            "href": "contents/TemplateHaskell/3.3.4_3.4_インスタンスの自動導出.html"
+          }
+        ]
+      },
+      {
+        "icon": "fas fa-tools",
+        "text": "4. 実践的な応用",
+        "children": [
+          {
+            "icon": "fas fa-file-code",
+            "text": "4.1 ボイラープレートコードの削減",
+            "href": "contents/TemplateHaskell/4.1_4.1_ボイラープレートコードの削減_-_Template_Haskell_学習ガイド.html"
+          },
+          {
+            "icon": "fas fa-language",
+            "text": "4.2 DSLの実装",
+            "href": "contents/TemplateHaskell/4.2_4.2_DSLの実装_-_Template_Haskell_学習ガイド.html"
+          },
+          {
+            "icon": "fas fa-project-diagram",
+            "text": "4.3 型レベルプログラミングとの連携",
+            "href": "contents/TemplateHaskell/4.3_4.3_型レベルプログラミングとの連携_-_Template_Haskell_学習ガイド.html"
+          },
+          {
+            "icon": "fas fa-tachometer-alt",
+            "text": "4.4 パフォーマンス最適化",
+            "href": "contents/TemplateHaskell/4.4_4.4_パフォーマンス最適化_-_Template_Haskell_学習ガイド.html"
+          }
+        ]
+      },
+      {
+        "icon": "fas fa-cogs",
+        "text": "5. 高度な機能",
+        "children": [
+          {
+            "icon": "fas fa-sync",
+            "text": "5.1 再帰的スプライシング",
+            "href": "contents/TemplateHaskell/5.1_5.1_再帰的スプライシング_-_Template_Haskell_学習ガイド.html"
+          },
+          {
+            "icon": "fas fa-puzzle-piece",
+            "text": "5.2 複雑なマクロの作成",
+            "href": "contents/TemplateHaskell/5.2_5.2_複雑なマクロの作成_-_Template_Haskell_学習ガイド.html"
+          },
+          {
+            "icon": "fas fa-bug",
+            "text": "5.3 エラー処理とデバッグ",
+            "href": "contents/TemplateHaskell/5.3_5.3_エラー処理とデバッグ_-_Template_Haskell_学習ガイド.html"
+          },
+          {
+            "icon": "fas fa-plug",
+            "text": "5.4 GHCの拡張機能との連携",
+            "href": "contents/TemplateHaskell/5.4_5.4_GHCの拡張機能との連携_-_Template_Haskell_学習ガイド.html"
+          }
+        ]
+      }
+    ]
   }
 ]

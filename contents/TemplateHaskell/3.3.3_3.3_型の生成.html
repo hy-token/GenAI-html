@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3.3 型の生成</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.1.0/github-markdown.min.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #24292e;
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .container {
+            background-color: #fff;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        h1, h2, h3 {
+            border-bottom: 1px solid #eaecef;
+            padding-bottom: 0.3em;
+        }
+        code {
+            font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+            background-color: rgba(27, 31, 35, 0.05);
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-size: 85%;
+        }
+        pre {
+            background-color: #f6f8fa;
+            border-radius: 3px;
+            padding: 16px;
+            overflow: auto;
+            line-height: 1.45;
+        }
+        pre code {
+            background-color: transparent;
+            padding: 0;
+        }
+        .column {
+            border: 1px solid #dfe2e5;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+        }
+        .column h4 {
+            margin-top: 0;
+            color: #0366d6;
+        }
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eaecef;
+        }
+        .nav-links a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+        .note {
+            background-color: #e7f7fe;
+            border-left: 4px solid #1976d2;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        .warning {
+            background-color: #fff8e1;
+            border-left: 4px solid #ffa000;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        .example {
+            background-color: #f1f8e9;
+            border-left: 4px solid #7cb342;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 1rem 0;
+        }
+        th, td {
+            border: 1px solid #dfe2e5;
+            padding: 8px 12px;
+        }
+        th {
+            background-color: #f6f8fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>3.3 型の生成</h1>
+
+        <h2>3.3.1 データ型の定義</h2>
+        <p>Template Haskellを使って型を生成することは、関数の生成と同様に強力な機能です。特に、外部データソースやスキーマからデータ型を自動的に生成したい場合に非常に有用です。</p>
+        
+        <p>Haskellには以下のような様々なデータ型があります：</p>
+        
+        <ul>
+            <li>代数的データ型（ADT）</li>
+            <li>レコード型</li>
+            <li>型シノニム</li>
+            <li>newtype</li>
+            <li>一般化代数的データ型（GADT）</li>
+        </ul>
+        
+        <p>Template Haskellを使って、これらの型を動的に生成することができます。</p>
+        
+        <h3>代数的データ型（ADT）の生成</h3>
+        <p>最も基本的なのは、単純な代数的データ型の生成です：</p>
+        
+        <pre><code>-- Maybe Int のような型を生成
+genMaybeInt :: Q [Dec]
+genMaybeInt = do
+    let typeName = mkName "MaybeInt"
+        nothingCon = NormalC (mkName "NothingInt") []
+        justCon = NormalC (mkName "JustInt") [(Bang NoSourceUnpackedness NoSourceStrictness, ConT ''Int)]
+    return [DataD [] typeName [] Nothing [nothingCon, justCon] []]
+
+-- クォート構文を使うとずっと簡単
+genMaybeIntQuoted :: Q [Dec]
+genMaybeIntQuoted = [d|
+    data MaybeInt = NothingInt | JustInt Int
+    |]</code></pre>
+        
+        <h3>レコード型の生成</h3>
+        <p>フィールド名を持つレコード型を生成する例：</p>
+        
+        <pre><code>-- Person型を生成
+genPerson :: Q [Dec]
+genPerson = do
+    let typeName = mkName "Person"
+        fields = [ (mkName "personName", Bang NoSourceUnpackedness NoSourceStrictness, ConT ''String)
+                 , (mkName "personAge", Bang NoSourceUnpackedness NoSourceStrictness, ConT ''Int)
+                 ]
+        constructor = RecC (mkName "Person") fields
+    return [DataD [] typeName [] Nothing [constructor] []]
+
+-- クォート構文を使用
+genPersonQuoted :: Q [Dec]
+genPersonQuoted = [d|
+    data Person = Person
+        { personName :: String
+        , personAge :: Int
+        }
+    |]</code></pre>
+        
+        <div class="column">
+            <h4>コラム：Bangパターンと厳格性</h4>
+            <p>フィールドを定義する際の<code>Bang</code>パラメータは、フィールドの厳格性（strictness）とアンパック方法を指定します：</p>
+            <ul>
+                <li><code>NoSourceUnpackedness</code>/<code>SourceUnpack</code>: GHCに値のアンパックを許可するかどうか</li>
+                <li><code>NoSourceStrictness</code>/<code>SourceStrict</code>/<code>SourceLazy</code>: フィールドの評価の厳格さを指定</li>
+            </ul>
+            <p>例えば、厳格なフィールドを生成するには：</p>
+            <pre><code>strictField = (mkName "field", Bang NoSourceUnpackedness SourceStrict, ConT ''Int)</code></pre>
+            <p>アンパックされるフィールドを生成するには：</p>
+            <pre><code>unpackedField = (mkName "field", Bang SourceUnpack SourceStrict, ConT ''Int)</code></pre>
+        </div>
+        
+        <h3>型変数を持つデータ型</h3>
+        <p>型変数（多相型）を含むデータ型を生成する例：</p>
+        
+        <pre><code>-- Either a b のような型を生成
+genEither :: Q [Dec]
+genEither = do
+    let typeName = mkName "MyEither"
+        typeVars = [PlainTV (mkName "a") (), PlainTV (mkName "b") ()]
+        leftCon = NormalC (mkName "MyLeft") [(Bang NoSourceUnpackedness NoSourceStrictness, VarT (mkName "a"))]
+        rightCon = NormalC (mkName "MyRight") [(Bang NoSourceUnpackedness NoSourceStrictness, VarT (mkName "b"))]
+    return [DataD [] typeName typeVars Nothing [leftCon, rightCon] []]
+
+-- クォート構文を使用
+genEitherQuoted :: Q [Dec]
+genEitherQuoted = [d|
+    data MyEither a b = MyLeft a | MyRight b
+    |]</code></pre>
+        
+        <div class="example">
+            <h4>実用例：CSVスキーマからデータ型を生成</h4>
+            <pre><code>-- CSVスキーマからレコード型を生成
+genRecordFromCSV :: String -> [String] -> [Q Type] -> Q [Dec]
+genRecordFromCSV typeName fieldNames fieldTypes = do
+    let typeNameT = mkName typeName
+        -- フィールド名を適切な形式に変換（例：camelCase）
+        formattedFieldNames = map formatFieldName fieldNames
+        -- フィールドの定義を作成
+        fields = zipWith3 (\name bangType type' -> 
+                          (mkName name, Bang NoSourceUnpackedness NoSourceStrictness, type'))
+                         formattedFieldNames
+                         (repeat $ Bang NoSourceUnpackedness NoSourceStrictness)
+                         fieldTypes
+        -- コンストラクタを作成
+        constructor = RecC (mkName typeName) fields
+    return [DataD [] typeNameT [] Nothing [constructor] []]
+  where
+    formatFieldName :: String -> String
+    formatFieldName s = let words = splitOn "_" s
+                         in concat $ head words : map capitalize (tail words)
+    capitalize (c:cs) = toUpper c : cs
+    capitalize [] = []
+
+-- 使用例
+$(genRecordFromCSV "User" 
+                  ["user_id", "user_name", "email_address"] 
+                  [[t| Int |], [t| String |], [t| String |]])
+-- 生成される型:
+-- data User = User
+--     { userId :: Int
+--     , userName :: String
+--     , emailAddress :: String
+--     }</code></pre>
+        </div>
+
+        <h2>3.3.2 型シノニムとnewtypeの生成</h2>
+        <p>型シノニム（type）とnewtype宣言も Template Haskell で生成できます。</p>
+        
+        <h3>型シノニムの生成</h3>
+        <p>型シノニムは既存の型に別名を付けるものです：</p>
+        
+        <pre><code>-- String の別名として UserName 型を生成
+genUserNameType :: Q [Dec]
+genUserNameType = do
+    let typeName = mkName "UserName"
+        definition = ConT ''String
+    return [TySynD typeName [] definition]
+
+-- クォート構文を使用
+genUserNameTypeQuoted :: Q [Dec]
+genUserNameTypeQuoted = [d|
+    type UserName = String
+    |]</code></pre>
+        
+        <h3>型変数を持つ型シノニム</h3>
+        <p>型変数を持つ型シノニムも生成できます：</p>
+        
+        <pre><code>-- Dictionary型を生成
+genDictionary :: Q [Dec]
+genDictionary = do
+    let typeName = mkName "Dictionary"
+        typeVars = [PlainTV (mkName "k") (), PlainTV (mkName "v") ()]
+        definition = AppT (AppT (ConT ''Map) (VarT $ mkName "k")) (VarT $ mkName "v")
+    return [TySynD typeName typeVars definition]
+
+-- クォート構文を使用
+genDictionaryQuoted :: Q [Dec]
+genDictionaryQuoted = [d|
+    type Dictionary k v = Map k v
+    |]</code></pre>
+        
+        <h3>newtypeの生成</h3>
+        <p>newtypeは、既存の型の単一コンストラクタによるラッパーを作成します：</p>
+        
+        <pre><code>-- UserId newtypeを生成
+genUserId :: Q [Dec]
+genUserId = do
+    let typeName = mkName "UserId"
+        constructor = NormalC (mkName "UserId") [(Bang NoSourceUnpackedness NoSourceStrictness, ConT ''Int)]
+    return [NewtypeD [] typeName [] Nothing constructor []]
+
+-- クォート構文を使用
+genUserIdQuoted :: Q [Dec]
+genUserIdQuoted = [d|
+    newtype UserId = UserId Int
+    |]</code></pre>
+        
+        <h3>フィールド名を持つnewtype</h3>
+        <p>フィールド名を持つnewtypeも生成できます：</p>
+        
+        <pre><code>-- EmailAddress newtypeを生成
+genEmailAddress :: Q [Dec]
+genEmailAddress = do
+    let typeName = mkName "EmailAddress"
+        field = (mkName "getEmailAddress", Bang NoSourceUnpackedness NoSourceStrictness, ConT ''String)
+        constructor = RecC (mkName "EmailAddress") [field]
+    return [NewtypeD [] typeName [] Nothing constructor []]
+
+-- クォート構文を使用
+genEmailAddressQuoted :: Q [Dec]
+genEmailAddressQuoted = [d|
+    newtype EmailAddress = EmailAddress { getEmailAddress :: String }
+    |]</code></pre>
+        
+        <div class="note">
+            <p><strong>ノート</strong>: <code>newtype</code>はランタイムではほぼゼロコストですが、型レベルでの区別が可能になります。これにより型安全性が向上し、異なる意味を持つ同じ基本型（例えば、<code>Int</code>として表される<code>UserId</code>と<code>ProductId</code>）を区別できます。</p>
+        </div>
+        
+        <div class="column">
+            <h4>コラム：型シノニム vs newtype</h4>
+            <p>型シノニム（<code>type</code>）とnewtype（<code>newtype</code>）は似ていますが、重要な違いがあります：</p>
+            <ul>
+                <li><strong>型シノニム</strong>: 完全に透過的で、コンパイル時にのみ意味を持ちます。元の型と完全に互換性があります。</li>
+                <li><strong>newtype</strong>: 新しい型として扱われ、元の型との自動的な変換は行われません。型安全性を高めるために使用されます。</li>
+            </ul>
+            <p>Template Haskellではどちらも生成できますが、用途に応じて適切な方を選ぶことが重要です：</p>
+            <ul>
+                <li>可読性を高めるだけなら型シノニム</li>
+                <li>型レベルでの区別が必要なら<code>newtype</code></li>
+            </ul>
+        </div>
+
+        <h2>3.3.3 GADTとの連携</h2>
+        <p>一般化代数的データ型（GADT）は、より高度な型安全性を提供する強力な機能です。Template Haskellを使ってGADTを生成することもできます。</p>
+        
+        <h3>基本的なGADTの生成</h3>
+        <p>Template HaskellでGADTを生成する例：</p>
+        
+        <pre><code>-- Expr GADT型を生成
+genExprGADT :: Q [Dec]
+genExprGADT = do
+    let typeName = mkName "Expr"
+        typeVar = PlainTV (mkName "a") ()
+        
+        -- Lit :: Int -> Expr Int
+        litCon = GadtC [mkName "Lit"] 
+                      [(Bang NoSourceUnpackedness NoSourceStrictness, ConT ''Int)] 
+                      (AppT (ConT $ mkName "Expr") (ConT ''Int))
+        
+        -- Add :: Expr Int -> Expr Int -> Expr Int
+        addCon = GadtC [mkName "Add"]
+                      [ (Bang NoSourceUnpackedness NoSourceStrictness, AppT (ConT $ mkName "Expr") (ConT ''Int))
+                      , (Bang NoSourceUnpackedness NoSourceStrictness, AppT (ConT $ mkName "Expr") (ConT ''Int))
+                      ]
+                      (AppT (ConT $ mkName "Expr") (ConT ''Int))
+        
+        -- IsZero :: Expr Int -> Expr Bool
+        isZeroCon = GadtC [mkName "IsZero"]
+                         [(Bang NoSourceUnpackedness NoSourceStrictness, AppT (ConT $ mkName "Expr") (ConT ''Int))]
+                         (AppT (ConT $ mkName "Expr") (ConT ''Bool))
+        
+        -- If :: Expr Bool -> Expr a -> Expr a -> Expr a
+        ifCon = GadtC [mkName "If"]
+                     [ (Bang NoSourceUnpackedness NoSourceStrictness, AppT (ConT $ mkName "Expr") (ConT ''Bool))
+                     , (Bang NoSourceUnpackedness NoSourceStrictness, AppT (ConT $ mkName "Expr") (VarT $ mkName "a"))
+                     , (Bang NoSourceUnpackedness NoSourceStrictness, AppT (ConT $ mkName "Expr") (VarT $ mkName "a"))
+                     ]
+                     (AppT (ConT $ mkName "Expr") (VarT $ mkName "a"))
+                     
+    return [GadtD [PlainTV typeName (), typeVar] Nothing Nothing [litCon, addCon, isZeroCon, ifCon] []]
+
+-- クォート構文を使用（GADTsyntax拡張が必要）
+genExprGADTQuoted :: Q [Dec]
+genExprGADTQuoted = [d|
+    data Expr a where
+        Lit :: Int -> Expr Int
+        Add :: Expr Int -> Expr Int -> Expr Int
+        IsZero :: Expr Int -> Expr Bool
+        If :: Expr Bool -> Expr a -> Expr a -> Expr a
+    |]</code></pre>
+        
+        <p>ここでは、<code>Expr</code>という型パラメータを持つGADTを定義しています。このGADTはDSL（ドメイン特化言語）の構文木を表現していて、型安全な評価が可能です。</p>
+        
+        <div class="warning">
+            <p><strong>注意</strong>: GADTを手動で構築するのは複雑です。可能であれば、クォート構文（<code>[d|...|]</code>）を使用した方が読みやすく、エラーも少なくなります。ただし、動的に構造を変化させる必要がある場合は、手動構築が必要になることもあります。</p>
+        </div>
+        
+        <h3>データ族（Data Families）の生成</h3>
+        <p>データ族は、型によってデータ型の表現が異なる場合に便利です：</p>
+        
+        <pre><code>-- データ族の宣言
+genDataFamily :: Q [Dec]
+genDataFamily = [d|
+    data family Collection a
+    |]
+
+-- データ族のインスタンス
+genDataFamilyInstances :: Q [Dec]
+genDataFamilyInstances = [d|
+    data instance Collection Int = IntCollection [Int]
+    data instance Collection Char = CharList String | CharSet (Set Char)
+    |]</code></pre>
+        
+        <div class="example">
+            <h4>実用例：スキーマからのGADT生成</h4>
+            <pre><code>-- 型リストからGADTを生成する汎用関数
+genSchemaGADT :: String -> [(String, Q Type)] -> Q [Dec]
+genSchemaGADT typeName fields = do
+    let gadtName = mkName typeName
+        typeVar = PlainTV (mkName "a") ()
+        
+        -- 各フィールドに対応するコンストラクタを生成
+        genCon (fieldName, fieldType) = do
+            fType <- fieldType
+            let conName = mkName $ "Get" ++ capitalize fieldName
+                resultType = AppT (ConT gadtName) fType
+            return $ GadtC [conName] [] resultType
+            
+    fieldCons <- mapM genCon fields
+    
+    return [GadtD [PlainTV gadtName (), typeVar] Nothing Nothing fieldCons []]
+  where
+    capitalize (c:cs) = toUpper c : cs
+    capitalize [] = []
+
+-- 使用例
+$(genSchemaGADT "UserField" 
+               [ ("name", [t| String |])
+               , ("age", [t| Int |])
+               , ("isActive", [t| Bool |])
+               ])
+-- 生成される型:
+-- data UserField a where
+--   GetName :: UserField String
+--   GetAge :: UserField Int
+--   GetIsActive :: UserField Bool</code></pre>
+        </div>
+        
+        <h2>型クラスと型族の生成</h2>
+        <p>Template Haskellでは、型クラスや型族（関連型）も生成できます：</p>
+        
+        <h3>型クラスの生成</h3>
+        <pre><code>-- Convertible型クラスの生成
+genConvertibleClass :: Q [Dec]
+genConvertibleClass = [d|
+    class Convertible a b where
+        convert :: a -> b
+    |]</code></pre>
+        
+        <h3>型族（Type Families）の生成</h3>
+        <pre><code>-- Element型族の生成
+genElementTypeFamily :: Q [Dec]
+genElementTypeFamily = [d|
+    type family Element c
+    
+    type instance Element [a] = a
+    type instance Element (Set a) = a
+    type instance Element (Map k v) = (k, v)
+    |]</code></pre>
+        
+        <div class="column">
+            <h4>コラム：型生成の応用アイデア</h4>
+            <p>Template Haskellによる型生成は、以下のような場面で特に威力を発揮します：</p>
+            <ul>
+                <li><strong>外部スキーマからの型生成</strong>: JSONスキーマ、データベーススキーマ、GraphQLスキーマなどから型を自動生成</li>
+                <li><strong>言語間ブリッジ</strong>: 他の言語で定義された型をHaskellの型として自動生成</li>
+                <li><strong>プロトコル実装</strong>: ネットワークプロトコルやAPIの型安全な表現を生成</li>
+                <li><strong>DSL（ドメイン特化言語）</strong>: 特定ドメインの概念を型安全に表現するためのDSL実装</li>
+                <li><strong>ボイラープレート削減</strong>: 類似した多数の型を一元管理して生成</li>
+            </ul>
+        </div>
+        
+        <h2>まとめ</h2>
+        <p>この章では、Template Haskellを使った型生成の基本と応用テクニックについて学びました：</p>
+        
+        <ul>
+            <li>代数的データ型（ADT）の生成</li>
+            <li>レコード型の生成</li>
+            <li>型シノニムとnewtypeの生成</li>
+            <li>GADTと型族の生成</li>
+            <li>外部スキーマからの型生成</li>
+        </ul>
+        
+        <p>型生成は、Template Haskellの中でも特に強力な機能です。適切に活用することで、型安全性を高めつつ、ボイラープレートコードを削減し、外部データソースとのインテグレーションを容易にすることができます。</p>
+        
+        <p>次のセクションでは、型クラスのインスタンスを自動的に導出する方法について詳しく見ていきます。</p>
+        
+        <div class="nav-links">
+            <a href="3.2_関数の生成.html">前へ：3.2 関数の生成</a>
+            <a href="3.4_インスタンスの自動導出.html">次へ：3.4 インスタンスの自動導出</a>
+        </div>
+    </div>
+</body>
+</html>
