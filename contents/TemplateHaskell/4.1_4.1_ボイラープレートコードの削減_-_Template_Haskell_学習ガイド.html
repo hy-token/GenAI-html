@@ -1,34 +1,26 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>4.1 ボイラープレートコードの削減 - Template Haskell 学習ガイド</title>
-    <link rel="stylesheet" href="../styles/main.css">
-</head>
 <body>
-    <header>
-        <h1>4.1 ボイラープレートコードの削減 - Template Haskell 学習ガイド</h1>
-    </header>
-    
-    <nav>
-        <a href="../chapter0_2_toc.html">目次</a>
-        <div>
-            <a href="../chapter3/3.4_インスタンスの自動導出.html">前へ</a>
-            <a href="4.2_DSLの実装.html">次へ</a>
-        </div>
-    </nav>
-    
-    <main>
-        <h1>4.1 ボイラープレートコードの削減</h1>
-        
-        <p>実用的なHaskellプログラミングでは、しばしば同じようなパターンのコードを繰り返し書く必要があります。このような「ボイラープレート」コードは冗長で、メンテナンスの負担となり、エラーの原因になることがあります。Template Haskellは、このようなボイラープレートコードを自動生成することで、コードの量を減らし、可読性と保守性を向上させる強力なツールです。</p>
+  <header>
+    <h1>4.1 ボイラープレートコードの削減 - Template Haskell 学習ガイド</h1>
+  </header>
 
-        <h2>レンズの自動生成</h2>
-        
-        <p>データ型のフィールドにアクセスするためのレンズの作成は、Template Haskellの最も一般的な使用例の一つです。<code>lens</code>ライブラリを使用すると、データ型からレンズを自動生成できます。</p>
-        
-        <pre><code>-- 必要な拡張機能とインポート
+  <nav>
+    <a href="../chapter0_2_toc.html">目次</a>
+    <div>
+      <a href="../chapter3/3.4_インスタンスの自動導出.html">前へ</a>
+      <a href="4.2_DSLの実装.html">次へ</a>
+    </div>
+  </nav>
+
+  <main>
+    <h1>4.1 ボイラープレートコードの削減</h1>
+
+    <p>実用的なHaskellプログラミングでは、しばしば同じようなパターンのコードを繰り返し書く必要があります。このような「ボイラープレート」コードは冗長で、メンテナンスの負担となり、エラーの原因になることがあります。Template Haskellは、このようなボイラープレートコードを自動生成することで、コードの量を減らし、可読性と保守性を向上させる強力なツールです。</p>
+
+    <h2>レンズの自動生成</h2>
+
+    <p>データ型のフィールドにアクセスするためのレンズの作成は、Template Haskellの最も一般的な使用例の一つです。<code>lens</code>ライブラリを使用すると、データ型からレンズを自動生成できます。</p>
+
+    <pre><code>-- 必要な拡張機能とインポート
 {-# LANGUAGE TemplateHaskell #-}
 import Control.Lens
 
@@ -53,19 +45,19 @@ makeLenses ''Address
 updatePersonCity :: Person -> String -> Person
 updatePersonCity person newCity =
   person & personAddress . addressCity .~ newCity</code></pre>
-        
-        <p><code>makeLenses</code>関数は、各フィールドに対応するレンズを自動生成します。これにより、フィールド名に対応する関数を手動で記述する必要がなくなります。</p>
-        
-        <div class="note">
-            <h4>注意</h4>
-            <p>レンズを自動生成するためには、フィールド名の先頭にアンダースコアを付ける必要があります。<code>makeLenses</code>関数は、このアンダースコアを削除したレンズ名を生成します。</p>
-        </div>
-        
-        <h2>導出インスタンスの拡張</h2>
-        
-        <p>Haskellの標準の<code>deriving</code>機能では、いくつかの基本的な型クラスのインスタンスを自動生成できますが、Template Haskellを使用すると、より複雑な型クラスのインスタンスも自動生成できます。</p>
-        
-        <pre><code>-- 必要な拡張機能とインポート
+
+    <p><code>makeLenses</code>関数は、各フィールドに対応するレンズを自動生成します。これにより、フィールド名に対応する関数を手動で記述する必要がなくなります。</p>
+
+    <div class="note">
+      <h4>注意</h4>
+      <p>レンズを自動生成するためには、フィールド名の先頭にアンダースコアを付ける必要があります。<code>makeLenses</code>関数は、このアンダースコアを削除したレンズ名を生成します。</p>
+    </div>
+
+    <h2>導出インスタンスの拡張</h2>
+
+    <p>Haskellの標準の<code>deriving</code>機能では、いくつかの基本的な型クラスのインスタンスを自動生成できますが、Template Haskellを使用すると、より複雑な型クラスのインスタンスも自動生成できます。</p>
+
+    <pre><code>-- 必要な拡張機能とインポート
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE DeriveGeneric #-}
 import Data.Aeson.TH
@@ -80,14 +72,14 @@ data User = User
 
 -- JSONインスタンスの自動生成
 $(deriveJSON defaultOptions ''User)</code></pre>
-        
-        <p><code>deriveJSON</code>関数は、<code>User</code>型に対して<code>ToJSON</code>と<code>FromJSON</code>のインスタンスを自動生成します。これにより、JSONとの相互変換を手動で実装する必要がなくなります。</p>
-        
-        <h2>型安全なルーティング</h2>
-        
-        <p>Webアプリケーションでは、URLルーティングの定義が必要です。Template Haskellを使用すると、型安全なルーティングを自動生成できます。</p>
-        
-        <pre><code>-- 必要な拡張機能とインポート
+
+    <p><code>deriveJSON</code>関数は、<code>User</code>型に対して<code>ToJSON</code>と<code>FromJSON</code>のインスタンスを自動生成します。これにより、JSONとの相互変換を手動で実装する必要がなくなります。</p>
+
+    <h2>型安全なルーティング</h2>
+
+    <p>Webアプリケーションでは、URLルーティングの定義が必要です。Template Haskellを使用すると、型安全なルーティングを自動生成できます。</p>
+
+    <pre><code>-- 必要な拡張機能とインポート
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE TypeFamilies #-}
@@ -110,14 +102,14 @@ getHomeR :: Handler Html
 getHomeR = defaultLayout [whamlet|&lt;h1&gt;Welcome to our site!&lt;/h1&gt;|]
 
 -- その他のハンドラ...</code></pre>
-        
-        <p><code>mkYesod</code>関数と<code>parseRoutes</code>準クォーターは、ルーティング定義から必要なデータ型、型クラスインスタンス、およびヘルパー関数を自動生成します。</p>
-        
-        <h2>カスタムボイラープレート削減関数の作成</h2>
-        
-        <p>既存のライブラリで提供されている関数だけでなく、プロジェクト固有のボイラープレートを削減するための独自の関数を作成することもできます。</p>
-        
-        <pre><code>-- 必要な拡張機能とインポート
+
+    <p><code>mkYesod</code>関数と<code>parseRoutes</code>準クォーターは、ルーティング定義から必要なデータ型、型クラスインスタンス、およびヘルパー関数を自動生成します。</p>
+
+    <h2>カスタムボイラープレート削減関数の作成</h2>
+
+    <p>既存のライブラリで提供されている関数だけでなく、プロジェクト固有のボイラープレートを削減するための独自の関数を作成することもできます。</p>
+
+    <pre><code>-- 必要な拡張機能とインポート
 {-# LANGUAGE TemplateHaskell #-}
 import Language.Haskell.TH
 
@@ -143,19 +135,19 @@ makeShowAndPrint name = do
 data MyData = MyData Int String
 
 $(makeShowAndPrint ''MyData)</code></pre>
-        
-        <p>この例では、<code>makeShowAndPrint</code>関数がデータ型に対して簡易的な<code>Show</code>インスタンスと、その型の値を表示するための<code>print関数</code>を生成しています。</p>
-        
-        <div class="warning">
-            <h4>警告</h4>
-            <p>Template Haskellを使用したコード生成は強力ですが、デバッグが難しくなる場合があります。生成されたコードを<code>-ddump-splices</code>オプションで確認し、期待通りのコードが生成されているか検証することをお勧めします。</p>
-        </div>
-        
-        <h2>例: アクセサ関数の自動生成</h2>
-        
-        <p>複数のフィールドを持つデータ型に対して、アクセサ関数を手動で定義するのは退屈な作業です。Template Haskellを使用すると、これらのアクセサ関数を自動生成できます。</p>
-        
-        <pre><code>-- 必要な拡張機能とインポート
+
+    <p>この例では、<code>makeShowAndPrint</code>関数がデータ型に対して簡易的な<code>Show</code>インスタンスと、その型の値を表示するための<code>print関数</code>を生成しています。</p>
+
+    <div class="warning">
+      <h4>警告</h4>
+      <p>Template Haskellを使用したコード生成は強力ですが、デバッグが難しくなる場合があります。生成されたコードを<code>-ddump-splices</code>オプションで確認し、期待通りのコードが生成されているか検証することをお勧めします。</p>
+    </div>
+
+    <h2>例: アクセサ関数の自動生成</h2>
+
+    <p>複数のフィールドを持つデータ型に対して、アクセサ関数を手動で定義するのは退屈な作業です。Template Haskellを使用すると、これらのアクセサ関数を自動生成できます。</p>
+
+    <pre><code>-- 必要な拡張機能とインポート
 {-# LANGUAGE TemplateHaskell #-}
 import Language.Haskell.TH
 
@@ -197,32 +189,31 @@ $(makeAccessors ''Product)
 -- setProductId :: Product -> Int -> Product
 -- setProductName :: Product -> String -> Product
 -- setProductPrice :: Product -> Double -> Product</code></pre>
-        
-        <p>この例では、<code>makeAccessors</code>関数が<code>Product</code>データ型に対して、各フィールドのゲッター関数とセッター関数を自動生成しています。</p>
-        
-        <div class="column">
-            <h4>コラム: Template Haskellを使用する際のトレードオフ</h4>
-            <p>Template Haskellはコードの冗長性を大幅に減らす強力なツールですが、いくつかのトレードオフが存在します。メタプログラミングを過度に使用すると、コードの透明性が低下し、理解しにくくなる可能性があります。また、Template Haskellはコンパイル時間を増加させる要因になることもあります。そのため、Template Haskellの使用は、本当に繰り返しのコードが多い場合や、型安全性を確保したい場合など、メリットが明確な状況に限定することをお勧めします。</p>
-        </div>
-        
-        <h2>ボイラープレート削減のベストプラクティス</h2>
-        
-        <ul>
-            <li><strong>既存のライブラリを活用する</strong>: 可能な限り、<code>lens</code>や<code>aeson-th</code>などの既存のライブラリを使用しましょう。これらのライブラリは十分にテストされており、多くの一般的なユースケースをカバーしています。</li>
-            <li><strong>シンプルに保つ</strong>: 複雑なTemplate Haskellコードは理解しにくく、デバッグも困難です。可能な限りシンプルな実装を目指しましょう。</li>
-            <li><strong>生成されたコードを確認する</strong>: <code>-ddump-splices</code>オプションを使用して、生成されたコードを確認しましょう。これにより、予期しない問題を早期に発見できます。</li>
-            <li><strong>ドキュメントを充実させる</strong>: Template Haskellで生成された関数やインスタンスにも、適切なドキュメントを提供しましょう。これにより、他の開発者がコードを理解しやすくなります。</li>
-        </ul>
-        
-        <div class="nav-links">
-            <a href="../chapter3/3.4_インスタンスの自動導出.html">← 前のページ</a>
-            <a href="../chapter0_2_toc.html">目次</a>
-            <a href="4.2_DSLの実装.html">次のページ →</a>
-        </div>
-    </main>
-    
-    <footer>
-        <p>© 2025 Template Haskell 学習ガイド</p>
-    </footer>
+
+    <p>この例では、<code>makeAccessors</code>関数が<code>Product</code>データ型に対して、各フィールドのゲッター関数とセッター関数を自動生成しています。</p>
+
+    <div class="column">
+      <h4>コラム: Template Haskellを使用する際のトレードオフ</h4>
+      <p>Template Haskellはコードの冗長性を大幅に減らす強力なツールですが、いくつかのトレードオフが存在します。メタプログラミングを過度に使用すると、コードの透明性が低下し、理解しにくくなる可能性があります。また、Template Haskellはコンパイル時間を増加させる要因になることもあります。そのため、Template Haskellの使用は、本当に繰り返しのコードが多い場合や、型安全性を確保したい場合など、メリットが明確な状況に限定することをお勧めします。</p>
+    </div>
+
+    <h2>ボイラープレート削減のベストプラクティス</h2>
+
+    <ul>
+      <li><strong>既存のライブラリを活用する</strong>: 可能な限り、<code>lens</code>や<code>aeson-th</code>などの既存のライブラリを使用しましょう。これらのライブラリは十分にテストされており、多くの一般的なユースケースをカバーしています。</li>
+      <li><strong>シンプルに保つ</strong>: 複雑なTemplate Haskellコードは理解しにくく、デバッグも困難です。可能な限りシンプルな実装を目指しましょう。</li>
+      <li><strong>生成されたコードを確認する</strong>: <code>-ddump-splices</code>オプションを使用して、生成されたコードを確認しましょう。これにより、予期しない問題を早期に発見できます。</li>
+      <li><strong>ドキュメントを充実させる</strong>: Template Haskellで生成された関数やインスタンスにも、適切なドキュメントを提供しましょう。これにより、他の開発者がコードを理解しやすくなります。</li>
+    </ul>
+
+    <div class="nav-links">
+      <a href="../chapter3/3.4_インスタンスの自動導出.html">← 前のページ</a>
+      <a href="../chapter0_2_toc.html">目次</a>
+      <a href="4.2_DSLの実装.html">次のページ →</a>
+    </div>
+  </main>
+
+  <footer>
+    <p>© 2025 Template Haskell 学習ガイド</p>
+  </footer>
 </body>
-</html>

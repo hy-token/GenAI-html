@@ -1,17 +1,10 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>1.2 メタプログラミングの基本概念</title>
-</head>
 <body>
-    <div >
+    <div>
         <h1>1.2 メタプログラミングの基本概念</h1>
 
         <h2>1.2.1 コード生成とは</h2>
         <p>メタプログラミングの中心的な概念である<strong>コード生成</strong>は、プログラムが別のプログラムコードを作成するプロセスです。Template Haskellを使用すると、Haskellのコードを使って別のHaskellコードを生成することができます。</p>
-        
+
         <p>コード生成は以下のような場面で特に有用です：</p>
         <ol>
             <li><strong>反復的なコードパターンの自動化</strong>: 同じようなコードを何度も書かなければならない場合、コード生成によって一度だけ書けば済むようになります。</li>
@@ -19,22 +12,22 @@
             <li><strong>外部ソースからのコード生成</strong>: データベーススキーマやAPI仕様などの外部定義からHaskellコードを自動生成できます。</li>
             <li><strong>最適化</strong>: 特定のケースに特化した効率的なコードを自動的に生成できます。</li>
         </ol>
-        
+
         <p>例えば、以下のようなレコード型を考えてみましょう：</p>
-        
+
         <pre><code>data Person = Person
   { personName :: String
   , personAge :: Int
   , personAddress :: String
   }</code></pre>
-        
+
         <p>このデータ型に対するレンズ（アクセサとセッタの組）を手動で書くと冗長ですが、Template Haskellを使うと一行で済みます：</p>
-        
+
         <pre><code>$(makeLenses ''Person)</code></pre>
-        
+
         <p>これにより、<code>name</code>、<code>age</code>、<code>address</code>というレンズが自動生成されます。このように、Template Haskellはコード量を大幅に削減し、開発効率を向上させることができます。</p>
-        
-        <div >
+
+        <div>
             <h4>コラム：生成コードの可視化</h4>
             <p>Template Haskellで生成されたコードを確認したい場合、GHCの <code>-ddump-splices</code> オプションを使用すると便利です。これにより、コンパイル時にTemplate Haskellスプライスが展開された内容がコンソールに表示されます。</p>
             <pre><code>$ ghc -ddump-splices MyFile.hs</code></pre>
@@ -43,28 +36,28 @@
 
         <h2>1.2.2 抽象構文木（AST）の理解</h2>
         <p>Template Haskellでメタプログラミングを行うには、<strong>抽象構文木</strong>（Abstract Syntax Tree、AST）の概念を理解することが重要です。ASTは、プログラムのソースコードを木構造で表現したものです。</p>
-        
+
         <p>例えば、式 <code>2 + 3 * 4</code> のASTは以下のような構造になります：</p>
-        
-        <div >     (+)
-    /   \
-   2    (*)
-       /   \
-      3     4</div>
-        
+
+        <div> (+)
+            / \
+            2 (*)
+            / \
+            3 4</div>
+
         <p>Template Haskellでは、このようなASTを操作するためのデータ型とAPI関数が提供されています。主要なASTデータ型には：</p>
-        
+
         <ul>
             <li><code>Exp</code>: 式を表すデータ型</li>
             <li><code>Dec</code>: 宣言を表すデータ型</li>
             <li><code>Type</code>: 型を表すデータ型</li>
             <li><code>Pat</code>: パターンを表すデータ型</li>
         </ul>
-        
+
         <p>などがあります。</p>
-        
+
         <p>例えば、式 <code>2 + 3</code> を表すASTは以下のように構築できます：</p>
-        
+
         <pre><code>addExpr :: Q Exp
 addExpr = [| 2 + 3 |]  -- クォートを使用した方法
 
@@ -74,14 +67,14 @@ addExpr' = do
   let two = LitE (IntegerL 2)
       three = LitE (IntegerL 3)
   return $ InfixE (Just two) (VarE '(+)) (Just three)</code></pre>
-        
+
         <p>ASTを理解することで、プログラムを「データ」として扱い、変換や分析を行うことが可能になります。</p>
 
         <h2>1.2.3 コンパイル時評価とランタイム</h2>
         <p>Template Haskellの重要な特徴は、コードが<strong>コンパイル時</strong>に評価されることです。これは通常のHaskellコードが<strong>ランタイム</strong>（実行時）に評価されるのとは異なります。</p>
-        
+
         <p>この違いを理解するために、以下の点に注目しましょう：</p>
-        
+
         <ol>
             <li><strong>実行タイミング</strong>:
                 <ul>
@@ -108,9 +101,9 @@ addExpr' = do
                 </ul>
             </li>
         </ol>
-        
+
         <p>例えば、以下のTemplate Haskellコードを考えてみましょう：</p>
-        
+
         <pre><code>{-# LANGUAGE TemplateHaskell #-}
 
 import Language.Haskell.TH
@@ -125,19 +118,19 @@ main :: IO ()
 main = do
   putStrLn "This runs at runtime!"
   print dummy</code></pre>
-        
+
         <p>このプログラムをコンパイルすると、「This runs at compile time!」というメッセージがコンパイル時に表示されます。プログラムを実行すると、「This runs at runtime!」というメッセージと「0」が表示されます。</p>
-        
-        <div >
+
+        <div>
             <h4>コラム：スプライスとステージ制約</h4>
             <p>Template Haskellでは、コンパイル時（ステージ1）とランタイム（ステージ0）の区別を「ステージ制約」と呼びます。コード内で「$」記号を使ったスプライスは、ステージ1のコードをステージ0に埋め込むためのものです。逆に、ステージ0のコードからステージ1の値を参照することはできません。これにより、コンパイル時とランタイムのコードが適切に分離されます。</p>
         </div>
-        
+
         <p>Template Haskellのコード生成は「純粋」ではないことに注意が必要です。つまり、同じ入力に対して常に同じ出力を生成するとは限りません。例えば、現在の時刻やファイルシステムの状態に依存するTemplate Haskellコードは、実行のたびに異なるコードを生成する可能性があります。</p>
-        
+
         <p>ただし、この非純粋性は慎重に制御されており、Template Haskellコードが行えるI/O操作には制限があります。この制限により、コンパイル時の振る舞いが予測可能で安全なものになっています。</p>
-        
-        <div >
+
+        <div>
             <a href="1.1.1_1.1_Template_Haskellとは.html">前へ：1.1 Template Haskellとは</a>
             <a href="1.1.3_1.3_なぜTemplate_Haskellを学ぶべきか.html">次へ：1.3 なぜTemplate Haskellを学ぶべきか</a>
         </div>

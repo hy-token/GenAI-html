@@ -1,114 +1,12 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3.2 関数の生成</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.1.0/github-markdown.min.css">
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-            line-height: 1.6;
-            color: #24292e;
-            max-width: 980px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-        .container {
-            background-color: #fff;
-            border: 1px solid #e1e4e8;
-            border-radius: 6px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-        }
-        h1, h2, h3 {
-            border-bottom: 1px solid #eaecef;
-            padding-bottom: 0.3em;
-        }
-        code {
-            font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
-            background-color: rgba(27, 31, 35, 0.05);
-            padding: 0.2em 0.4em;
-            border-radius: 3px;
-            font-size: 85%;
-        }
-        pre {
-            background-color: #f6f8fa;
-            border-radius: 3px;
-            padding: 16px;
-            overflow: auto;
-            line-height: 1.45;
-        }
-        pre code {
-            background-color: transparent;
-            padding: 0;
-        }
-        .column {
-            border: 1px solid #dfe2e5;
-            background-color: #f8f9fa;
-            border-radius: 6px;
-            padding: 1rem;
-            margin: 1.5rem 0;
-        }
-        .column h4 {
-            margin-top: 0;
-            color: #0366d6;
-        }
-        .nav-links {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 2rem;
-            padding-top: 1rem;
-            border-top: 1px solid #eaecef;
-        }
-        .nav-links a {
-            color: #0366d6;
-            text-decoration: none;
-        }
-        .nav-links a:hover {
-            text-decoration: underline;
-        }
-        .note {
-            background-color: #e7f7fe;
-            border-left: 4px solid #1976d2;
-            padding: 1rem;
-            margin: 1rem 0;
-        }
-        .warning {
-            background-color: #fff8e1;
-            border-left: 4px solid #ffa000;
-            padding: 1rem;
-            margin: 1rem 0;
-        }
-        .example {
-            background-color: #f1f8e9;
-            border-left: 4px solid #7cb342;
-            padding: 1rem;
-            margin: 1rem 0;
-        }
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            margin: 1rem 0;
-        }
-        th, td {
-            border: 1px solid #dfe2e5;
-            padding: 8px 12px;
-        }
-        th {
-            background-color: #f6f8fa;
-        }
-    </style>
-</head>
 <body>
     <div class="container">
         <h1>3.2 関数の生成</h1>
 
         <h2>3.2.1 シンプルな関数の生成</h2>
         <p>前節では式の生成方法を学びましたが、Template Haskellの本当の力を発揮するのは、完全な関数定義を生成する場合です。関数の生成は、ボイラープレートコードの削減や反復的なパターンの自動化に特に有効です。</p>
-        
+
         <p>Haskellの関数定義は、基本的に以下の要素から構成されます：</p>
-        
+
         <ul>
             <li>関数名</li>
             <li>型シグネチャ（オプショナル）</li>
@@ -116,9 +14,9 @@
             <li>関数本体</li>
             <li>where句（オプショナル）</li>
         </ul>
-        
+
         <p>Template Haskellでは、関数定義は<code>Dec</code>（宣言）として表現されます。最も基本的な関数生成方法は、<code>FunD</code>コンストラクタを使用することです：</p>
-        
+
         <pre><code>-- add x y = x + y という関数を生成
 genAddFunction :: Q [Dec]
 genAddFunction = do
@@ -127,9 +25,9 @@ genAddFunction = do
     let body = InfixE (Just $ VarE x) (VarE '(+)) (Just $ VarE y)
         clause = Clause [VarP x, VarP y] (NormalB body) []
     return [FunD (mkName "add") [clause]]</code></pre>
-        
+
         <p>型シグネチャを追加するには、<code>SigD</code>コンストラクタを使用します：</p>
-        
+
         <pre><code>-- add :: Int -> Int -> Int を追加
 genAddFunctionWithType :: Q [Dec]
 genAddFunctionWithType = do
@@ -146,16 +44,16 @@ genAddFunctionWithType = do
         sigDec = SigD (mkName "add") funType
         
     return [sigDec, funDec]</code></pre>
-        
+
         <p>上記のコードは複雑に見えるかもしれませんが、クォート構文を使用するとずっと簡潔に書くことができます：</p>
-        
+
         <pre><code>-- クォート構文を使った関数生成
 genAddFunctionQuoted :: Q [Dec]
 genAddFunctionQuoted = [d|
     add :: Int -> Int -> Int
     add x y = x + y
     |]</code></pre>
-        
+
         <div class="column">
             <h4>コラム：宣言のクォートとスプライス</h4>
             <p>関数生成の大部分のケースでは、<code>[d|...|]</code>クォート構文を使用するのが最も簡単で読みやすい方法です。このクォートは、通常のHaskellコードを直接書くことができ、そのコードに対応する宣言のリスト（<code>[Dec]</code>）を生成します。</p>
@@ -163,10 +61,10 @@ genAddFunctionQuoted = [d|
             <pre><code>-- モジュールに関数を追加
 $(genAddFunctionQuoted)</code></pre>
         </div>
-        
+
         <h3>複数の節（clause）を持つ関数</h3>
         <p>パターンマッチングを使用して、複数の節を持つ関数を生成することもできます：</p>
-        
+
         <pre><code>-- factorial関数の生成
 genFactorial :: Q [Dec]
 genFactorial = do
@@ -193,7 +91,7 @@ genFactorialQuoted = [d|
     factorial 0 = 1
     factorial n = n * factorial (n - 1)
     |]</code></pre>
-        
+
         <div class="example">
             <h4>関数生成の実用例：フィールドアクセサの自動生成</h4>
             <pre><code>-- データ型に対するゲッター関数を生成
@@ -236,10 +134,10 @@ $(genGetters ''Person)
 
         <h2>3.2.2 パラメータ化された関数生成</h2>
         <p>Template Haskellの強力な機能の一つは、パラメータに基づいて動的に関数を生成できることです。これにより、共通のパターンを抽象化し、様々な状況に適用できます。</p>
-        
+
         <h3>名前に基づく関数生成</h3>
         <p>関数名をパラメータとして受け取り、その名前に基づいて関数を生成することができます：</p>
-        
+
         <pre><code>-- 指定された名前のgetter関数を生成
 genNamedGetter :: Name -> Name -> Type -> Q [Dec]
 genNamedGetter typeName fieldName fieldType = do
@@ -262,10 +160,10 @@ data Person = Person { personName :: String, personAge :: Int }
 $(genNamedGetter ''Person 'personName [t| String |])
 -- getName :: Person -> String
 -- getName x = personName x</code></pre>
-        
+
         <h3>動的な本体を持つ関数生成</h3>
         <p>関数の本体を動的に構築することで、より柔軟な関数生成が可能になります：</p>
-        
+
         <pre><code>-- 二項演算子と引数を受け取り、計算関数を生成
 genBinaryFunction :: Name -> Int -> Int -> Q [Dec]
 genBinaryFunction op x y = do
@@ -288,7 +186,7 @@ $(genBinaryFunction '(+) 5 3)
 $(genBinaryFunction '(*) 5 3)
 -- computeMul :: Int
 -- computeMul = 5 * 3</code></pre>
-        
+
         <div class="column">
             <h4>コラム：関数名の生成戦略</h4>
             <p>関数名を動的に生成する際には、いくつかの戦略があります：</p>
@@ -303,37 +201,37 @@ $(genBinaryFunction '(*) 5 3)
 
         <h2>3.2.3 高階関数の生成</h2>
         <p>Template Haskellを使って高階関数（他の関数を引数として受け取るか、関数を返す関数）を生成することもできます。これにより、より抽象的で再利用可能なコードパターンを実現できます。</p>
-        
+
         <h3>関数を引数に取る関数の生成</h3>
         <p>関数型のパラメータを持つ関数を生成します：</p>
-        
+
         <pre><code>-- mapTwice関数を生成（f関数を2回適用する）
 genMapTwice :: Q [Dec]
 genMapTwice = [d|
     mapTwice :: (a -> a) -> [a] -> [a]
     mapTwice f = map f . map f
     |]</code></pre>
-        
+
         <h3>関数を返す関数（カリー化関数）の生成</h3>
         <p>関数を返す関数（カリー化関数）を生成します：</p>
-        
+
         <pre><code>-- adder関数を生成（加算器を返す）
 genAdder :: Q [Dec]
 genAdder = [d|
     adder :: Int -> (Int -> Int)
     adder x = \y -> x + y
     |]</code></pre>
-        
+
         <h3>型パラメータを持つ多相関数の生成</h3>
         <p>多相的な型パラメータを持つ関数を生成します：</p>
-        
+
         <pre><code>-- 多相的なflip関数を生成
 genFlip :: Q [Dec]
 genFlip = [d|
     myFlip :: (a -> b -> c) -> b -> a -> c
     myFlip f x y = f y x
     |]</code></pre>
-        
+
         <div class="example">
             <h4>実用例：カスタム合成演算子の生成</h4>
             <pre><code>-- 合成演算子のファミリーを生成
@@ -365,12 +263,12 @@ $(genCompositionOperators)
 example1 = sum .:. zipWith (*) [1,2,3] [4,5,6]  -- 32
 example2 = length .::. filter (\x -> x > 0) . map (*2) $ [1,-2,3]  -- 2</code></pre>
         </div>
-        
+
         <h2>関数生成の応用テクニック</h2>
-        
+
         <h3>多数の類似関数の生成</h3>
         <p>特に便利なのは、類似した多数の関数を一度に生成する能力です：</p>
-        
+
         <pre><code>-- 指定された名前と演算子のリストから関数のセットを生成
 genOperatorFunctions :: [(String, Name)] -> Q [Dec]
 genOperatorFunctions opPairs = do
@@ -406,10 +304,10 @@ $(genOperatorFunctions [
 -- subtract :: Int -> Int -> Int
 -- subtract x y = x - y
 -- などなど</code></pre>
-        
+
         <h3>ユーティリティ関数のライブラリ</h3>
         <p>実際のプロジェクトでは、関数生成のためのユーティリティ関数ライブラリを作成すると便利です：</p>
-        
+
         <pre><code>-- よく使われる関数生成パターンのユーティリティライブラリ
 module FunctionGenerators where
 
@@ -438,14 +336,14 @@ $(genGetter ''Person 'name [t| String |])
 $(genSetter ''Person 'age [t| Int |])
 $(genPredicate ''Person 'age [| (> 18) |])
 $(genConverter ''Person ''PersonDTO)</code></pre>
-        
+
         <div class="warning">
             <p><strong>注意</strong>: 大量の関数を自動生成する場合、コンパイル時間が長くなる可能性があります。特に大規模なプロジェクトでは、必要な関数のみを生成するよう注意しましょう。また、生成された関数が多すぎると、ドキュメントやコードナビゲーションが難しくなる場合もあります。</p>
         </div>
-        
+
         <h2>まとめ</h2>
         <p>この章では、Template Haskellを使った関数生成の基本と応用テクニックについて学びました：</p>
-        
+
         <ul>
             <li>基本的な関数定義の生成方法</li>
             <li>型シグネチャの追加</li>
@@ -454,11 +352,11 @@ $(genConverter ''Person ''PersonDTO)</code></pre>
             <li>高階関数の生成</li>
             <li>多数の類似関数を効率的に生成する方法</li>
         </ul>
-        
+
         <p>関数生成は、Template Haskellの中でも特に実用的で強力な機能です。これを使いこなすことで、ボイラープレートコードを大幅に削減し、コードの保守性と一貫性を向上させることができます。</p>
-        
+
         <p>次のセクションでは、Template Haskellを使って型を生成する方法について詳しく見ていきます。</p>
-        
+
         <div class="nav-links">
             <a href="3.1_式の生成.html">前へ：3.1 式の生成</a>
             <a href="3.3_型の生成.html">次へ：3.3 型の生成</a>

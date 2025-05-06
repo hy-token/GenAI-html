@@ -1,39 +1,32 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2.1 基本的な構文と機能</title>
-</head>
 <body>
-    <div >
+    <div>
         <h1>2.1 基本的な構文と機能</h1>
 
         <h2>2.1.1 言語拡張の有効化</h2>
         <p>Template Haskellを使用するためには、まず適切な言語拡張を有効にする必要があります。言語拡張は、標準のHaskell言語に追加機能を提供するGHCの機能です。</p>
-        
+
         <p>Template Haskellを使用するために必要な主な言語拡張は以下の通りです：</p>
-        
+
         <pre><code>{-# LANGUAGE TemplateHaskell #-}</code></pre>
-        
+
         <p>この言語拡張を有効にすることで、Template Haskellのスプライス構文（<code>$(...)</code>）やクォート構文（<code>[|...|]</code>など）が使用可能になります。</p>
-        
+
         <p>また、Template Haskellと併用されることが多い関連言語拡張には以下のようなものがあります：</p>
-        
+
         <ul>
             <li><code>QuasiQuotes</code>: 準クォートを使用可能にします</li>
             <li><code>KindSignatures</code>: 明示的な種(kind)シグネチャを使用可能にします</li>
             <li><code>TypeFamilies</code>: 型族を定義できるようにします</li>
             <li><code>DataKinds</code>: データ型から種を生成できるようにします</li>
         </ul>
-        
-        <div >
+
+        <div>
             <p><strong>ノート</strong>: GHC 8.0以降では、多くの言語拡張をまとめて有効にするために <code>{-# LANGUAGE Haskell2010 #-}</code> を使用することもできます。ただし、Template Haskellなど一部の拡張は別途有効化する必要があります。</p>
         </div>
-        
+
         <h2>2.1.2 基本的なデータ型</h2>
         <p>Template Haskellを使用する際に理解すべき主要なデータ型は、抽象構文木（AST）を表現するためのものです。<code>Language.Haskell.TH</code>モジュールで定義されている主なデータ型は以下の通りです：</p>
-        
+
         <table>
             <thead>
                 <tr>
@@ -70,10 +63,10 @@
                 </tr>
             </tbody>
         </table>
-        
+
         <p>これらのデータ型は互いに関連しており、AST内での役割に応じて使い分けられます。</p>
-        
-        <div >
+
+        <div>
             <h4>コラム：Name の特殊性</h4>
             <p><code>Name</code>型は Template Haskell での変数や型名を表す特殊なデータ型です。名前の空間（変数名か型名か）と識別情報を持ちます。名前を参照する際には、シングルクォート（<code>'</code>）やダブルクォート（<code>''</code>）を使用して区別します：</p>
             <ul>
@@ -82,21 +75,21 @@
             </ul>
             <p>このような区別により、Template Haskellは名前の衝突を防止し、適切な名前空間で識別子を参照できます。</p>
         </div>
-        
+
         <p>これらの基本データ型に加えて、<code>Q</code>モナドも重要な概念です。<code>Q</code>はTemplate Haskellの「クォート」モナドであり、Template Haskell内でのコンテキストを提供します。</p>
-        
+
         <h2>2.1.3 モナディックな操作</h2>
         <p>Template Haskellでのコード生成は、<code>Q</code>モナドの中で行われます。<code>Q</code>モナドは以下のような機能を提供します：</p>
-        
+
         <ul>
             <li>一意な名前の生成</li>
             <li>エラー報告</li>
             <li>制限されたI/O操作</li>
             <li>モジュール情報へのアクセス</li>
         </ul>
-        
+
         <p><code>Q</code>モナドの基本的な操作には以下のようなものがあります：</p>
-        
+
         <pre><code>-- 新しい一意な名前を生成
 newName :: String -> Q Name
 
@@ -114,15 +107,15 @@ thisModule :: Q Module
 
 -- 現在のファイルの位置情報を取得
 location :: Q Loc</code></pre>
-        
+
         <p>これらの操作を組み合わせることで、複雑なコード生成や変換を実現できます。</p>
-        
-        <div >
+
+        <div>
             <p><strong>注意</strong>: <code>runIO</code>関数を使うとI/O操作が可能ですが、コンパイル時に実行されることに注意してください。ファイル読み込みなどの無害な操作にのみ使用し、副作用のある操作は避けるべきです。</p>
         </div>
-        
+
         <p>Template Haskellで一般的な操作のパターンは以下のようになります：</p>
-        
+
         <pre><code>-- 簡単なコード生成関数の例
 genFunction :: String -> Q [Dec]
 genFunction name = do
@@ -140,10 +133,10 @@ genFunction name = do
   
   -- 宣言のリストを返す
   return [typeSig, funDec]</code></pre>
-        
+
         <p>この例では、指定された名前の関数を生成しています。この関数は整数を受け取り、それを文字列に変換して返します。</p>
-        
-        <div >
+
+        <div>
             <h4>コラム：Template Haskellのデバッグ</h4>
             <p>Template Haskellのコードをデバッグするには、以下のGHCオプションが便利です：</p>
             <ul>
@@ -153,10 +146,10 @@ genFunction name = do
             </ul>
             <p>例えば、<code>ghc -ddump-splices MyFile.hs</code>とすると、<code>$(genFunction "myFunc")</code>がどのようなコードに展開されるか確認できます。</p>
         </div>
-        
+
         <h2>基本的な構文パターン</h2>
         <p>Template Haskellを使用する際の基本的な構文パターンは以下のようになります：</p>
-        
+
         <ol>
             <li><strong>インポート</strong>: Template Haskellの機能を使用するためのモジュールをインポートします。
                 <pre><code>import Language.Haskell.TH</code></pre>
@@ -169,22 +162,22 @@ makeGreeting name = ...</code></pre>
                 <pre><code>$(makeGreeting "hello")</code></pre>
             </li>
         </ol>
-        
+
         <p>これらの基本パターンを理解することで、Template Haskellのより高度な機能を使いこなすための基礎が身につきます。</p>
-        
+
         <h2>スコープと変数の扱い</h2>
         <p>Template Haskellでの変数のスコープと名前解決は、通常のHaskellとはやや異なる点に注意が必要です。Template Haskellのコードは、定義されているモジュールのスコープ内で実行されます。</p>
-        
+
         <p>変数を参照する主な方法は以下の通りです：</p>
-        
+
         <ul>
             <li><strong>ローカル変数</strong>: <code>Q</code>モナド内で<code>newName</code>を使って新しい変数を生成します。</li>
             <li><strong>既存の変数/関数</strong>: シングルクォート（<code>'</code>）を使って参照します（例：<code>'map</code>）。</li>
             <li><strong>既存の型</strong>: ダブルクォート（<code>''</code>）を使って参照します（例：<code>''Int</code>）。</li>
         </ul>
-        
+
         <p>例えば、以下のように変数を参照できます：</p>
-        
+
         <pre><code>-- 関数 map を参照
 mapExpr :: Q Exp
 mapExpr = varE 'map
@@ -192,14 +185,14 @@ mapExpr = varE 'map
 -- 型 Maybe を参照
 maybeType :: Q Type
 maybeType = conT ''Maybe</code></pre>
-        
-        <div >
+
+        <div>
             <p><strong>ノート</strong>: Template Haskellのコードはコンパイル時に実行されるため、実行時に定義される変数を参照することはできません。これは「ステージ制約」と呼ばれる制限です。</p>
         </div>
-        
+
         <p>以上が基本的な構文と機能の概要です。次のセクションでは、Template Haskellの中核的な機能である「スプライシング」について詳しく見ていきます。</p>
-        
-        <div >
+
+        <div>
             <a href="../chapter1/1.3_なぜTemplate_Haskellを学ぶべきか.html">前へ：1.3 なぜTemplate Haskellを学ぶべきか</a>
             <a href="chapter2.2_2.2_スプライシング.html">次へ：2.2 スプライシング</a>
         </div>

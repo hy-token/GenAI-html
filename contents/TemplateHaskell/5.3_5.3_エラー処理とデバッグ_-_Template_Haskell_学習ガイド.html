@@ -1,99 +1,27 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>5.3 エラー処理とデバッグ - Template Haskell 学習ガイド</title>
-    <link rel="stylesheet" href="../styles/main.css">
-</head>
 <body>
-    <header>
-        <h1>5.3 エラー処理とデバッグ - Template Haskell 学習ガイド</h1>
-    </header>
-    
-    <nav>
-        <a href="../chapter0_2_toc.html">目次</a>
-        <div>
-            <a href="5.2_複雑なマクロの作成.html">前へ</a>
-            <a href="5.4_GHCの拡張機能との連携.html">次へ</a>
-        </div>
-    </nav>
-    
-    <main>
-        <h1>5.3 エラー処理とデバッグ</h1>
-        
-        <p>Template Haskellは強力なメタプログラミングツールですが、コンパイル時に動作するという性質上、エラー処理とデバッグが特に重要になります。この章では、Template Haskellのコードにおけるエラー処理の方法と、効果的なデバッグ技術について説明します。</p>
+  <header>
+    <h1>5.3 エラー処理とデバッグ - Template Haskell 学習ガイド</h1>
+  </header>
 
-        <h2>Template Haskellにおけるエラー処理</h2>
-        
-        <p>Template Haskellのコードでエラーが発生した場合、コンパイル時にエラーメッセージが表示されます。ここでは、Template Haskellのコードで適切にエラーを処理する方法について説明します。</p>
-        
-        <h3>エラーの報告</h3>
-        
-        <p>Template Haskellでは、<code>reportError</code>、<code>reportWarning</code>、<code>fail</code>関数を使用してエラーや警告を報告できます。</p>
-        
-        <pre><code>-- 必要な拡張機能とインポート
+  <nav>
+    <a href="../chapter0_2_toc.html">目次</a>
+    <div>
+      <a href="5.2_複雑なマクロの作成.html">前へ</a>
+      <a href="5.4_GHCの拡張機能との連携.html">次へ</a>
+    </div>
+  </nav>
+
+  <main>
+    <h3>エラーメッセージの改善</h3>
+
+    <p>適切なエラーメッセージは、Template Haskellのコードをデバッグする上で非常に重要です。エラーメッセージは具体的で、問題の原因と解決策を明確に示すべきです。</p>
+
+    <pre><code>-- 必要な拡張機能とインポート
 {-# LANGUAGE TemplateHaskell #-}
 import Language.Haskell.TH
-
--- エラーを報告する例
-validateAndGenerate :: String -> Q Exp
-validateAndGenerate s = do
-  -- 入力の検証
-  if null s
-    then reportError "Empty string is not allowed" >> [| () |]
-    else if length s > 100
-      then reportWarning "String is too long, might cause performance issues" >> genExp s
-      else genExp s
-  where
-    genExp s = [| s ++ "!" |]
-    
--- 使用例
-result :: String
-result = $(validateAndGenerate "Hello")</code></pre>
-        
-        <p>この例では、空の文字列が渡された場合にエラーを報告し、長すぎる文字列が渡された場合に警告を報告しています。エラーの場合はダミーの式<code>() :: ()</code>を返していますが、コンパイルは失敗します。</p>
-        
-        <div class="note">
-            <h4>注意</h4>
-            <p><code>reportError</code>を呼び出してもQ型の値を返す必要があります。これは、GHCのエラー報告メカニズムがエラーの報告と式の評価を分離しているためです。また、エラーが報告されても、その後の処理は実行される可能性があります。</p>
-        </div>
-        
-        <h3>エラーの捕捉と処理</h3>
-        
-        <p>Template Haskellでは、<code>recover</code>関数を使用してエラーを捕捉し、代替のアクションを実行できます。</p>
-        
-        <pre><code>-- 必要な拡張機能とインポート
-{-# LANGUAGE TemplateHaskell #-}
-import Language.Haskell.TH
-
--- エラーを捕捉する例
-tryGenerate :: String -> Q Exp
-tryGenerate s = recover
-  (do
-    reportWarning $ "Failed to generate code for: " ++ s
-    [| "Default value" |])
-  (do
-    if null s
-      then fail "Empty string is not allowed"
-      else [| s ++ "!" |])
-    
--- 使用例
-result1 :: String
-result1 = $(tryGenerate "Hello")  -- "Hello!"に展開される
-
-result2 :: String
-result2 = $(tryGenerate "")  -- "Default value"に展開される</code></pre>
-        
-        <p>この例では、<code>recover</code>関数を使用して、エラーが発生した場合に代替のアクションを実行しています。空の文字列が渡された場合、エラーが発生しますが、<code>recover</code>によって捕捉され、デフォルト値が返されます。</p>
-        
-        <h3>エラーメッセージの改善</h3>
-        
-        <p>適切なエラーメッセージは、Template Haskellのコードをデバッグする上で非常に重要です。エラーメッセージは具体的で、問題の原因と解決策を明確に示すべきです。</p>
-        
-        <pre><code>-- 必要な拡張機能とインポート
-{-# LANGUAGE TemplateHaskell #-}
-import Language.Haskell.TH
+import Data.List (nub, (\\), intercalate)
+import Data.Char (isUpper)
+import Control.Monad (forM_, unless)
 
 -- 詳細なエラーメッセージの例
 generateEnum :: String -> [String] -> Q [Dec]
@@ -118,6 +46,306 @@ generateEnum typeName values = do
           reportError $ "Duplicate enum values: " ++ intercalate ", " duplicates
           
         -- ここで実際のコード生成
-        -- ...</code></pre>
-        
-        <p
+        -- ... コード生成のロジック ...
+        dataD (cxt []) (mkName typeName) [] Nothing
+          [normalC (mkName value) [] | value <- values]
+          [derivClause Nothing [conT ''Show, conT ''Eq]]
+          
+-- 使用例
+$(generateEnum "Color" ["Red", "Green", "Blue"])</code></pre>
+
+    <p>この例では、型名や列挙値に対して詳細な検証を行い、問題がある場合は具体的なエラーメッセージを報告しています。これにより、ユーザーは問題の原因を特定し、修正することが容易になります。</p>
+
+    <h2>Template Haskellのデバッグ技術</h2>
+
+    <p>Template Haskellのコードをデバッグするためのいくつかの技術を紹介します。</p>
+
+    <h3>1. スプライスのダンプ</h3>
+
+    <p>GHCの<code>-ddump-splices</code>オプションを使用すると、Template Haskellのスプライスが生成するコードを表示できます。</p>
+
+    <pre><code>$ ghc -ddump-splices MyFile.hs</code></pre>
+
+    <p>このオプションを使用すると、以下のような出力が得られます：</p>
+
+    <pre><code>MyFile.hs:10:12-24: Splicing expression
+    validateAndGenerate "Hello"
+  ======>
+    "Hello" ++ "!"</code></pre>
+
+    <p>より詳細な情報を得るには、<code>-dsuppress-module-prefixes</code>オプションと組み合わせるとよいでしょう：</p>
+
+    <pre><code>$ ghc -ddump-splices -dsuppress-module-prefixes MyFile.hs</code></pre>
+
+    <h3>2. デバッグ出力</h3>
+
+    <p>Template Haskellのコード内で<code>reportWarning</code>を使用して、デバッグ情報を出力できます。</p>
+
+    <pre><code>-- 必要な拡張機能とインポート
+{-# LANGUAGE TemplateHaskell #-}
+import Language.Haskell.TH
+
+-- デバッグ出力の例
+generateFunction :: String -> Q [Dec]
+generateFunction name = do
+  reportWarning $ "Generating function for: " ++ name
+  
+  -- 関数の型の作成
+  funTy <- [t| String -> String |]
+  reportWarning $ "Function type: " ++ pprint funTy
+  
+  -- 関数本体の作成
+  body <- [| \s -> s ++ " from " ++ $(stringE name) |]
+  reportWarning $ "Function body: " ++ pprint body
+  
+  -- 関数宣言の作成
+  func <- funD (mkName name)
+    [clause [] (normalB body) []]
+  
+  reportWarning $ "Generated function: " ++ pprint func
+  
+  return [func]
+  
+-- 使用例
+$(generateFunction "greet")</code></pre>
+
+    <p>この例では、関数生成の各ステップで<code>reportWarning</code>を使用してデバッグ情報を出力しています。<code>pprint</code>関数を使用すると、Template Haskellの内部表現を人間が読める形式で表示できます。</p>
+
+    <h3>3. 段階的な開発</h3>
+
+    <p>複雑なTemplate Haskellのコードを開発する際は、段階的なアプローチが有効です。最初に単純なケースのみをサポートし、それが正しく動作することを確認してから、徐々に機能を追加していきましょう。</p>
+
+    <pre><code>-- 段階的な開発の例
+
+-- ステップ1: 単純な関数生成
+genFuncStep1 :: String -> Q [Dec]
+genFuncStep1 name = do
+  body <- [| \s -> s ++ " from " ++ $(stringE name) |]
+  func <- funD (mkName name)
+    [clause [] (normalB body) []]
+  return [func]
+
+-- ステップ2: パラメータのサポートを追加
+genFuncStep2 :: String -> [String] -> Q [Dec]
+genFuncStep2 name params = do
+  paramVars <- mapM (newName . ('p':)) params
+  body <- [| \s -> s ++ " from " ++ $(stringE name) |]
+  func <- funD (mkName name)
+    [clause (map varP paramVars) (normalB body) []]
+  return [func]
+
+-- ステップ3: パラメータを関数本体で使用
+genFuncStep3 :: String -> [String] -> Q [Dec]
+genFuncStep3 name params = do
+  paramVars <- mapM (newName . ('p':)) params
+  let paramVarExps = map varE paramVars
+  body <- [| \s -> s ++ " from " ++ $(stringE name) ++ " with " ++ 
+              $(listE [|show $(varE p) ++ " " | p <- paramVars]) |]
+  func <- funD (mkName name)
+    [clause (map varP paramVars) (normalB body) []]
+  return [func]</code></pre>
+
+    <p>この例では、関数生成マクロを3つのステップに分けて開発しています。各ステップが正しく動作することを確認してから、次のステップに進むことで、デバッグが容易になります。</p>
+
+    <div class="warning">
+      <h4>警告</h4>
+      <p>段階的な開発を行う際は、各ステップが完全に独立していることを確認してください。依存関係があると、デバッグが複雑になる可能性があります。</p>
+    </div>
+
+    <h3>4. テスト駆動開発</h3>
+
+    <p>Template Haskellのコードでもテスト駆動開発（TDD）のアプローチが有効です。生成されるコードに対するテストを先に書き、それに合わせてTemplate Haskellのコードを開発しましょう。</p>
+
+    <pre><code>-- テスト駆動開発の例
+
+-- テストケース
+{-
+testGenerated :: Bool
+testGenerated = and
+  [ greet "World" == "World from greet"
+  , greetWith "Hello" "World" == "Hello from World with greetWith"
+  ]
+-}
+
+-- 実装
+genGreet :: Q [Dec]
+genGreet = do
+  -- greet関数の生成
+  greetFunc <- funD (mkName "greet")
+    [clause [varP (mkName "s")]
+      (normalB [| $(varE (mkName "s")) ++ " from greet" |]) []]
+  
+  -- greetWith関数の生成
+  greetWithFunc <- funD (mkName "greetWith")
+    [clause [varP (mkName "greeting"), varP (mkName "name")]
+      (normalB [| $(varE (mkName "greeting")) ++ " from " ++ 
+                $(varE (mkName "name")) ++ " with greetWith" |]) []]
+  
+  return [greetFunc, greetWithFunc]
+  
+-- 生成
+$(genGreet)</code></pre>
+
+    <p>この例では、最初にテストケースを（コメントとして）書き、それに合わせて<code>genGreet</code>マクロを実装しています。生成されたコードがテストに合格するかどうかを確認することで、マクロの正確性を検証できます。</p>
+
+    <h3>5. リフレクションの活用</h3>
+
+    <p>Template Haskellの<code>reify</code>関数を使用すると、既存の宣言に関する情報を取得できます。これを利用して、生成されたコードの構造を検証できます。</p>
+
+    <pre><code>-- 必要な拡張機能とインポート
+{-# LANGUAGE TemplateHaskell #-}
+import Language.Haskell.TH
+
+-- 宣言の検証
+verifyDeclaration :: Name -> Q Exp
+verifyDeclaration name = do
+  info <- reify name
+  case info of
+    VarI _ typ _ _ -> do
+      reportWarning $ "Function " ++ nameBase name ++ " has type: " ++ pprint typ
+      [| True |]
+    _ -> do
+      reportError $ nameBase name ++ " is not a function"
+      [| False |]
+      
+-- 使用例
+{-# LANGUAGE TemplateHaskell #-}
+module Main where
+
+import Language.Haskell.TH
+
+-- 関数定義
+greet :: String -> String
+greet s = s ++ " from greet"
+
+-- 検証
+result :: Bool
+result = $(verifyDeclaration 'greet)</code></pre>
+
+    <p>この例では、<code>reify</code>関数を使用して<code>greet</code>関数の情報を取得し、その型を検証しています。これにより、生成されたコードが期待通りの構造を持っているかを確認できます。</p>
+
+    <div class="column">
+      <h4>コラム: Template Haskellとコンパイルエラー</h4>
+      <p>Template Haskellのコードでエラーが発生した場合、GHCのエラーメッセージは通常のHaskellコードのエラーよりも複雑になる傾向があります。これは、エラーがコンパイル時コード生成の文脈で発生するためです。エラーメッセージを解読するには、まず、エラーがTemplate Haskellのコード自体のエラーなのか、生成されたコードのエラーなのかを特定することが重要です。<code>-ddump-splices</code>オプションを使用して生成されたコードを確認し、それがエラーの原因かどうかを調べましょう。また、複雑なTemplate Haskellのコードを開発する際は、細かいステップに分けて段階的に進めることで、エラーを容易に特定できます。</p>
+    </div>
+
+    <h2>実践的なエラー処理の例</h2>
+
+    <p>ここで、より実践的なエラー処理の例を示します。この例では、データ型からJSONエンコーダ/デコーダを生成するマクロを実装します。</p>
+
+    <pre><code>-- 必要な拡張機能とインポート
+{-# LANGUAGE TemplateHaskell #-}
+import Language.Haskell.TH
+import Control.Monad (forM, unless)
+import Data.List (nub)
+
+-- JSONエンコーダ/デコーダを生成するマクロ
+deriveJSON :: Name -> Q [Dec]
+deriveJSON name = do
+  info <- reify name
+  case info of
+    TyConI (DataD _ _ tyVars _ cons _) -> do
+      -- サポートされている型変数の数を検証
+      unless (length tyVars <= 1) $
+        reportError $ "Too many type variables for " ++ nameBase name ++ 
+                     ". Only 0 or 1 type variables are supported."
+      
+      -- コンストラクタの検証
+      case cons of
+        [] -> reportError $ "Data type " ++ nameBase name ++ " has no constructors"
+        [_] -> do
+          -- フィールドの検証
+          fields <- validateConstructor (head cons)
+          -- ToJSON インスタンスの生成
+          toJSONInst <- genToJSON name tyVars (head cons) fields
+          -- FromJSON インスタンスの生成
+          fromJSONInst <- genFromJSON name tyVars (head cons) fields
+          return $ toJSONInst ++ fromJSONInst
+        _ -> reportError $ "Data type " ++ nameBase name ++ 
+                         " has multiple constructors. Only single constructor data types are supported."
+    _ -> reportError $ nameBase name ++ " is not a data type"
+
+-- コンストラクタの検証
+validateConstructor :: Con -> Q [(Name, Type)]
+validateConstructor con = case con of
+  RecC _ fields -> do
+    -- フィールド名の重複チェック
+    let fieldNames = [nameBase n | (n, _, _) <- fields]
+        duplicates = fieldNames \\ nub fieldNames
+    unless (null duplicates) $
+      reportError $ "Duplicate field names: " ++ show duplicates
+    
+    -- フィールド型のチェック
+    forM fields $ \(fieldName, _, fieldType) -> do
+      -- サポートされている型のみ許可
+      unless (isSupportedType fieldType) $
+        reportError $ "Unsupported field type for " ++ nameBase fieldName ++ 
+                     ": " ++ pprint fieldType
+      return (fieldName, fieldType)
+  _ -> reportError "Only record constructors are supported"
+
+-- サポートされている型かどうかをチェック
+isSupportedType :: Type -> Bool
+isSupportedType ty = case ty of
+  ConT name -> nameBase name `elem` ["Int", "Integer", "Float", "Double", "Bool", "Char", "String", "Text"]
+  AppT ListT innerTy -> isSupportedType innerTy
+  AppT (AppT (ConT name) keyTy) valueTy 
+    | nameBase name == "Map" -> isSupportedType keyTy && isSupportedType valueTy
+  _ -> False
+
+-- ToJSON インスタンスの生成
+genToJSON :: Name -> [TyVarBndr] -> Con -> [(Name, Type)] -> Q [Dec]
+genToJSON name tyVars con fields = do
+  -- 実装は省略
+  [d|instance ToJSON $(conT name) where toJSON _ = object []|]
+
+-- FromJSON インスタンスの生成
+genFromJSON :: Name -> [TyVarBndr] -> Con -> [(Name, Type)] -> Q [Dec]
+genFromJSON name tyVars con fields = do
+  -- 実装は省略
+  [d|instance FromJSON $(conT name) where parseJSON _ = pure undefined|]
+
+-- 使用例
+data Person = Person
+  { personName :: String
+  , personAge :: Int
+  } deriving Show
+
+$(deriveJSON ''Person)</code></pre>
+
+    <p>この例では、データ型からJSONエンコーダ/デコーダを生成するマクロを実装しています。マクロは以下の点を検証しています：</p>
+
+    <ul>
+      <li>データ型の型変数の数</li>
+      <li>コンストラクタの数</li>
+      <li>フィールド名の重複</li>
+      <li>フィールド型のサポート状況</li>
+    </ul>
+
+    <p>これらの検証により、サポートされていない構造のデータ型に対してマクロが使用された場合に、明確なエラーメッセージが提供されます。</p>
+
+    <h2>まとめ</h2>
+
+    <p>Template Haskellのコードにおけるエラー処理とデバッグは、コードの品質と保守性を向上させるために重要です。この章では、以下の点について説明しました：</p>
+
+    <ul>
+      <li>エラーの報告: <code>reportError</code>、<code>reportWarning</code>、<code>fail</code>関数の使用</li>
+      <li>エラーの捕捉: <code>recover</code>関数の使用</li>
+      <li>エラーメッセージの改善: 具体的で有用なエラーメッセージの提供</li>
+      <li>デバッグ技術: スプライスのダンプ、デバッグ出力、段階的な開発、テスト駆動開発、リフレクションの活用</li>
+      <li>実践的なエラー処理の例: データ型からJSONエンコーダ/デコーダを生成するマクロの実装</li>
+    </ul>
+
+    <p>これらの技術を適切に組み合わせることで、Template Haskellのコードの品質が向上し、デバッグが容易になります。特に、複雑なマクロを開発する際は、段階的なアプローチと充実したエラー処理が重要です。</p>
+
+    <div class="nav-links">
+      <a href="5.2_複雑なマクロの作成.html">← 前のページ</a>
+      <a href="../chapter0_2_toc.html">目次</a>
+      <a href="5.4_GHCの拡張機能との連携.html">次のページ →</a>
+    </div>
+  </main>
+
+  <footer>
+    <p>© 2025 Template Haskell 学習ガイド</p>
+  </footer>
+</body>

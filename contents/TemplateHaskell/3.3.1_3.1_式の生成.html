@@ -1,124 +1,22 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3.1 式の生成</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.1.0/github-markdown.min.css">
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-            line-height: 1.6;
-            color: #24292e;
-            max-width: 980px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-        .container {
-            background-color: #fff;
-            border: 1px solid #e1e4e8;
-            border-radius: 6px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-        }
-        h1, h2, h3 {
-            border-bottom: 1px solid #eaecef;
-            padding-bottom: 0.3em;
-        }
-        code {
-            font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
-            background-color: rgba(27, 31, 35, 0.05);
-            padding: 0.2em 0.4em;
-            border-radius: 3px;
-            font-size: 85%;
-        }
-        pre {
-            background-color: #f6f8fa;
-            border-radius: 3px;
-            padding: 16px;
-            overflow: auto;
-            line-height: 1.45;
-        }
-        pre code {
-            background-color: transparent;
-            padding: 0;
-        }
-        .column {
-            border: 1px solid #dfe2e5;
-            background-color: #f8f9fa;
-            border-radius: 6px;
-            padding: 1rem;
-            margin: 1.5rem 0;
-        }
-        .column h4 {
-            margin-top: 0;
-            color: #0366d6;
-        }
-        .nav-links {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 2rem;
-            padding-top: 1rem;
-            border-top: 1px solid #eaecef;
-        }
-        .nav-links a {
-            color: #0366d6;
-            text-decoration: none;
-        }
-        .nav-links a:hover {
-            text-decoration: underline;
-        }
-        .note {
-            background-color: #e7f7fe;
-            border-left: 4px solid #1976d2;
-            padding: 1rem;
-            margin: 1rem 0;
-        }
-        .warning {
-            background-color: #fff8e1;
-            border-left: 4px solid #ffa000;
-            padding: 1rem;
-            margin: 1rem 0;
-        }
-        .example {
-            background-color: #f1f8e9;
-            border-left: 4px solid #7cb342;
-            padding: 1rem;
-            margin: 1rem 0;
-        }
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            margin: 1rem 0;
-        }
-        th, td {
-            border: 1px solid #dfe2e5;
-            padding: 8px 12px;
-        }
-        th {
-            background-color: #f6f8fa;
-        }
-    </style>
-</head>
 <body>
     <div class="container">
         <h1>3.1 式の生成</h1>
 
         <h2>3.1.1 リテラルからの式生成</h2>
         <p>Template Haskellにおける<strong>式の生成</strong>は、メタプログラミングの基本的かつ重要な側面です。式（Expression）はHaskellプログラムの最も基本的な構成要素の一つであり、値を計算するためのコードを表します。</p>
-        
+
         <p>式の生成を学ぶ最初のステップは、<strong>リテラル</strong>からの式生成です。リテラルとは、数値、文字列、文字、真偽値などのプログラム中に直接記述される値のことです。</p>
-        
+
         <p>Template Haskellでリテラルから式を生成するには、主に二つの方法があります：</p>
-        
+
         <ol>
             <li>クォート構文 <code>[| ... |]</code> を使用する方法</li>
             <li><code>Exp</code> データ型のコンストラクタを直接使用する方法</li>
         </ol>
-        
+
         <h3>クォート構文を使用した方法</h3>
         <p>クォート構文は、リテラルから式を生成する最も簡単で直感的な方法です：</p>
-        
+
         <pre><code>-- 数値リテラル
 intExpr :: Q Exp
 intExpr = [| 42 |]
@@ -138,10 +36,10 @@ doubleExpr = [| 3.14159 |]
 -- 文字リテラル
 charExpr :: Q Exp
 charExpr = [| 'a' |]</code></pre>
-        
+
         <h3>コンストラクタを直接使用した方法</h3>
         <p>より詳細な制御が必要な場合や、動的に値を構築する場合は、<code>Exp</code> データ型のコンストラクタを直接使用します：</p>
-        
+
         <pre><code>-- 数値リテラル
 intExpr' :: Q Exp
 intExpr' = return $ LitE $ IntegerL 42
@@ -161,9 +59,9 @@ doubleExpr' = return $ LitE $ RationalL $ toRational 3.14159
 -- 文字リテラル
 charExpr' :: Q Exp
 charExpr' = return $ LitE $ CharL 'a'</code></pre>
-        
+
         <p>以下の表に、主なリテラルタイプとそれらの構築方法をまとめます：</p>
-        
+
         <table>
             <thead>
                 <tr>
@@ -200,7 +98,7 @@ charExpr' = return $ LitE $ CharL 'a'</code></pre>
                 </tr>
             </tbody>
         </table>
-        
+
         <div class="column">
             <h4>コラム：lift関数の活用</h4>
             <p>リテラルを式に変換する別の方法として、<code>lift</code>関数を使用する方法があります。<code>Lift</code>型クラスのインスタンスである型に対して使用できます：</p>
@@ -217,10 +115,10 @@ liftedStringExpr = lift "Hello, Template Haskell"</code></pre>
 
         <h2>3.1.2 変数と参照</h2>
         <p>式の生成において、変数の参照は非常に重要な要素です。Template Haskellでは、変数を参照するためのいくつかの方法があります。</p>
-        
+
         <h3>既存の変数の参照</h3>
         <p>既に定義されている変数を参照するには、シングルクォート <code>'</code> を使用してその名前を指定します：</p>
-        
+
         <pre><code>-- mapを参照する式
 mapExpr :: Q Exp
 mapExpr = return $ VarE 'map
@@ -228,9 +126,9 @@ mapExpr = return $ VarE 'map
 -- (+)を参照する式
 plusExpr :: Q Exp
 plusExpr = return $ VarE '(+)</code></pre>
-        
+
         <p>クォート構文を使用した方が簡潔に書けることも多いです：</p>
-        
+
         <pre><code>-- mapを参照する式（クォート構文）
 mapExpr' :: Q Exp
 mapExpr' = [| map |]
@@ -238,37 +136,37 @@ mapExpr' = [| map |]
 -- (+)を参照する式（クォート構文）
 plusExpr' :: Q Exp
 plusExpr' = [| (+) |]</code></pre>
-        
+
         <h3>新しい変数の生成</h3>
         <p>新しい変数名を生成するには、<code>newName</code>関数を使用します：</p>
-        
+
         <pre><code>-- 新しい変数名 "x" を生成
 genVarExpr :: Q Exp
 genVarExpr = do
     name <- newName "x"  -- "x"をベースにした一意な名前を生成
     return $ VarE name   -- その名前を参照する式を返す</code></pre>
-        
+
         <p><code>newName</code>は与えられた名前をベースに一意な名前を生成します。これは、変数の衝突を避けるために重要です。</p>
-        
+
         <h3>ラムダ抽象での変数参照</h3>
         <p>ラムダ式（無名関数）を生成する場合、パラメータとして変数を導入します：</p>
-        
+
         <pre><code>-- \x -> x + 1 のようなラムダ式を生成
 genLambda :: Q Exp
 genLambda = do
     x <- newName "x"
     return $ LamE [VarP x] $ InfixE (Just $ VarE x) (VarE '(+)) (Just $ LitE $ IntegerL 1)</code></pre>
-        
+
         <p>クォート構文を使用すると、より直感的に書くことができます：</p>
-        
+
         <pre><code>-- \x -> x + 1 のようなラムダ式を生成（クォート構文）
 genLambda' :: Q Exp
 genLambda' = [| \x -> x + 1 |]</code></pre>
-        
+
         <div class="note">
             <p><strong>ノート</strong>: Template Haskellでは、ステージ制約により、生成されるコード内で参照できる変数には制限があります。現在のステージで定義されている変数のみを参照でき、まだ定義されていない変数や、別のコンパイル段階の変数は参照できません。</p>
         </div>
-        
+
         <div class="example">
             <h4>変数の参照と束縛の実用例</h4>
             <pre><code>-- 与えられた関数を2回適用する高階関数を生成
@@ -286,10 +184,10 @@ twice f x = f (f x)</code></pre>
 
         <h2>3.1.3 複雑な式の構築</h2>
         <p>より複雑な式を構築するためには、基本的な式を組み合わせる方法を理解する必要があります。以下では、よく使われる式の構築パターンを紹介します。</p>
-        
+
         <h3>関数適用</h3>
         <p>関数適用（function application）は、関数に引数を渡す操作です：</p>
-        
+
         <pre><code>-- map (+1) [1,2,3] という式を生成
 genMapExpr :: Q Exp
 genMapExpr = do
@@ -302,10 +200,10 @@ genMapExpr = do
 -- クォート構文を使用するとはるかに簡潔
 genMapExpr' :: Q Exp
 genMapExpr' = [| map (+1) [1,2,3] |]</code></pre>
-        
+
         <h3>条件式（if-then-else）</h3>
         <p>条件式を生成するには、<code>CondE</code>コンストラクタを使用します：</p>
-        
+
         <pre><code>-- if x > 0 then "positive" else "non-positive" という式を生成
 genCondExpr :: Name -> Q Exp
 genCondExpr x = do
@@ -319,10 +217,10 @@ genCondExpr' :: Name -> Q Exp
 genCondExpr' x = [| if $(return $ VarE x) > 0 
                      then "positive" 
                      else "non-positive" |]</code></pre>
-        
+
         <h3>let式とwhere句</h3>
         <p>ローカル変数を定義するには、<code>LetE</code>コンストラクタを使用します：</p>
-        
+
         <pre><code>-- let y = x * 2 in y + 1 という式を生成
 genLetExpr :: Name -> Q Exp
 genLetExpr x = do
@@ -336,10 +234,10 @@ genLetExpr x = do
 -- クォート構文を使用した方がシンプル
 genLetExpr' :: Name -> Q Exp
 genLetExpr' x = [| let y = $(return $ VarE x) * 2 in y + 1 |]</code></pre>
-        
+
         <h3>ケース式</h3>
         <p>パターンマッチングのためのケース式を生成するには、<code>CaseE</code>コンストラクタを使用します：</p>
-        
+
         <pre><code>-- case xs of [] -> 0; (x:_) -> x という式を生成
 genCaseExpr :: Name -> Q Exp
 genCaseExpr xs = do
@@ -356,14 +254,14 @@ genCaseExpr' :: Name -> Q Exp
 genCaseExpr' xs = [| case $(return $ VarE xs) of
                        [] -> 0
                        (x:_) -> x |]</code></pre>
-        
+
         <div class="warning">
             <p><strong>注意</strong>: 複雑な式の構築では、クォート構文を活用すると、コードが格段に読みやすくなります。直接コンストラクタを使用する方法は、クォート構文では表現できない特殊なケースや、動的にコードを構築する必要がある場合に役立ちます。</p>
         </div>
-        
+
         <h3>do記法</h3>
         <p>モナド計算のためのdo記法を生成するには、<code>DoE</code>コンストラクタを使用します：</p>
-        
+
         <pre><code>-- do { x <- getLine; putStrLn ("Hello, " ++ x) } という式を生成
 genDoExpr :: Q Exp
 genDoExpr = do
@@ -381,12 +279,12 @@ genDoExpr' = [| do
                  x <- getLine
                  putStrLn ("Hello, " ++ x)
                |]</code></pre>
-        </div>
-        
-        <h3>リスト内包表記</h3>
-        <p>リスト内包表記を生成するには、<code>CompE</code>コンストラクタを使用します：</p>
-        
-        <pre><code>-- [x * 2 | x <- [1..10], x `mod` 2 == 0] という式を生成
+    </div>
+
+    <h3>リスト内包表記</h3>
+    <p>リスト内包表記を生成するには、<code>CompE</code>コンストラクタを使用します：</p>
+
+    <pre><code>-- [x * 2 | x <- [1..10], x `mod` 2 == 0] という式を生成
 genCompExpr :: Q Exp
 genCompExpr = do
     x <- newName "x"
@@ -400,11 +298,11 @@ genCompExpr = do
 -- クォート構文を使用
 genCompExpr' :: Q Exp
 genCompExpr' = [| [x * 2 | x <- [1..10], x `mod` 2 == 0] |]</code></pre>
-        
-        <div class="column">
-            <h4>コラム：構文木の視覚化</h4>
-            <p>Template Haskellで生成された式の構造を理解するのに役立つテクニックとして、<code>pprint</code>関数を使用して構文木を視覚化する方法があります：</p>
-            <pre><code>import Language.Haskell.TH.Ppr (pprint)
+
+    <div class="column">
+        <h4>コラム：構文木の視覚化</h4>
+        <p>Template Haskellで生成された式の構造を理解するのに役立つテクニックとして、<code>pprint</code>関数を使用して構文木を視覚化する方法があります：</p>
+        <pre><code>import Language.Haskell.TH.Ppr (pprint)
 
 -- 式の構文木を文字列として表示
 printExprAST :: Q Exp -> Q Exp
@@ -416,27 +314,27 @@ printExprAST qexp = do
 -- 使用例
 main :: IO ()
 main = $(printExprAST [| 1 + 2 * 3 |])</code></pre>
-            <p>これにより、生成された式のAST構造を確認でき、デバッグや学習に役立ちます。</p>
-        </div>
-        
-        <h2>複雑な式の構築テクニック</h2>
-        <p>実際のTemplate Haskellプログラミングでは、以下のようなテクニックが役立ちます：</p>
-        
-        <h3>1. クォートとスプライスの組み合わせ</h3>
-        <p>クォートの中でスプライスを使用すると、動的に式の一部を構築できます：</p>
-        
-        <pre><code>-- 任意の演算子で二つの値を結合する式を生成
+        <p>これにより、生成された式のAST構造を確認でき、デバッグや学習に役立ちます。</p>
+    </div>
+
+    <h2>複雑な式の構築テクニック</h2>
+    <p>実際のTemplate Haskellプログラミングでは、以下のようなテクニックが役立ちます：</p>
+
+    <h3>1. クォートとスプライスの組み合わせ</h3>
+    <p>クォートの中でスプライスを使用すると、動的に式の一部を構築できます：</p>
+
+    <pre><code>-- 任意の演算子で二つの値を結合する式を生成
 genBinaryOp :: Name -> Int -> Int -> Q Exp
 genBinaryOp op x y = [| $(return $ VarE op) $(lift x) $(lift y) |]
 
 -- 使用例
 exampleAdd = $(genBinaryOp '(+) 5 3)  -- 8
 exampleMul = $(genBinaryOp '(*) 5 3)  -- 15</code></pre>
-        
-        <h3>2. クォートとパターンマッチの組み合わせ</h3>
-        <p>クォートを使ってパターンマッチから式を構築することもできます：</p>
-        
-        <pre><code>-- 式を受け取り、その式が定数かどうかを判定する関数を生成
+
+    <h3>2. クォートとパターンマッチの組み合わせ</h3>
+    <p>クォートを使ってパターンマッチから式を構築することもできます：</p>
+
+    <pre><code>-- 式を受け取り、その式が定数かどうかを判定する関数を生成
 genIsConstant :: Q Exp -> Q Exp
 genIsConstant qexp = do
     exp <- qexp
@@ -448,21 +346,21 @@ genIsConstant qexp = do
 -- 使用例
 isConst1 = $(genIsConstant [| 42 |])  -- True
 isConst2 = $(genIsConstant [| x |])   -- False</code></pre>
-        
-        <h3>3. 再帰的な式の構築</h3>
-        <p>再帰を使用して、パターンに基づいて式を生成できます：</p>
-        
-        <pre><code>-- 整数のリストから和を計算する式を生成
+
+    <h3>3. 再帰的な式の構築</h3>
+    <p>再帰を使用して、パターンに基づいて式を生成できます：</p>
+
+    <pre><code>-- 整数のリストから和を計算する式を生成
 genSum :: [Int] -> Q Exp
 genSum [] = [| 0 |]
 genSum (x:xs) = [| $(lift x) + $(genSum xs) |]
 
 -- 使用例
 example = $(genSum [1, 2, 3, 4, 5])  -- 1 + 2 + 3 + 4 + 5 + 0 = 15</code></pre>
-        
-        <div class="example">
-            <h4>実用的な例：SQLクエリビルダー</h4>
-            <pre><code>-- シンプルなSQLクエリビルダー
+
+    <div class="example">
+        <h4>実用的な例：SQLクエリビルダー</h4>
+        <pre><code>-- シンプルなSQLクエリビルダー
 data SQLQuery = Select String | Where SQLQuery String | OrderBy SQLQuery String
 
 -- SQLQueryからTemplate Haskellの式を生成
@@ -478,24 +376,24 @@ genSQLExpr (OrderBy query column) =
 query = OrderBy (Where (Select "users") "age > 18") "name"
 sql = $(genSQLExpr query)
 -- "SELECT * FROM users WHERE age > 18 ORDER BY name"</code></pre>
-        </div>
-        
-        <h2>まとめと次のステップ</h2>
-        <p>この章では、Template Haskellを使った式の生成の基本を学びました：</p>
-        
-        <ul>
-            <li>リテラルからの式生成</li>
-            <li>変数の参照と新しい変数の導入</li>
-            <li>複雑な式（関数適用、条件式、ケース式など）の構築</li>
-            <li>クォート構文とコンストラクタの直接使用の使い分け</li>
-            <li>複雑な式を構築するための実用的なテクニック</li>
-        </ul>
-        
-        <p>式の生成は、Template Haskellによるコード生成の基礎です。これらの技術を習得することで、関数の生成や型の生成など、より高度なコード生成テクニックへと進むことができます。</p>
-        
-        <p>次のセクションでは、関数定義を生成する方法について詳しく見ていきます。</p>
-        
-        <div class="nav-links">
-            <a href="../chapter2/2.4_準クォート.html">前へ：2.4 準クォート</a>
-            <a href="3.2_関数の生成.html">次へ：3.2 関数の生成</a>
-        </div>
+    </div>
+
+    <h2>まとめと次のステップ</h2>
+    <p>この章では、Template Haskellを使った式の生成の基本を学びました：</p>
+
+    <ul>
+        <li>リテラルからの式生成</li>
+        <li>変数の参照と新しい変数の導入</li>
+        <li>複雑な式（関数適用、条件式、ケース式など）の構築</li>
+        <li>クォート構文とコンストラクタの直接使用の使い分け</li>
+        <li>複雑な式を構築するための実用的なテクニック</li>
+    </ul>
+
+    <p>式の生成は、Template Haskellによるコード生成の基礎です。これらの技術を習得することで、関数の生成や型の生成など、より高度なコード生成テクニックへと進むことができます。</p>
+
+    <p>次のセクションでは、関数定義を生成する方法について詳しく見ていきます。</p>
+
+    <div class="nav-links">
+        <a href="../chapter2/2.4_準クォート.html">前へ：2.4 準クォート</a>
+        <a href="3.2_関数の生成.html">次へ：3.2 関数の生成</a>
+    </div>

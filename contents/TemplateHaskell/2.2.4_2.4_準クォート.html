@@ -1,128 +1,34 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2.4 準クォート</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.1.0/github-markdown.min.css">
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-            line-height: 1.6;
-            color: #24292e;
-            max-width: 980px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-        .container {
-            background-color: #fff;
-            border: 1px solid #e1e4e8;
-            border-radius: 6px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-        }
-        h1, h2, h3 {
-            border-bottom: 1px solid #eaecef;
-            padding-bottom: 0.3em;
-        }
-        code {
-            font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
-            background-color: rgba(27, 31, 35, 0.05);
-            padding: 0.2em 0.4em;
-            border-radius: 3px;
-            font-size: 85%;
-        }
-        pre {
-            background-color: #f6f8fa;
-            border-radius: 3px;
-            padding: 16px;
-            overflow: auto;
-            line-height: 1.45;
-        }
-        pre code {
-            background-color: transparent;
-            padding: 0;
-        }
-        .column {
-            border: 1px solid #dfe2e5;
-            background-color: #f8f9fa;
-            border-radius: 6px;
-            padding: 1rem;
-            margin: 1.5rem 0;
-        }
-        .column h4 {
-            margin-top: 0;
-            color: #0366d6;
-        }
-        .nav-links {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 2rem;
-            padding-top: 1rem;
-            border-top: 1px solid #eaecef;
-        }
-        .nav-links a {
-            color: #0366d6;
-            text-decoration: none;
-        }
-        .nav-links a:hover {
-            text-decoration: underline;
-        }
-        .note {
-            background-color: #e7f7fe;
-            border-left: 4px solid #1976d2;
-            padding: 1rem;
-            margin: 1rem 0;
-        }
-        .warning {
-            background-color: #fff8e1;
-            border-left: 4px solid #ffa000;
-            padding: 1rem;
-            margin: 1rem 0;
-        }
-        .example {
-            background-color: #f1f8e9;
-            border-left: 4px solid #7cb342;
-            padding: 1rem;
-            margin: 1rem 0;
-        }
-        .diagram {
-            margin: 1.5rem 0;
-            text-align: center;
-        }
-    </style>
-</head>
 <body>
     <div class="container">
         <h1>2.4 準クォート</h1>
 
         <h2>2.4.1 準クォートの基本</h2>
         <p><strong>準クォート</strong>（Quasi-quotes）は、Template Haskellの機能を拡張し、カスタム構文パーサーを定義して使用するための仕組みです。準クォートを使うと、Haskell以外の構文やドメイン特化言語（DSL）をHaskellプログラム内に直接埋め込むことができます。</p>
-        
+
         <p>準クォートは以下のような構文で記述します：</p>
-        
+
         <pre><code>[quasiquoter|content|]</code></pre>
-        
+
         <p>ここで <code>quasiquoter</code> は準クォーターの名前であり、<code>content</code> はそのパーサーによって処理される任意のテキスト内容です。</p>
-        
+
         <p>準クォートの主な利点は以下の通りです：</p>
-        
+
         <ul>
             <li>特定のドメインに特化した言語や構文を直接Haskellに埋め込める</li>
             <li>複雑なデータ構造をより読みやすく記述できる</li>
             <li>外部ファイルフォーマットやDSLとのインテグレーションが容易になる</li>
             <li>コンパイル時にエラーチェックと検証が可能</li>
         </ul>
-        
+
         <p>Haskellエコシステムには、以下のような様々な準クォーターが用意されています：</p>
-        
+
         <ul>
             <li><code>sql</code>: SQL文をHaskellに埋め込むための準クォーター</li>
             <li><code>json</code>: JSON値を直接記述するための準クォーター</li>
             <li><code>regex</code>: 正規表現パターンを記述するための準クォーター</li>
             <li><code>html</code>, <code>xml</code>: HTMLやXMLを直接埋め込むための準クォーター</li>
         </ul>
-        
+
         <div class="example">
             <h4>準クォートの基本的な例</h4>
             <pre><code>-- 'interpolatedstring-qq' パッケージを使った文字列補間の例
@@ -135,33 +41,33 @@ greeting name = [q|Hello, {name}! Welcome to Template Haskell.|]
 main :: IO ()
 main = putStrLn $ greeting "Alice"  -- "Hello, Alice! Welcome to Template Haskell."</code></pre>
         </div>
-        
+
         <p>上記の例では、<code>q</code>という準クォーターを使用して、変数<code>name</code>を含む文字列テンプレートを定義しています。<code>{name}</code>の部分は、<code>name</code>変数の値に置き換えられます。</p>
-        
+
         <div class="note">
             <p><strong>ノート</strong>: 準クォートを使用するには、<code>QuasiQuotes</code>言語拡張を有効にする必要があります。<code>{-# LANGUAGE QuasiQuotes #-}</code>をモジュールの先頭に記述してください。</p>
         </div>
 
         <h2>2.4.2 カスタム準クォートの定義</h2>
         <p>カスタムの準クォートを定義するには、<code>Language.Haskell.TH.Quote</code>モジュールの<code>QuasiQuoter</code>データ型を使用します。</p>
-        
+
         <pre><code>data QuasiQuoter = QuasiQuoter
   { quoteExp  :: String -> Q Exp
   , quotePat  :: String -> Q Pat
   , quoteType :: String -> Q Type
   , quoteDec  :: String -> Q [Dec]
   }</code></pre>
-        
+
         <p><code>QuasiQuoter</code>は、準クォート内のテキストを異なる文脈（式、パターン、型、宣言）でどのように解釈するかを定義する4つの関数を持ちます。すべての関数を実装する必要はなく、使用しない関数には<code>error</code>を設定することができます。</p>
-        
+
         <p>以下は、カスタム準クォートを定義する基本的な手順です：</p>
-        
+
         <ol>
             <li>テキストを解析するパーサーを作成（<code>parsec</code>や<code>megaparsec</code>などのパーサーライブラリを使用）</li>
             <li>パース結果を適切なTemplate Haskell AST（抽象構文木）に変換</li>
             <li><code>QuasiQuoter</code>を構築して、パーサーと変換ロジックを組み合わせる</li>
         </ol>
-        
+
         <div class="example">
             <h4>簡単なCSV準クォートの定義</h4>
             <pre><code>{-# LANGUAGE QuasiQuotes #-}
@@ -197,9 +103,9 @@ x,y,z
 |]
 -- 出力: [["a","b","c"],["1","2","3"],["x","y","z"]]</code></pre>
         </div>
-        
+
         <p>上記の例では、CSVテキストを解析して二次元文字列リストに変換する簡単な準クォートを定義しています。この準クォートは式の文脈でのみ使用可能です。</p>
-        
+
         <div class="column">
             <h4>コラム：準クォートとパース失敗</h4>
             <p>準クォートの重要な特徴は、コンパイル時にパースエラーを検出できることです。パーサーが失敗すると、GHCはコンパイルエラーとしてその問題を報告します。これにより、実行時ではなくコンパイル時に問題を発見することができます。</p>
@@ -212,17 +118,17 @@ myParser s = case parseMyLanguage s of
 
         <h2>2.4.3 準クォートとパーサーの連携</h2>
         <p>準クォートを効果的に活用するには、高品質なパーサーとの連携が重要です。Haskellには多くのパーサーライブラリが用意されており、その中でも<code>parsec</code>や<code>megaparsec</code>が準クォートとの相性が良いです。</p>
-        
+
         <p>パーサーと準クォートの一般的な連携パターンは以下の通りです：</p>
-        
+
         <div class="diagram">
             <pre>
 入力テキスト → パーサー → 中間表現 → Template Haskell AST変換 → コンパイルされたコード
             </pre>
         </div>
-        
+
         <p>このパターンに従って、より複雑な例を見てみましょう：</p>
-        
+
         <div class="example">
             <h4>JSON準クォートの例（簡略化）</h4>
             <pre><code>{-# LANGUAGE QuasiQuotes #-}
@@ -277,15 +183,15 @@ config = [json|
 }
 |]</code></pre>
         </div>
-        
+
         <p>上記の例では、JSONテキストをAesonライブラリを使ってパースし、その結果をTemplate Haskellの式に変換する準クォートを定義しています。これにより、Haskellコード内に直接JSONを埋め込むことができます。</p>
-        
+
         <h2>準クォートの実用的なユースケース</h2>
         <p>準クォートは様々な実用的なシナリオで活用されています：</p>
-        
+
         <h3>1. DSL（ドメイン特化言語）の埋め込み</h3>
         <p>特定のドメインに特化した言語をHaskellに埋め込むことができます：</p>
-        
+
         <pre><code>-- SQLクエリの埋め込み（persistent-questライブラリの例）
 users <- runDB [sql|
     SELECT * FROM users 
@@ -295,10 +201,10 @@ users <- runDB [sql|
 
 -- 正規表現の埋め込み（regex-tdfa-textライブラリの例）
 let emailPattern = [re|^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$|]</code></pre>
-        
+
         <h3>2. 構造化データの記述</h3>
         <p>複雑なデータ構造をより読みやすく記述できます：</p>
-        
+
         <pre><code>-- HTMLの埋め込み（hamlet準クォート）
 myPage = [hamlet|
 &lt;div .container&gt;
@@ -316,10 +222,10 @@ logging:
   level: info
   file: /var/log/app.log
 |]</code></pre>
-        
+
         <h3>3. コード生成とメタプログラミング</h3>
         <p>外部ソースからコードを生成する強力な手段を提供します：</p>
-        
+
         <pre><code>-- スキーマからデータ型を生成
 $(generateTypes [schema|
 Person:
@@ -332,21 +238,21 @@ Post:
   content: Text
   author: Person
 |])</code></pre>
-        
+
         <h3>4. テンプレートエンジン</h3>
         <p>テキストテンプレートを効率的に記述できます：</p>
-        
+
         <pre><code>-- 文字列補間（text-interpolationライブラリの例）
 let greeting name = [i|Hello, ${name}! Today is ${currentDate}.|]</code></pre>
-        
+
         <div class="column">
             <h4>コラム：準クォートとアンチクォート</h4>
             <p>準クォート内で変数や式を参照する仕組みを「アンチクォート」と呼びます。アンチクォートの構文は準クォーターによって異なりますが、一般的には <code>${...}</code>、<code>#{...}</code>、<code>@{...}</code> などの形式が使われます。</p>
             <p>アンチクォートを使うと、準クォート内でHaskellの変数や式を参照できるため、動的なコンテンツを生成する際に特に有用です。</p>
         </div>
-        
+
         <h2>準クォートの利点と注意点</h2>
-        
+
         <h3>利点</h3>
         <ul>
             <li><strong>読みやすさの向上</strong>: ドメイン特化言語を直接埋め込むことで、コードの意図がより明確になります。</li>
@@ -354,7 +260,7 @@ let greeting name = [i|Hello, ${name}! Today is ${currentDate}.|]</code></pre>
             <li><strong>抽象化</strong>: 複雑な操作や構造を簡潔に表現できます。</li>
             <li><strong>保守性</strong>: 外部のフォーマットや言語との統合が容易になり、インターフェースの変更に対応しやすくなります。</li>
         </ul>
-        
+
         <h3>注意点</h3>
         <ul>
             <li><strong>パフォーマンス</strong>: 準クォートはコンパイル時に評価されるため、複雑なパーサーを使用すると、コンパイル時間が長くなる可能性があります。</li>
@@ -362,18 +268,18 @@ let greeting name = [i|Hello, ${name}! Today is ${currentDate}.|]</code></pre>
             <li><strong>学習曲線</strong>: 独自の準クォートを作成するには、Template Haskellとパーサーライブラリに関する深い理解が必要です。</li>
             <li><strong>IDE対応</strong>: 一部のIDEやエディタは、準クォート内のシンタックスハイライトやコード補完を十分にサポートしていないことがあります。</li>
         </ul>
-        
+
         <div class="warning">
             <p><strong>注意</strong>: 準クォートを使用する際は、セキュリティにも注意が必要です。ユーザー入力から準クォートのコンテンツを直接生成することは避け、適切なバリデーションと削除を行ってください。</p>
         </div>
-        
+
         <h2>まとめ</h2>
         <p>準クォートは、Template Haskellを拡張し、カスタム構文やドメイン特化言語をHaskellプログラムに統合するための強力な機能です。構造化データの記述、DSLの埋め込み、テンプレートエンジンなど、様々な用途に活用できます。</p>
-        
+
         <p>基本的な準クォートの使用方法から、カスタム準クォートの作成、パーサーとの連携まで理解することで、よりエレガントで保守性の高いHaskellコードを書くことができます。</p>
-        
+
         <p>第2章では、Template Haskellの基本的な機能である言語拡張、基本データ型、スプライシング、クォート、そして準クォートについて学びました。次の第3章では、これらの基本を応用して、具体的なコード生成手法を詳しく見ていきます。</p>
-        
+
         <div class="nav-links">
             <a href="2.3_クォート.html">前へ：2.3 クォート</a>
             <a href="../chapter3/3.1_式の生成.html">次へ：3.1 式の生成</a>

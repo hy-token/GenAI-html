@@ -1,114 +1,12 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3.4 インスタンスの自動導出</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.1.0/github-markdown.min.css">
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-            line-height: 1.6;
-            color: #24292e;
-            max-width: 980px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-        .container {
-            background-color: #fff;
-            border: 1px solid #e1e4e8;
-            border-radius: 6px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-        }
-        h1, h2, h3 {
-            border-bottom: 1px solid #eaecef;
-            padding-bottom: 0.3em;
-        }
-        code {
-            font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
-            background-color: rgba(27, 31, 35, 0.05);
-            padding: 0.2em 0.4em;
-            border-radius: 3px;
-            font-size: 85%;
-        }
-        pre {
-            background-color: #f6f8fa;
-            border-radius: 3px;
-            padding: 16px;
-            overflow: auto;
-            line-height: 1.45;
-        }
-        pre code {
-            background-color: transparent;
-            padding: 0;
-        }
-        .column {
-            border: 1px solid #dfe2e5;
-            background-color: #f8f9fa;
-            border-radius: 6px;
-            padding: 1rem;
-            margin: 1.5rem 0;
-        }
-        .column h4 {
-            margin-top: 0;
-            color: #0366d6;
-        }
-        .nav-links {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 2rem;
-            padding-top: 1rem;
-            border-top: 1px solid #eaecef;
-        }
-        .nav-links a {
-            color: #0366d6;
-            text-decoration: none;
-        }
-        .nav-links a:hover {
-            text-decoration: underline;
-        }
-        .note {
-            background-color: #e7f7fe;
-            border-left: 4px solid #1976d2;
-            padding: 1rem;
-            margin: 1rem 0;
-        }
-        .warning {
-            background-color: #fff8e1;
-            border-left: 4px solid #ffa000;
-            padding: 1rem;
-            margin: 1rem 0;
-        }
-        .example {
-            background-color: #f1f8e9;
-            border-left: 4px solid #7cb342;
-            padding: 1rem;
-            margin: 1rem 0;
-        }
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            margin: 1rem 0;
-        }
-        th, td {
-            border: 1px solid #dfe2e5;
-            padding: 8px 12px;
-        }
-        th {
-            background-color: #f6f8fa;
-        }
-    </style>
-</head>
 <body>
     <div class="container">
         <h1>3.4 インスタンスの自動導出</h1>
 
         <h2>3.4.1 標準クラスのインスタンス導出</h2>
         <p>Template Haskellの最も実用的な用途の一つは、型クラスのインスタンスを自動的に導出することです。型クラスのインスタンスは、型に特定の操作や振る舞いを提供する方法です。</p>
-        
+
         <p>Haskellには、標準で以下のような重要な型クラスがあります：</p>
-        
+
         <ul>
             <li><code>Eq</code>: 等値比較</li>
             <li><code>Ord</code>: 順序比較</li>
@@ -118,24 +16,24 @@
             <li><code>Bounded</code>: 上限と下限を持つ型</li>
             <li><code>Functor</code>, <code>Applicative</code>, <code>Monad</code>: 関数型プログラミングの抽象化</li>
         </ul>
-        
+
         <p>通常、これらのインスタンスはデータ型定義時に<code>deriving</code>構文を使って導出できますが、Template Haskellを使うと既存の型に対しても動的にインスタンスを追加できます。</p>
-        
+
         <h3>DerivingストラテジーとTemplate Haskell</h3>
         <p>GHCには、型クラスインスタンスを導出するためのいくつかのストラテジーがあります：</p>
-        
+
         <ul>
             <li><strong>stock</strong>: GHCの標準メカニズム（Eq, Ord, Showなど）</li>
             <li><strong>newtype</strong>: newtypeのラップされた型のインスタンスを再利用</li>
             <li><strong>anyclass</strong>: デフォルト実装に依存</li>
             <li><strong>via</strong>: 別の型の実装を使用</li>
         </ul>
-        
+
         <p>Template Haskellでこれらのストラテジーを使用してインスタンスを導出できます。</p>
-        
+
         <h3>基本的なインスタンス導出</h3>
         <p>最も基本的なインスタンス導出の例を見てみましょう：</p>
-        
+
         <pre><code>-- Show インスタンスを導出
 genShowInstance :: Name -> Q [Dec]
 genShowInstance typeName = do
@@ -157,10 +55,10 @@ $(genShowInstance ''Point)
 $(genShowInstanceQuoted ''Point)
 -- 生成されるインスタンス:
 -- deriving stock instance Show Point</code></pre>
-        
+
         <h3>複数のインスタンスの導出</h3>
         <p>複数のインスタンスを一度に導出することもできます：</p>
-        
+
         <pre><code>-- 複数の標準クラスのインスタンスを導出
 genStandardInstances :: Name -> Q [Dec]
 genStandardInstances typeName = do
@@ -182,11 +80,11 @@ $(genStandardInstances ''Person)
 -- deriving stock instance Eq Person
 -- deriving stock instance Ord Person
 -- deriving stock instance Read Person</code></pre>
-        
+
         <div class="note">
             <p><strong>ノート</strong>: 実際には、<code>StandaloneDerivD</code>を使ったインスタンス導出は、対象の型がそのクラスのインスタンスになるための前提条件を満たしている必要があります。例えば、<code>Ord</code>インスタンスを導出するには、その型のすべてのフィールドが<code>Ord</code>のインスタンスでなければなりません。</p>
         </div>
-        
+
         <div class="column">
             <h4>コラム：DerivingViaとStock、NewtypeストラテジーのTemplate Haskell表現</h4>
             <p>GHC 8.6以降では、<code>DerivingVia</code>という強力な機能が追加されました。これを使うと、別の型の実装を利用してインスタンスを導出できます。Template Haskellでも、これらのストラテジーを使用できます：</p>
@@ -202,10 +100,10 @@ derivingViaExample typeName = do
 
         <h2>3.4.2 カスタムクラスのインスタンス生成</h2>
         <p>自分で定義したカスタム型クラスのインスタンスも、Template Haskellを使って自動生成できます。このアプローチは、ボイラープレートコードを削減する強力な方法です。</p>
-        
+
         <h3>インスタンス宣言の生成</h3>
         <p>まず、基本的なインスタンス宣言を生成する方法を見てみましょう：</p>
-        
+
         <pre><code>-- カスタム型クラス
 class Convertible a b where
     convert :: a -> b
@@ -235,10 +133,10 @@ $(genConvertibleInstance ''UserName ''String)
 --   convert x = read (show x)
 -- instance Convertible UserName String where
 --   convert x = read (show x)</code></pre>
-        
+
         <h3>型に基づく条件付きインスタンス生成</h3>
         <p>型情報を取得して、その構造に基づいてインスタンスを生成する方法を見てみましょう：</p>
-        
+
         <pre><code>-- データ型の構造を調べてJSONインスタンスを生成
 genJSONInstance :: Name -> Q [Dec]
 genJSONInstance typeName = do
@@ -267,7 +165,7 @@ genJSONInstance typeName = do
     genFromJSONForRecord typeName fields = ... -- レコード型のfromJSON実装を生成
     genToJSONForNormal types = ... -- 通常型のtoJSON実装を生成
     genFromJSONForNormal typeName types = ... -- 通常型のfromJSON実装を生成</code></pre>
-        
+
         <div class="example">
             <h4>実用例：データベースエンティティのインスタンス生成</h4>
             <pre><code>-- データベースエンティティのFromRowインスタンスを生成
@@ -315,10 +213,10 @@ $(genFromRowInstance ''User)
 
         <h2>3.4.3 条件付きインスタンス生成</h2>
         <p>より高度な使用例として、条件付きインスタンス生成があります。これは、特定の条件が満たされた場合にのみインスタンスを生成するアプローチです。</p>
-        
+
         <h3>型クラス制約付きインスタンス</h3>
         <p>特定の型クラス制約を満たす型に対してのみインスタンスを生成する例：</p>
-        
+
         <pre><code>-- Showに基づくPrettyインスタンスを生成
 genPrettyInstance :: Name -> Q [Dec]
 genPrettyInstance typeName = do
@@ -345,10 +243,10 @@ $(genPrettyInstance ''Int)
 -- 生成されるインスタンス:
 -- instance Show Int => Pretty Int where
 --   prettyPrint x = format (show x)</code></pre>
-        
+
         <h3>複数の型パラメータを持つクラスのインスタンス</h3>
         <p>複数の型パラメータを持つ型クラスのインスタンスも生成できます：</p>
-        
+
         <pre><code>-- ConvertibleインスタンスをNewtypeとそのラップされた型の間に生成
 genNewtypeConvertible :: Name -> Q [Dec]
 genNewtypeConvertible typeName = do
@@ -395,7 +293,7 @@ $(genNewtypeConvertible ''UserId)
 --   convert (UserId a) = a
 -- instance Convertible Int UserId where
 --   convert x = UserId x</code></pre>
-        
+
         <div class="column">
             <h4>コラム：マルチパラメータ型クラスとFunctional Dependencies</h4>
             <p>Template Haskellを使って、マルチパラメータ型クラスと関数従属性（Functional Dependencies）を持つクラスのインスタンスも生成できます：</p>
@@ -415,7 +313,7 @@ genConvertInstance fromType toType = do
 
         <h2>インスタンス導出の応用例</h2>
         <p>インスタンス自動導出の実際の応用例をいくつか見てみましょう：</p>
-        
+
         <h3>1. JSONシリアライゼーション</h3>
         <pre><code>-- Aesonのインスタンスを自動生成
 genJSONInstances :: Name -> Q [Dec]
@@ -437,7 +335,7 @@ data User = User { name :: String, age :: Int }
     deriving (Generic)
 
 $(genJSONInstances ''User)</code></pre>
-        
+
         <h3>2. データベースマッピング</h3>
         <pre><code>-- Persistentのインスタンスを自動生成
 genEntityInstances :: Name -> Q [Dec]
@@ -460,7 +358,7 @@ genEntityInstances typeName = do
         |]
     
     return $ pfInst ++ pfsInst</code></pre>
-        
+
         <h3>3. テスト用モックデータ生成</h3>
         <pre><code>-- Arbitraryインスタンスを自動生成
 genArbitraryInstance :: Name -> Q [Dec]
@@ -486,29 +384,28 @@ genArbitraryInstance typeName = do
             |]
             
         _ -> fail "Expected a record data type"</code></pre>
-        
+
         <div class="warning">
             <p><strong>注意</strong>: インスタンスの自動導出は、コードの生成量を減らす素晴らしい方法ですが、生成されたコードが意図した通りに動作することを確認するためのテストが重要です。特に、複雑な型に対するインスタンス導出では、予期しない動作が発生する可能性があります。</p>
         </div>
-        
+
         <h2>まとめ</h2>
         <p>この章では、Template Haskellを使った型クラスインスタンスの自動導出について学びました：</p>
-        
+
         <ul>
             <li>標準クラス（Eq, Show, Ordなど）のインスタンス導出</li>
             <li>カスタム型クラスのインスタンス生成</li>
             <li>条件付きインスタンス生成</li>
             <li>実用的な応用例（JSON、データベース、テストなど）</li>
         </ul>
-        
+
         <p>インスタンスの自動導出は、ボイラープレートコードを大幅に削減し、一貫性を確保するための非常に効果的な方法です。適切に使用することで、より保守性が高く、エラーの少ないコードを作成できます。</p>
-        
+
         <p>第3章では、Template Haskellを使ったコード生成の基本技術（式、関数、型、インスタンスの生成）を学びました。次の第4章では、これらの技術を実際の問題解決にどのように応用するかを見ていきます。</p>
-        
+
         <div class="nav-links">
             <a href="3.3_型の生成.html">前へ：3.3 型の生成</a>
             <a href="../chapter4/4.1_ボイラープレートコードの削減.html">次へ：4.1 ボイラープレートコードの削減</a>
         </div>
     </div>
 </body>
-</html>
