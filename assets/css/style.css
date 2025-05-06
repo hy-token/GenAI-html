@@ -1,0 +1,32 @@
+/* ----------- 基本レイアウト ------------ */
+body { margin:0; font-family:"Noto Sans JP",sans-serif; background:#f9f9f9; }
+.header{ background:#00bcd4;color:#fff;padding:10px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:1000; }
+.menu-toggle{ background:none;border:none;color:#fff;font-size:1.6em;cursor:pointer; }
+.title{ color:#fff;text-decoration:none;font-size:1.4em;font-weight:bold;margin-left:10px; }
+.search-box input{ padding:6px 8px;font-size:1em;border:none;border-radius:4px;width:200px; }
+
+.container{ display:flex;height:calc(100vh - 60px); }
+.sidebar{ width:240px;background:#f0f0f0;padding:10px;overflow-y:auto; }
+.sidebar ul,.sidebar li{ list-style:none;padding:0;margin:0; }
+.sidebar li{ font-size:1.05em;cursor:pointer; }
+.sidebar li ul{ margin-left:1em;display:none; }
+.sidebar a{ text-decoration:none;color:#333;margin-left:8px; }
+.sidebar a:hover,.sidebar a.active{ color:#00bcd4;font-weight:bold; }
+.toggle-arrow{ margin-right:5px;transition:transform .2s; }
+.toggle-arrow.open{ transform:rotate(90deg); }
+
+/* ----------- コンテンツエリア ------------ */
+.content{ flex-grow:1;display:flex;flex-direction:column;padding:10px;background:#fff; }
+.nav-buttons{ display:flex;justify-content:space-between;margin-bottom:8px; }
+.nav-buttons button{ padding:6px 12px;border:none;border-radius:4px;font-size:1em;background:#00bcd4;color:#fff;cursor:pointer; }
+.nav-buttons button:hover{ background:#0097a7; }
+.breadcrumb{ font-size:.9em;color:#666;margin-bottom:6px; }
+.loader{ display:none;text-align:center;margin:8px;font-size:.9em;color:#666; }
+iframe{ flex-grow:1;width:100%;height:100%;border:none;visibility:hidden; }
+
+/* ----------- モバイル ------------ */
+@media(max-width:768px){
+  .container{ flex-direction:column; }
+  .sidebar{ position:absolute;top:60px;left:-260px;height:calc(100% - 60px);transition:left .3s;z-index:999; }
+  .sidebar.open{ left:0; }
+}

@@ -1,0 +1,23 @@
+[
+  {
+    "icon": "fas fa-book",
+    "text": "はじめに",
+    "href": "contents/intro.html"
+  },
+  {
+    "icon": "fas fa-code",
+    "text": "HTML入門",
+    "children": [
+      {
+        "icon": "fas fa-play",
+        "text": "基本文法",
+        "href": "contents/html/basics.html"
+      },
+      {
+        "icon": "fas fa-tags",
+        "text": "タグの使い方",
+        "href": "contents/html/tags.html"
+      }
+    ]
+  }
+]

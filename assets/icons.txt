@@ -1,0 +1,5 @@
+fas fa-book
+fas fa-code
+fas fa-play
+fas fa-tags
+fas fa-chevron-right
