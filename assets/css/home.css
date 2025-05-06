@@ -1,0 +1,191 @@
+.hero {
+    background: linear-gradient(135deg, #6B46C1 0%, #9F7AEA 100%);
+    color: white;
+    padding: 60px 20px;
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.hero h1 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+}
+
+.hero p {
+    font-size: 1.2em;
+    max-width: 800px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+.features-container {
+    position: relative;
+    padding: 20px 0;
+    margin: 0 auto;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.features {
+    display: flex;
+    gap: 30px;
+    padding: 20px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+    scroll-snap-type: x mandatory;
+}
+
+.features::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+.feature-card {
+    flex: 0 0 300px;
+    background: white;
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+    scroll-snap-align: start;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+}
+
+.feature-icon {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+}
+
+.feature-card h2 {
+    color: #333;
+    margin-bottom: 15px;
+    font-size: 1.5em;
+}
+
+.feature-card p {
+    color: #666;
+    line-height: 1.6;
+    font-size: 1em;
+}
+
+.cta-button {
+    display: inline-block;
+    background: #6B46C1;
+    color: white;
+    padding: 12px 30px;
+    border-radius: 25px;
+    text-decoration: none;
+    margin-top: 20px;
+    transition: background 0.3s ease;
+    font-size: 1em;
+}
+
+.cta-button:hover {
+    background: #553C9A;
+}
+
+.scroll-hint {
+    text-align: center;
+    color: #666;
+    margin-top: 10px;
+    font-size: 0.9em;
+}
+
+/* タブレット向けのスタイル */
+@media (max-width: 1024px) {
+    .hero h1 {
+        font-size: 2em;
+    }
+    .hero p {
+        font-size: 1.1em;
+    }
+    .feature-card {
+        flex: 0 0 280px;
+    }
+}
+
+/* スマートフォン向けのスタイル */
+@media (max-width: 768px) {
+    .hero {
+        padding: 30px 15px;
+    }
+    .hero h1 {
+        font-size: 1.5em;
+        margin-bottom: 12px;
+    }
+    .hero p {
+        font-size: 0.9em;
+        padding: 0 10px;
+        line-height: 1.4;
+    }
+    .features-container {
+        padding: 10px 0;
+    }
+    .features {
+        gap: 20px;
+        padding: 15px;
+    }
+    .feature-card {
+        flex: 0 0 260px;
+        padding: 20px;
+    }
+    .feature-icon {
+        font-size: 2em;
+        margin-bottom: 15px;
+    }
+    .feature-card h2 {
+        font-size: 1.3em;
+        margin-bottom: 10px;
+    }
+    .feature-card p {
+        font-size: 0.95em;
+        line-height: 1.5;
+    }
+    .cta-button {
+        padding: 10px 25px;
+        font-size: 0.95em;
+        width: 100%;
+        text-align: center;
+    }
+    .scroll-hint {
+        font-size: 0.8em;
+        margin-top: 8px;
+    }
+}
+
+/* 小さいスマートフォン向けのスタイル */
+@media (max-width: 480px) {
+    .hero {
+        padding: 25px 12px;
+    }
+    .hero h1 {
+        font-size: 1.3em;
+        margin-bottom: 10px;
+    }
+    .hero p {
+        font-size: 0.85em;
+        line-height: 1.3;
+    }
+    .feature-card {
+        flex: 0 0 240px;
+        padding: 15px;
+    }
+    .feature-icon {
+        font-size: 1.8em;
+    }
+    .feature-card h2 {
+        font-size: 1.2em;
+    }
+    .feature-card p {
+        font-size: 0.9em;
+    }
+    .cta-button {
+        padding: 8px 20px;
+        font-size: 0.9em;
+    }
+} 
