@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <title>第7章 ファンクターとモナドの理論と実践</title>
+</head>
+
+<body>
+  <h1>第7章 ファンクターとモナドの理論と実践</h1>
+
+  <h2>7.1 カテゴリー理論の基礎</h2>
+  <h3>7.1.1 カテゴリーの定義</h3>
+  <p>カテゴリーは以下の要素で構成されます：</p>
+  <ul>
+    <li><strong>対象（Objects）</strong>: データ型や集合</li>
+    <li><strong>射（Morphisms）</strong>: 対象間の変換や関数</li>
+    <li><strong>合成（Composition）</strong>: 射の結合</li>
+    <li><strong>恒等射（Identity）</strong>: 各対象に対する恒等変換</li>
+  </ul>
+
+  <h3>7.1.2 関手（Functor）の定義</h3>
+  <p>関手は、カテゴリー間の写像を保持する構造です：</p>
+  <pre>
+// 関手の型定義（TypeScript）
+interface Functor<T> {
+    map<U>(f: (x: T) => U): Functor<U>;
+}
+
+// 関手則
+// 1. 恒等射の保存
+// map(id) = id
+// 2. 合成の保存
+// map(f . g) = map(f) . map(g)
+  </pre>
+
+  <h2>7.2 ファンクターの実装</h2>
+  <h3>7.2.1 Maybe ファンクター</h3>
+  <pre>
+class Maybe<T> {
+    private value: T | null;
+
+    private constructor(value: T | null) {
+        this.value = value;
+    }
+
+    static of<T>(value: T | null): Maybe<T> {
+        return new Maybe(value);
+    }
+
+    map<U>(f: (x: T) => U): Maybe<U> {
+        return this.value === null
+            ? Maybe.of<U>(null)
+            : Maybe.of(f(this.value));
+    }
+
+    // 便利なメソッド
+    getOrElse(defaultValue: T): T {
+        return this.value === null ? defaultValue : this.value;
+    }
+}
+
+// 使用例
+const maybeNumber = Maybe.of(5);
+const doubled = maybeNumber.map(x => x * 2);
+const result = doubled.getOrElse(0);
+  </pre>
+
+  <h3>7.2.2 Either ファンクター</h3>
+  <pre>
+class Either<L, R> {
+    private constructor(
+        private readonly left: L | null,
+        private readonly right: R | null
+    ) {}
+
+    static left<L, R>(value: L): Either<L, R> {
+        return new Either(value, null);
+    }
+
+    static right<L, R>(value: R): Either<L, R> {
+        return new Either(null, value);
+    }
+
+    map<U>(f: (x: R) => U): Either<L, U> {
+        return this.right === null
+            ? Either.left<L, U>(this.left!)
+            : Either.right<L, U>(f(this.right));
+    }
+
+    // 便利なメソッド
+    fold<U>(leftFn: (l: L) => U, rightFn: (r: R) => U): U {
+        return this.right === null
+            ? leftFn(this.left!)
+            : rightFn(this.right);
+    }
+}
+  </pre>
+
+  <h2>7.3 モナドの理論</h2>
+  <h3>7.3.1 モナドの定義</h3>
+  <p>モナドは、以下の3つの要素で定義されます：</p>
+  <ul>
+    <li><strong>型構築子（Type Constructor）</strong>: 型を別の型に変換</li>
+    <li><strong>return/unit</strong>: 値をモナドに包む</li>
+    <li><strong>bind/>>=</strong>: モナドの値を変換</li>
+  </ul>
+
+  <h3>7.3.2 モナド則</h3>
+  <pre>
+// モナド則
+// 1. 左単位元
+// return a >>= f = f a
+// 2. 右単位元
+// m >>= return = m
+// 3. 結合律
+// (m >>= f) >>= g = m >>= (\x -> f x >>= g)
+  </pre>
+
+  <h2>7.4 モナドの実装</h2>
+  <h3>7.4.1 Maybe モナド</h3>
+  <pre>
+class Maybe<T> {
+    // ... 前の実装 ...
+
+    chain<U>(f: (x: T) => Maybe<U>): Maybe<U> {
+        return this.value === null
+            ? Maybe.of<U>(null)
+            : f(this.value);
+    }
+
+    // 便利なメソッド
+    static sequence<T>(maybes: Maybe<T>[]): Maybe<T[]> {
+        return maybes.reduce(
+            (acc, maybe) => acc.chain(xs =>
+                maybe.map(x => [...xs, x])
+            ),
+            Maybe.of<T[]>([])
+        );
+    }
+}
+  </pre>
+
+  <h3>7.4.2 IO モナド</h3>
+  <pre>
+class IO<T> {
+    private constructor(private readonly effect: () => T) {}
+
+    static of<T>(value: T): IO<T> {
+        return new IO(() => value);
+    }
+
+    map<U>(f: (x: T) => U): IO<U> {
+        return new IO(() => f(this.effect()));
+    }
+
+    chain<U>(f: (x: T) => IO<U>): IO<U> {
+        return new IO(() => f(this.effect()).run());
+    }
+
+    run(): T {
+        return this.effect();
+    }
+
+    // 便利なメソッド
+    static fromEffect<T>(effect: () => T): IO<T> {
+        return new IO(effect);
+    }
+}
+
+// 使用例
+const readFile = (path: string): IO<string> =>
+    IO.fromEffect(() => fs.readFileSync(path, 'utf-8'));
+
+const writeFile = (path: string, content: string): IO<void> =>
+    IO.fromEffect(() => fs.writeFileSync(path, content));
+  </pre>
+
+  <h2>7.5 実践的なアプリケーション</h2>
+  <h3>7.5.1 エラーハンドリング</h3>
+  <pre>
+// Either モナドを使用したエラーハンドリング
+const parseJSON = (json: string): Either<Error, any> => {
+    try {
+        return Either.right(JSON.parse(json));
+    } catch (e) {
+        return Either.left(e as Error);
+    }
+};
+
+const validateUser = (user: any): Either<Error, User> => {
+    if (!user.name || !user.email) {
+        return Either.left(new Error('Invalid user data'));
+    }
+    return Either.right(user);
+};
+
+// 使用例
+const result = parseJSON('{"name": "John", "email": "john@example.com"}')
+    .chain(validateUser)
+    .map(user => user.name)
+    .fold(
+        error => console.error(error),
+        name => console.log(name)
+    );
+  </pre>
+
+  <h3>7.5.2 非同期処理</h3>
+  <pre>
+// Promise モナドの実装
+class Promise<T> {
+    static of<T>(value: T): Promise<T> {
+        return Promise.resolve(value);
+    }
+
+    map<U>(f: (x: T) => U): Promise<U> {
+        return this.then(f);
+    }
+
+    chain<U>(f: (x: T) => Promise<U>): Promise<U> {
+        return this.then(f);
+    }
+}
+
+// 使用例
+const fetchUser = (id: number): Promise<User> =>
+    fetch(`/api/users/${id}`).then(res => res.json());
+
+const fetchPosts = (userId: number): Promise<Post[]> =>
+    fetch(`/api/users/${userId}/posts`).then(res => res.json());
+
+// モナドの連鎖
+const result = fetchUser(1)
+    .chain(user => fetchPosts(user.id))
+    .map(posts => posts.map(post => post.title));
+  </pre>
+
+  <h2>7.6 高度なトピック</h2>
+  <h3>7.6.1 モナド変換子</h3>
+  <pre>
+// MaybeT モナド変換子
+class MaybeT<M, T> {
+    constructor(private readonly value: M<Maybe<T>>) {}
+
+    static of<M, T>(value: T): MaybeT<M, T> {
+        return new MaybeT(M.of(Maybe.of(value)));
+    }
+
+    map<U>(f: (x: T) => U): MaybeT<M, U> {
+        return new MaybeT(
+            this.value.map(maybe => maybe.map(f))
+        );
+    }
+
+    chain<U>(f: (x: T) => MaybeT<M, U>): MaybeT<M, U> {
+        return new MaybeT(
+            this.value.chain(maybe =>
+                maybe.fold(
+                    () => M.of(Maybe.of<U>(null)),
+                    x => f(x).value
+                )
+            )
+        );
+    }
+}
+  </pre>
+
+  <h3>7.6.2 型システムとの統合</h3>
+  <pre>
+// TypeScriptでの型定義
+type Monad<T> = {
+    map<U>(f: (x: T) => U): Monad<U>;
+    chain<U>(f: (x: T) => Monad<U>): Monad<U>;
+    of<U>(value: U): Monad<U>;
+};
+
+// 型クラスの実装
+interface MonadClass<T> {
+    of<U>(value: U): Monad<U>;
+}
+
+// 使用例
+class Maybe<T> implements Monad<T> {
+    // ... 実装 ...
+}
+  </pre>
+
+  <p><a href="00_index.html">目次に戻る</a></p>
+</body>
+
+</html>

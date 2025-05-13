@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第2章: 開発環境と基礎概念</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        h1 {
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        h2 {
+            border-bottom: 1px solid #bdc3c7;
+            padding-bottom: 5px;
+            margin-top: 40px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .highlight {
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .code-block {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 10px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        }
+        .reference-links {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #bdc3c7;
+        }
+        .reference-links h3 {
+            color: #2980b9;
+        }
+        .reference-links ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .reference-links li {
+            margin: 10px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+        .reference-links li:before {
+            content: "🔗";
+            position: absolute;
+            left: 0;
+        }
+        .terms {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #bdc3c7;
+        }
+        .terms h3 {
+            color: #27ae60;
+        }
+        .terms dl {
+            margin-top: 20px;
+        }
+        .terms dt {
+            font-weight: bold;
+            margin-top: 15px;
+            color: #2c3e50;
+        }
+        .terms dd {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+        svg {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>第2章: 開発環境と基礎概念</h1>
+    
+    <h2>2.1 Godot4の環境構築（VSCode/エディタ比較）</h2>
+    
+    <p>Godotの環境構築は非常にシンプルです。インストーラー不要で、実行ファイルをダウンロードするだけで即座に使用開始できます。</p>
+    
+    <h3>主要な開発環境の選択肢</h3>
+    
+    <table>
+        <tr>
+            <th>環境</th>
+            <th>特徴</th>
+            <th>長所</th>
+            <th>短所</th>
+            <th>推奨度</th>
+        </tr>
+        <tr>
+            <td>Godot Editor</td>
+            <td>組み込みエディタ</td>
+            <td>完全統合、設定不要</td>
+            <td>機能が限定的</td>
+            <td>★★★★★</td>
+        </tr>
+        <tr>
+            <td>VSCode</td>
+            <td>外部エディタ</td>
+            <td>豊富な拡張機能</td>
+            <td>設定が必要</td>
+            <td>★★★★☆</td>
+        </tr>
+        <tr>
+            <td>Vim/Emacs</td>
+            <td>CUIエディタ</td>
+            <td>軽量、高速</td>
+            <td>学習曲線が高い</td>
+            <td>★★☆☆☆</td>
+        </tr>
+        <tr>
+            <td>Sublime Text</td>
+            <td>軽量テキストエディタ</td>
+            <td>高速、シンプル</td>
+            <td>統合機能に限界</td>
+            <td>★★★☆☆</td>
+        </tr>
+    </table>
+    
+    <div class="highlight">
+        <h3>推奨セットアップ方法</h3>
+        <ol>
+            <li>デフォルトはGodot Editorを使用</li>
+            <li>コード部分は外部エディタ（VSCode）を併用</li>
+            <li>自動コード補完にはLSP（Language Server Protocol）を活用</li>
+        </ol>
+    </div>
+    
+    <h3>VSCodeとGodotの統合設定</h3>
+    
+    <div class="code-block">
+// settings.json例
+{
+    "godot_tools.gdscript_lsp_server_port": 6008,
+    "godot_tools.editor_path": "/path/to/godot",
+    "files.associations": {
+        "*.gd": "gdscript",
+        "*.tscn": "text"
+    },
+    "editor.formatOnSave": true
+}
+    </div>
+    
+    <h2>2.2 ノードとシーンの概念（従来のオブジェクト指向との違い）</h2>
+    
+    <p>Godotのノード・シーンシステムは、従来のGameObject（Unity）やActor（Unreal）とは根本的に異なる設計思想です。</p>
+    
+    <div class="highlight">
+        <h3>コンセプトの違い</h3>
+        <table>
+            <tr>
+                <th>概念</th>
+                <th>Unity</th>
+                <th>Unreal Engine</th>
+                <th>Godot</th>
+            </tr>
+            <tr>
+                <td>基本単位</td>
+                <td>GameObject</td>
+                <td>Actor</td>
+                <td>Node</td>
+            </tr>
+            <tr>
+                <td>機能追加</td>
+                <td>Component</td>
+                <td>Component</td>
+                <td>Node継承</td>
+            </tr>
+            <tr>
+                <td>組み立て方式</td>
+                <td>アタッチ</td>
+                <td>アタッチ</td>
+                <td>ツリー構造</td>
+            </tr>
+            <tr>
+                <td>実行時の動作</td>
+                <td>コンポーネント実行</td>
+                <td>Tick/Event</td>
+                <td>プロセス関数</td>
+            </tr>
+        </table>
+    </div>
+    
+    <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0" y="0" width="400" height="300" fill="#f8f9fa" stroke="#dee2e6" stroke-width="2"/>
+        <text x="200" y="25" text-anchor="middle" font-size="16" font-weight="bold">Godotのノード階層構造</text>
+        
+        <!-- ルートノード -->
+        <rect x="150" y="50" width="100" height="30" fill="#3498db" stroke="#2c3e50"/>
+        <text x="200" y="70" text-anchor="middle" fill="white">Node2D</text>
+        
+        <!-- 子ノード -->
+        <line x1="200" y1="80" x2="150" y2="110" stroke="#2c3e50" stroke-width="2"/>
+        <line x1="200" y1="80" x2="200" y2="110" stroke="#2c3e50" stroke-width="2"/>
+        <line x1="200" y1="80" x2="250" y2="110" stroke="#2c3e50" stroke-width="2"/>
+        <line x1="200" y1="80" x2="300" y2="110" stroke="#2c3e50" stroke-width="2"/>
+        
+        <rect x="100" y="110" width="100" height="30" fill="#27ae60" stroke="#2c3e50"/>
+        <text x="150" y="130" text-anchor="middle" fill="white">Sprite2D</text>
+        
+        <rect x="150" y="110" width="100" height="30" fill="#e74c3c" stroke="#2c3e50"/>
+        <text x="200" y="130" text-anchor="middle" fill="white">CollisionShape2D</text>
+        
+        <rect x="200" y="110" width="100" height="30" fill="#f39c12" stroke="#2c3e50"/>
+        <text x="250" y="130" text-anchor="middle" fill="white">AudioStream2D</text>
+        
+        <rect x="250" y="110" width="100" height="30" fill="#9b59b6" stroke="#2c3e50"/>
+        <text x="300" y="130" text-anchor="middle" fill="white">Script</text>
+        
+        <!-- 孫ノード -->
+        <line x1="150" y1="140" x2="150" y2="170" stroke="#2c3e50" stroke-width="2"/>
+        <rect x="100" y="170" width="100" height="30" fill="#3498db" stroke="#2c3e50"/>
+        <text x="150" y="190" text-anchor="middle" fill="white">AnimationPlayer</text>
+    </svg>
+    
+    <h3>ノードの特徴</h3>
+    
+    <ul>
+        <li><strong>継承ベース：</strong>ノードは他のノードを継承して機能を拡張</li>
+        <li><strong>単一責任：</strong>各ノードは特定の機能に特化</li>
+        <li><strong>再利用性：</strong>シーンとして保存し、他のプロジェクトで再利用可能</li>
+        <li><strong>直感的な階層：</strong>親子関係が視覚的に明確</li>
+    </ul>
+    
+    <h2>2.3 GDScript基本文法とイディオム</h2>
+    
+    <p>GDScriptは、ゲーム開発に特化したPythonライクな言語です。シンプルな文法でありながら、ゲーム開発に必要な機能が充実しています。</p>
+    
+    <div class="code-block">
+# 基本的な変数宣言とデータ型
+var health = 100  # int型（動的型付け）
+var speed: float = 5.0  # float型（静的型付け）
+var player_name: String = "Player1"  # String型
+var is_jumping: bool = false  # bool型
+
+# 配列とディクショナリ
+var items = ["sword", "potion", "key"]
+var stats = {"hp": 100, "mp": 50, "attack": 20}
+
+# 関数定義
+func heal(amount: int) -> void:
+    health += amount
+    if health > 100:
+        health = 100
+
+# クラス定義（ノード継承）
+extends CharacterBody2D
+class_name Player
+
+@export var move_speed = 400  # インスペクタで調整可能
+@onready var sprite = $Sprite2D  # シーン読み込み後に初期化
+    </div>
+    
+    <h3>GDScript特有のイディオム</h3>
+    
+    <table>
+        <tr>
+            <th>パターン</th>
+            <th>用途</th>
+            <th>例</th>
+        </tr>
+        <tr>
+            <td>@export</td>
+            <td>インスペクタ公開

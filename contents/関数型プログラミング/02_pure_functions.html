@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <title>第2章 純粋関数と副作用の理論</title>
+</head>
+
+<body>
+  <h1>第2章 純粋関数と副作用の理論</h1>
+
+  <h2>2.1 純粋関数の数学的定義</h2>
+  <p>純粋関数は、数学的な関数の概念に基づいて定義されます。数学的な関数は、入力から出力への写像であり、同じ入力に対して常に同じ出力を返します。</p>
+
+  <h3>2.1.1 参照透過性（Referential Transparency）</h3>
+  <p>参照透過性は、式をその値で置き換えてもプログラムの動作が変わらないという性質です。</p>
+  <pre>
+// 参照透過な関数の例
+function add(a, b) {
+    return a + b;
+}
+
+// 参照透過でない関数の例
+let counter = 0;
+function increment() {
+    counter += 1;
+    return counter;
+}
+
+// 参照透過性の検証
+const x = add(2, 3);
+const y = add(2, 3);
+console.log(x === y); // true
+
+const a = increment();
+const b = increment();
+console.log(a === b); // false
+  </pre>
+
+  <h3>2.1.2 等価性（Equational Reasoning）</h3>
+  <p>純粋関数は、数学的な等価性に基づいた推論が可能です：</p>
+  <pre>
+// 等価性の例
+const add = (a, b) => a + b;
+const multiply = (a, b) => a * b;
+
+// 以下の式は等価
+add(2, 3) === 5
+add(1, 4) === 5
+
+// 関数合成の等価性
+const double = x => x * 2;
+const addOne = x => x + 1;
+
+// 以下の2つの式は等価
+const f1 = x => addOne(double(x));
+const f2 = x => double(addOne(x));
+  </pre>
+
+  <h2>2.2 副作用の理論</h2>
+  <h3>2.2.1 副作用の種類</h3>
+  <ul>
+    <li><strong>状態の変更（State Mutation）</strong>
+      <ul>
+        <li>グローバル変数の変更</li>
+        <li>オブジェクトのプロパティ変更</li>
+        <li>配列の要素変更</li>
+        <li>クラスのインスタンス変数の変更</li>
+      </ul>
+    </li>
+    <li><strong>入出力操作（I/O Operations）</strong>
+      <ul>
+        <li>ファイルの読み書き</li>
+        <li>ネットワーク通信</li>
+        <li>データベース操作</li>
+        <li>コンソール出力</li>
+        <li>ユーザー入力の読み取り</li>
+      </ul>
+    </li>
+    <li><strong>例外処理（Exception Handling）</strong>
+      <ul>
+        <li>例外の発生</li>
+        <li>エラーの伝播</li>
+        <li>非同期エラー</li>
+        <li>スタックトレースの生成</li>
+      </ul>
+    </li>
+    <li><strong>時間依存の操作（Time-Dependent Operations）</strong>
+      <ul>
+        <li>現在時刻の取得</li>
+        <li>乱数の生成</li>
+        <li>タイマー操作</li>
+        <li>非同期処理のタイミング</li>
+      </ul>
+    </li>
+  </ul>
+
+  <h3>2.2.2 副作用の影響</h3>
+  <p>副作用は以下の問題を引き起こす可能性があります：</p>
+  <ul>
+    <li><strong>プログラムの予測可能性の低下</strong>
+      <ul>
+        <li>実行順序への依存</li>
+        <li>状態の変更の追跡困難</li>
+        <li>デバッグの複雑化</li>
+      </ul>
+    </li>
+    <li><strong>テストの困難さ</strong>
+      <ul>
+        <li>テスト環境の準備</li>
+        <li>モックの必要性</li>
+        <li>テストの再現性</li>
+      </ul>
+    </li>
+    <li><strong>並行処理での競合状態</strong>
+      <ul>
+        <li>レースコンディション</li>
+        <li>デッドロック</li>
+        <li>ライブロック</li>
+      </ul>
+    </li>
+    <li><strong>コードの保守性の低下</strong>
+      <ul>
+        <li>依存関係の複雑化</li>
+        <li>変更の影響範囲の拡大</li>
+        <li>リファクタリングの困難さ</li>
+      </ul>
+    </li>
+  </ul>
+
+  <h2>2.3 副作用の制御手法</h2>
+  <h3>2.3.1 関数型エフェクトシステム</h3>
+  <p>副作用を型システムで制御する方法：</p>
+  <pre>
+// IOモナドによる副作用の制御
+class IO<T> {
+    constructor(private readonly effect: () => T) {}
+
+    static of<T>(value: T): IO<T> {
+        return new IO(() => value);
+    }
+
+    map<U>(fn: (x: T) => U): IO<U> {
+        return new IO(() => fn(this.effect()));
+    }
+
+    chain<U>(fn: (x: T) => IO<U>): IO<U> {
+        return new IO(() => fn(this.effect()).run());
+    }
+
+    run(): T {
+        return this.effect();
+    }
+}
+
+// 使用例
+const readFile = (path: string): IO<string> =>
+    new IO(() => fs.readFileSync(path, 'utf8'));
+
+const writeFile = (path: string, content: string): IO<void> =>
+    new IO(() => fs.writeFileSync(path, content));
+
+// 副作用の合成
+const processFile = (path: string): IO<string> =>
+    readFile(path)
+        .map(content => content.toUpperCase())
+        .chain(content => writeFile(path + '.upper', content));
+  </pre>
+
+  <h3>2.3.2 エフェクト追跡（Effect Tracking）</h3>
+  <p>型システムで副作用を追跡する方法：</p>
+  <pre>
+// TypeScriptでのエフェクト追跡の例
+type Effect<T, E> = {
+    type: 'Effect';
+    run: () => Promise<T>;
+    map: <U>(f: (t: T) => U) => Effect<U, E>;
+    chain: <U>(f: (t: T) => Effect<U, E>) => Effect<U, E>;
+};
+
+// エフェクトの実装
+const createEffect = <T, E>(run: () => Promise<T>): Effect<T, E> => ({
+    type: 'Effect',
+    run,
+    map: f => createEffect(async () => f(await run())),
+    chain: f => createEffect(async () => (await f(await run())).run())
+});
+
+// 使用例
+const fetchUser = (id: number): Effect<User, Error> =>
+    createEffect(async () => {
+        const response = await fetch(`/api/users/${id}`);
+        if (!response.ok) throw new Error('Failed to fetch user');
+        return response.json();
+    });
+  </pre>
+
+  <h2>2.4 純粋関数の実装パターン</h2>
+  <h3>2.4.1 不変データ構造の使用</h3>
+  <pre>
+// 不変なデータ更新
+const updateUser = (user: User, newName: string): User => ({
+    ...user,
+    name: newName
+});
+
+// 深い更新
+const updateNestedObject = (obj: any, path: string[], value: any): any => {
+    if (path.length === 0) return value;
+    const [head, ...tail] = path;
+    return {
+        ...obj,
+        [head]: updateNestedObject(obj[head], tail, value)
+    };
+};
+
+// 使用例
+const user = {
+    name: 'John',
+    address: {
+        city: 'Tokyo',
+        country: 'Japan'
+    }
+};
+
+const updatedUser = updateNestedObject(user, ['address', 'city'], 'Osaka');
+  </pre>
+
+  <h3>2.4.2 関数合成による副作用の分離</h3>
+  <pre>
+// 副作用を分離した関数合成
+const pipe = <T>(...fns: Array<(arg: T) => T>) =>
+    (value: T): T => fns.reduce((acc, fn) => fn(acc), value);
+
+const validateUser = (user: User): Either<Error, User> => {
+    if (!user.name) return Either.left(new Error('Name is required'));
+    if (!user.email) return Either.left(new Error('Email is required'));
+    return Either.right(user);
+};
+
+const enrichUserData = (user: User): User => ({
+    ...user,
+    fullName: `${user.firstName} ${user.lastName}`,
+    age: calculateAge(user.birthDate)
+});
+
+const saveUser = (user: User): IO<void> =>
+    IO.fromEffect(() => database.save(user));
+
+// 副作用の分離
+const processUser = pipe(
+    validateUser,
+    map(enrichUserData),
+    chain(saveUser)
+);
+  </pre>
+
+  <h2>2.5 実践的なアプローチ</h2>
+  <h3>2.5.1 段階的な純粋化</h3>
+  <p>既存のコードを純粋関数型に移行する方法：</p>
+  <ol>
+    <li><strong>副作用を持つ関数の特定</strong>
+      <ul>
+        <li>状態変更の追跡</li>
+        <li>I/O操作の特定</li>
+        <li>例外処理の分析</li>
+      </ul>
+    </li>
+    <li><strong>副作用の分離と制御</strong>
+      <ul>
+        <li>エフェクトシステムの導入</li>
+        <li>モナドの使用</li>
+        <li>型システムの活用</li>
+      </ul>
+    </li>
+    <li><strong>純粋関数へのリファクタリング</strong>
+      <ul>
+        <li>不変データ構造の導入</li>
+        <li>関数合成の活用</li>
+        <li>型安全性の向上</li>
+      </ul>
+    </li>
+    <li><strong>型システムの導入</strong>
+      <ul>
+        <li>型定義の作成</li>
+        <li>型チェックの強化</li>
+        <li>型推論の活用</li>
+      </ul>
+    </li>
+  </ol>
+
+  <h3>2.5.2 テスト戦略</h3>
+  <p>純粋関数のテスト方法：</p>
+  <ul>
+    <li><strong>プロパティベーステスト</strong>
+      <pre>
+// fast-checkを使用したプロパティベーステスト
+import { fc } from 'fast-check';
+
+describe('Array operations', () => {
+    it('map and filter commute', () => {
+        fc.assert(
+            fc.property(
+                fc.array(fc.integer()),
+                fc.func(fc.boolean()),
+                fc.func(fc.integer()),
+                (arr, predicate, mapper) => {
+                    const result1 = arr.filter(predicate).map(mapper);
+                    const result2 = arr.map(mapper).filter(predicate);
+                    return JSON.stringify(result1) === JSON.stringify(result2);
+                }
+            )
+        );
+    });
+});
+      </pre>
+    </li>
+    <li><strong>境界値テスト</strong>
+      <pre>
+// 境界値テストの例
+describe('String operations', () => {
+    it('handles empty strings', () => {
+        expect(reverse('')).toBe('');
+    });
+
+    it('handles single character', () => {
+        expect(reverse('a')).toBe('a');
+    });
+
+    it('handles palindrome', () => {
+        expect(reverse('radar')).toBe('radar');
+    });
+});
+      </pre>
+    </li>
+    <li><strong>等価性テスト</strong>
+      <pre>
+// 等価性テストの例
+describe('Function composition', () => {
+    it('preserves identity', () => {
+        const f = (x: number) => x * 2;
+        const g = (x: number) => x + 1;
+        const h = compose(f, g);
+        const k = compose(g, f);
+        expect(h(5)).not.toBe(k(5));
+    });
+});
+      </pre>
+    </li>
+  </ul>
+
+  <h2>2.6 高度なトピック</h2>
+  <h3>2.6.1 遅延評価（Lazy Evaluation）</h3>
+  <p>計算を必要になるまで遅延させる手法：</p>
+  <pre>
+// 遅延評価の実装
+class Lazy<T> {
+    private value: T | null = null;
+    private computation: () => T;
+
+    constructor(computation: () => T) {
+        this.computation = computation;
+    }
+
+    get(): T {
+        if (this.value === null) {
+            this.value = this.computation();
+        }
+        return this.value;
+    }
+
+    map<U>(f: (x: T) => U): Lazy<U> {
+        return new Lazy(() => f(this.get()));
+    }
+}
+
+// 使用例
+const expensiveCalculation = () => {
+    console.log('Calculating...');
+    return 42;
+};
+
+const lazyValue = new Lazy(expensiveCalculation);
+console.log('Value not calculated yet');
+console.log(lazyValue.get()); // 計算が実行される
+console.log(lazyValue.get()); // キャッシュされた値が返される
+  </pre>
+
+  <h3>2.6.2 メモ化（Memoization）</h3>
+  <p>計算結果をキャッシュする手法：</p>
+  <pre>
+// メモ化の実装
+const memoize = <T, U>(fn: (arg: T) => U) => {
+    const cache = new Map<string, U>();
+    return (arg: T): U => {
+        const key = JSON.stringify(arg);
+        if (cache.has(key)) return cache.get(key)!;
+        const result = fn(arg);
+        cache.set(key, result);
+        return result;
+    };
+};
+
+// 使用例
+const fibonacci = memoize((n: number): number => {
+    if (n <= 1) return n;
+    return fibonacci(n - 1) + fibonacci(n - 2);
+});
+
+// パフォーマンスの比較
+console.time('First call');
+console.log(fibonacci(40));
+console.timeEnd('First call');
+
+console.time('Second call');
+console.log(fibonacci(40));
+console.timeEnd('Second call');
+  </pre>
+
+  <h2>2.7 コラム：純粋関数の実践的な利点</h2>
+  <p>純粋関数を使用することによる実践的な利点：</p>
+  <ul>
+    <li><strong>デバッグの容易さ</strong>
+      <ul>
+        <li>入力と出力の関係が明確</li>
+        <li>状態の追跡が不要</li>
+        <li>再現性の高いバグ</li>
+      </ul>
+    </li>
+    <li><strong>テストの簡素化</strong>
+      <ul>
+        <li>モックの必要性の低減</li>
+        <li>テストケースの明確化</li>
+        <li>自動テストの容易さ</li>
+      </ul>
+    </li>
+    <li><strong>並行処理の安全性</strong>
+      <ul>
+        <li>競合状態の防止</li>
+        <li>スレッドセーフな操作</li>
+        <li>分散処理の容易さ</li>
+      </ul>
+    </li>
+    <li><strong>コードの保守性</strong>
+      <ul>
+        <li>変更の影響範囲の限定</li>
+        <li>リファクタリングの容易さ</li>
+        <li>ドキュメントの明確化</li>
+      </ul>
+    </li>
+  </ul>
+
+  <p><a href="00_index.html">目次に戻る</a></p>
+</body>
+
+</html>

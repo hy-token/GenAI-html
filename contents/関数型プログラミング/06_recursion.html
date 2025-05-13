@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <title>第6章 再帰と末尾再帰の理論と実践</title>
+</head>
+
+<body>
+  <h1>第6章 再帰と末尾再帰の理論と実践</h1>
+
+  <h2>6.1 再帰の理論的基盤</h2>
+  <p>再帰は、関数型プログラミングにおける基本的な制御構造の一つです。数学的な帰納法に基づいています。</p>
+
+  <h3>6.1.1 再帰の数学的定義</h3>
+  <p>再帰は、以下の2つの要素で定義されます：</p>
+  <ul>
+    <li><strong>基本ケース（Base Case）</strong>: 再帰の終了条件</li>
+    <li><strong>再帰ケース（Recursive Case）</strong>: 問題をより小さな部分問題に分割</li>
+  </ul>
+
+  <h3>6.1.2 再帰の種類</h3>
+  <p>再帰には主に以下の種類があります：</p>
+  <ul>
+    <li><strong>直接再帰（Direct Recursion）</strong>: 関数が自身を直接呼び出す</li>
+    <li><strong>相互再帰（Mutual Recursion）</strong>: 複数の関数が互いに呼び出し合う</li>
+    <li><strong>末尾再帰（Tail Recursion）</strong>: 再帰呼び出しが関数の最後の操作</li>
+  </ul>
+
+  <h2>6.2 基本的な再帰パターン</h2>
+  <h3>6.2.1 リスト処理</h3>
+  <pre>
+// リストの合計を計算
+const sum = (list) => {
+    if (list.length === 0) return 0;
+    return list[0] + sum(list.slice(1));
+};
+
+// リストの長さを計算
+const length = (list) => {
+    if (list.length === 0) return 0;
+    return 1 + length(list.slice(1));
+};
+
+// リストの要素を反転
+const reverse = (list) => {
+    if (list.length === 0) return [];
+    return [...reverse(list.slice(1)), list[0]];
+};
+  </pre>
+
+  <h3>6.2.2 ツリー処理</h3>
+  <pre>
+// 二分木の定義
+class BinaryTree {
+    constructor(value, left = null, right = null) {
+        this.value = value;
+        this.left = left;
+        this.right = right;
+    }
+}
+
+// ツリーの深さを計算
+const depth = (tree) => {
+    if (!tree) return 0;
+    return 1 + Math.max(depth(tree.left), depth(tree.right));
+};
+
+// ツリーの要素を合計
+const sumTree = (tree) => {
+    if (!tree) return 0;
+    return tree.value + sumTree(tree.left) + sumTree(tree.right);
+};
+  </pre>
+
+  <h2>6.3 末尾再帰の最適化</h2>
+  <h3>6.3.1 末尾再帰の原理</h3>
+  <p>末尾再帰は、再帰呼び出しが関数の最後の操作である場合に、スタックフレームを再利用できる最適化です：</p>
+  <pre>
+// 末尾再帰による階乗の計算
+const factorial = (n, acc = 1) => {
+    if (n <= 1) return acc;
+    return factorial(n - 1, n * acc);
+};
+
+// 末尾再帰によるフィボナッチ数列の計算
+const fibonacci = (n, a = 0, b = 1) => {
+    if (n === 0) return a;
+    if (n === 1) return b;
+    return fibonacci(n - 1, b, a + b);
+};
+  </pre>
+
+  <h3>6.3.2 末尾再帰の変換</h3>
+  <p>通常の再帰を末尾再帰に変換する方法：</p>
+  <pre>
+// 通常の再帰
+const sum = (list) => {
+    if (list.length === 0) return 0;
+    return list[0] + sum(list.slice(1));
+};
+
+// 末尾再帰に変換
+const sumTail = (list, acc = 0) => {
+    if (list.length === 0) return acc;
+    return sumTail(list.slice(1), acc + list[0]);
+};
+  </pre>
+
+  <h2>6.4 再帰の最適化技術</h2>
+  <h3>6.4.1 メモ化（Memoization）</h3>
+  <p>メモ化は、計算結果をキャッシュして再利用する最適化技術です：</p>
+  <pre>
+// メモ化の実装
+const memoize = (fn) => {
+    const cache = new Map();
+    return (...args) => {
+        const key = JSON.stringify(args);
+        if (cache.has(key)) return cache.get(key);
+        const result = fn(...args);
+        cache.set(key, result);
+        return result;
+    };
+};
+
+// メモ化されたフィボナッチ関数
+const fibonacci = memoize((n) => {
+    if (n <= 1) return n;
+    return fibonacci(n - 1) + fibonacci(n - 2);
+});
+  </pre>
+
+  <h3>6.4.2 継続渡しスタイル（CPS）</h3>
+  <p>継続渡しスタイルは、再帰を最適化するための技術です：</p>
+  <pre>
+// 継続渡しスタイルの実装
+const factorialCPS = (n, cont = x => x) => {
+    if (n <= 1) return cont(1);
+    return factorialCPS(n - 1, x => cont(n * x));
+};
+
+// 使用例
+const result = factorialCPS(5); // 120
+  </pre>
+
+  <h2>6.5 実践的なアプリケーション</h2>
+  <h3>6.5.1 パターンマッチング</h3>
+  <pre>
+// パターンマッチングの実装
+const match = (pattern, value) => {
+    if (typeof pattern === 'function') {
+        return pattern(value);
+    }
+    if (Array.isArray(pattern)) {
+        if (!Array.isArray(value)) return false;
+        if (pattern.length !== value.length) return false;
+        return pattern.every((p, i) => match(p, value[i]));
+    }
+    if (typeof pattern === 'object' && pattern !== null) {
+        if (typeof value !== 'object' || value === null) return false;
+        return Object.entries(pattern).every(([k, v]) => match(v, value[k]));
+    }
+    return pattern === value;
+};
+  </pre>
+
+  <h3>6.5.2 データ変換</h3>
+  <pre>
+// 再帰的なデータ変換
+const transform = (fn, data) => {
+    if (Array.isArray(data)) {
+        return data.map(x => transform(fn, x));
+    }
+    if (typeof data === 'object' && data !== null) {
+        return Object.fromEntries(
+            Object.entries(data).map(([k, v]) => [k, transform(fn, v)])
+        );
+    }
+    return fn(data);
+};
+  </pre>
+
+  <h2>6.6 高度なトピック</h2>
+  <h3>6.6.1 相互再帰の最適化</h3>
+  <pre>
+// 相互再帰の例
+const isEven = (n) => {
+    if (n === 0) return true;
+    return isOdd(n - 1);
+};
+
+const isOdd = (n) => {
+    if (n === 0) return false;
+    return isEven(n - 1);
+};
+
+// 最適化された実装
+const isEvenOdd = (n) => {
+    const isEven = (n) => n === 0 ? true : isOdd(n - 1);
+    const isOdd = (n) => n === 0 ? false : isEven(n - 1);
+    return isEven(n);
+};
+  </pre>
+
+  <h3>6.6.2 型システムとの統合</h3>
+  <pre>
+// TypeScriptでの型定義
+type RecursiveType<T> = {
+    value: T;
+    children: RecursiveType<T>[];
+};
+
+// 再帰的な型の使用例
+interface TreeNode<T> {
+    value: T;
+    left: TreeNode<T> | null;
+    right: TreeNode<T> | null;
+}
+  </pre>
+
+  <p><a href="00_index.html">目次に戻る</a></p>
+</body>
+
+</html>

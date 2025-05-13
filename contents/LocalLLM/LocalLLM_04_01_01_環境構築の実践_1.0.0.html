@@ -1,0 +1,570 @@
+<h1>環境構築の実践</h1>
+
+<h2>4.1 基本環境（Python、ライブラリ）の準備</h2>
+
+<h3>必要なPython環境</h3>
+<p>StarCoder2-7Bの実行には、以下のPython環境が必要です：</p>
+
+<table>
+    <tr>
+        <th>項目</th>
+        <th>推奨バージョン</th>
+        <th>最小要件</th>
+        <th>備考</th>
+    </tr>
+    <tr>
+        <td>Python</td>
+        <td>3.10+</td>
+        <td>3.8+</td>
+        <td>最新版推奨</td>
+    </tr>
+    <tr>
+        <td>pip</td>
+        <td>23.0+</td>
+        <td>20.0+</td>
+        <td>最新版にアップデート</td>
+    </tr>
+    <tr>
+        <td>venv</td>
+        <td>標準装備</td>
+        <td>-</td>
+        <td>仮想環境用</td>
+    </tr>
+</table>
+
+<h3>仮想環境の構築</h3>
+<pre><code class="language-bash"># 仮想環境の作成
+python3 -m venv starcoder2-env
+
+# 仮想環境のアクティベート（Linux/Mac）
+source starcoder2-env/bin/activate
+
+# 仮想環境のアクティベート（Windows）
+starcoder2-env\Scripts\activate
+
+# 基本パッケージの更新
+pip install --upgrade pip setuptools wheel</code></pre>
+
+<h3>必須ライブラリのインストール</h3>
+<pre><code class="language-bash"># 基本的な機械学習ライブラリ
+pip install torch==2.0.1+cpu -f https://download.pytorch.org/whl/torch_stable.html
+pip install transformers==4.35.0
+pip install safetensors==0.4.0
+
+# 推論高速化ライブラリ
+pip install accelerate==0.24.0
+pip install bitsandbytes  # 量子化用（Windowsの場合は要調整）
+
+# 開発・運用支援
+pip install python-dotenv  # 環境変数管理
+pip install tqdm          # 進捗表示
+pip install psutil        # システム監視</code></pre>
+
+<h3>ライブラリ依存関係の確認</h3>
+<svg viewBox="0 0 500 350" width="500" height="350">
+    <!-- 背景 -->
+    <rect x="10" y="10" width="480" height="330" fill="#f8f9fa" stroke="#333" stroke-width="2"/>
+    
+    <!-- タイトル -->
+    <text x="250" y="35" text-anchor="middle" font-size="16" font-weight="bold">ライブラリ依存関係</text>
+    
+    <!-- 中核ライブラリ -->
+    <rect x="200" y="60" width="100" height="40" fill="#4a90e2" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="250" y="80" text-anchor="middle" fill="white" font-size="12">transformers</text>
+    
+    <!-- 依存ライブラリ -->
+    <rect x="50" y="130" width="80" height="35" fill="#7ed321" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="90" y="150" text-anchor="middle" font-size="11">torch</text>
+    
+    <rect x="150" y="130" width="80" height="35" fill="#f5a623" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="190" y="150" text-anchor="middle" font-size="11">safetensors</text>
+    
+    <rect x="250" y="130" width="80" height="35" fill="#d0021b" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="290" y="150" text-anchor="middle" font-size="11">accelerate</text>
+    
+    <rect x="350" y="130" width="80" height="35" fill="#9013fe" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="390" y="150" text-anchor="middle" font-size="11">bitsandbytes</text>
+    
+    <!-- オプションライブラリ -->
+    <rect x="100" y="200" width="80" height="35" fill="#b8e986" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="140" y="220" text-anchor="middle" font-size="11">python-dotenv</text>
+    
+    <rect x="200" y="200" width="80" height="35" fill="#ffc107" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="240" y="220" text-anchor="middle" font-size="11">tqdm</text>
+    
+    <rect x="300" y="200" width="80" height="35" fill="#17a2b8" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="340" y="220" text-anchor="middle" font-size="11">psutil</text>
+    
+    <!-- 接続線 -->
+    <line x1="230" y1="100" x2="110" y2="130" stroke="#666" stroke-width="2"/>
+    <line x1="250" y1="100" x2="200" y2="130" stroke="#666" stroke-width="2"/>
+    <line x1="270" y1="100" x2="300" y2="130" stroke="#666" stroke-width="2"/>
+    <line x1="290" y1="100" x2="400" y2="130" stroke="#666" stroke-width="2"/>
+    
+    <line x1="90" y1="165" x2="140" y2="200" stroke="#666" stroke-width="1" stroke-dasharray="3,3"/>
+    <line x1="290" y1="165" x2="240" y2="200" stroke="#666" stroke-width="1" stroke-dasharray="3,3"/>
+    <line x1="390" y1="165" x2="340" y2="200" stroke="#666" stroke-width="1" stroke-dasharray="3,3"/>
+    
+    <!-- 凡例 -->
+    <rect x="10" y="260" width="15" height="15" fill="#333"/>
+    <text x="30" y="273" font-size="11">必須依存</text>
+    
+    <rect x="100" y="260" width="15" height="15" fill="none" stroke="#333" stroke-dasharray="3,3"/>
+    <text x="120" y="273" font-size="11">オプション依存</text>
+</svg>
+
+<h2>4.2 量子化とメモリ最適化</h2>
+
+<h3>量子化の種類と選択</h3>
+<p>メモリ16GB制限下では、量子化の適用が必須となります：</p>
+
+<table>
+    <tr>
+        <th>量子化レベル</th>
+        <th>メモリ使用量</th>
+        <th>精度低下</th>
+        <th>速度</th>
+        <th>推奨度</th>
+    </tr>
+    <tr>
+        <td>8bit</td>
+        <td>約8GB</td>
+        <td>軽微</td>
+        <td>やや遅い</td>
+        <td>★★★</td>
+    </tr>
+    <tr>
+        <td>4bit NF4</td>
+        <td>約5GB</td>
+        <td>中程度</td>
+        <td>遅い</td>
+        <td>★★☆</td>
+    </tr>
+    <tr>
+        <td>4bit FP4</td>
+        <td>約5GB</td>
+        <td>中程度</td>
+        <td>やや速い</td>
+        <td>★★★</td>
+    </tr>
+    <tr>
+        <td>GPTQ</td>
+        <td>約4GB</td>
+        <td>中～大</td>
+        <td>標準的</td>
+        <td>★★☆</td>
+    </tr>
+</table>
+
+<h3>量子化の設定方法</h3>
+<pre><code class="language-python"># transformersの設定例
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
+import torch
+
+# 8bitの場合
+quantization_config = BitsAndBytesConfig(
+    load_in_8bit=True,
+    llm_int8_threshold=6.0
+)
+
+# 4bit NF4の場合
+quantization_config = BitsAndBytesConfig(
+    load_in_4bit=True,
+    bnb_4bit_compute_dtype=torch.float16,
+    bnb_4bit_quant_type="nf4"
+)
+
+# モデルの読み込み
+model = AutoModelForCausalLM.from_pretrained(
+    "bigcode/starcoder2-7b",
+    quantization_config=quantization_config,
+    device_map="auto",
+    trust_remote_code=True
+)</code></pre>
+
+<h3>メモリ使用量の最適化</h3>
+<svg viewBox="0 0 500 280" width="500" height="280">
+    <!-- 背景 -->
+    <rect x="10" y="10" width="480" height="260" fill="#f5f5f5" stroke="#333" stroke-width="2"/>
+    
+    <!-- タイトル -->
+    <text x="250" y="35" text-anchor="middle" font-size="16" font-weight="bold">メモリ使用量の比較</text>
+    
+    <!-- グラフ軸 -->
+    <line x1="50" y1="220" x2="450" y2="220" stroke="#666" stroke-width="2"/>
+    <line x1="50" y1="220" x2="50" y2="60" stroke="#666" stroke-width="2"/>
+    
+    <!-- 軸ラベル -->
+    <text x="250" y="245" text-anchor="middle" font-size="12">量子化タイプ</text>
+    <text x="30" y="140" text-anchor="middle" font-size="12" transform="rotate(-90 30 140)">メモリ使用量 (GB)</text>
+    
+    <!-- バー -->
+    <rect x="80" y="80" width="60" height="140" fill="#4a90e2" stroke="#333"/>
+    <text x="110" y="230" text-anchor="middle" font-size="11">通常</text>
+    <text x="110" y="70" text-anchor="middle" font-size="11">14GB</text>
+    
+    <rect x="160" y="120" width="60" height="100" fill="#7ed321" stroke="#333"/>
+    <text x="190" y="230" text-anchor="middle" font-size="11">8bit</text>
+    <text x="190" y="110" text-anchor="middle" font-size="11">8GB</text>
+    
+    <rect x="240" y="150" width="60" height="70" fill="#f5a623" stroke="#333"/>
+    <text x="270" y="230" text-anchor="middle" font-size="11">4bit NF4</text>
+    <text x="270" y="140" text-anchor="middle" font-size="11">5GB</text>
+    
+    <rect x="320" y="150" width="60" height="70" fill="#bd10e0" stroke="#333"/>
+    <text x="350" y="230" text-anchor="middle" font-size="11">4bit FP4</text>
+    <text x="350" y="140" text-anchor="middle" font-size="11">5GB</text>
+    
+    <rect x="400" y="160" width="60" height="60" fill="#50e3c2" stroke="#333"/>
+    <text x="430" y="230" text-anchor="middle" font-size="11">GPTQ</text>
+    <text x="430" y="150" text-anchor="middle" font-size="11">4GB</text>
+</svg>
+
+<h2>4.3 推論環境の構築</h2>
+
+<h3>基本的な推論スクリプト</h3>
+<pre><code class="language-python"># inference.py
+from transformers import AutoModelForCausalLM, AutoTokenizer
+import torch
+import time
+import os
+
+# メモリ使用状況の確認
+import psutil
+process = psutil.Process(os.getpid())
+
+# モデルパス
+MODEL_PATH = "./starcoder2-7b"
+
+# 量子化設定
+from transformers import BitsAndBytesConfig
+quantization_config = BitsAndBytesConfig(
+    load_in_8bit=True,  # 8bit量子化
+    llm_int8_threshold=6.0
+)
+
+# モデルとトークナイザーの読み込み
+print("モデルを読み込んでいます...")
+tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH)
+model = AutoModelForCausalLM.from_pretrained(
+    MODEL_PATH,
+    quantization_config=quantization_config,
+    device_map="auto",
+    trust_remote_code=True,
+    low_cpu_mem_usage=True
+)
+
+# メモリ使用量の表示
+memory_info = process.memory_info()
+print(f"メモリ使用量: {memory_info.rss / 1024 / 1024 / 1024:.2f} GB")
+
+# コード生成関数
+def generate_code(prompt, max_length=256):
+    inputs = tokenizer(prompt, return_tensors="pt")
+    
+    start_time = time.time()
+    
+    with torch.no_grad():
+        outputs = model.generate(
+            inputs.input_ids,
+            max_length=max_length,
+            temperature=0.2,
+            top_p=0.95,
+            do_sample=True
+        )
+    
+    elapsed = time.time() - start_time
+    generated_code = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    tokens_generated = len(outputs[0]) - len(inputs.input_ids[0])
+    
+    print(f"生成時間: {elapsed:.2f}秒")
+    print(f"生成速度: {tokens_generated / elapsed:.2f} トークン/秒")
+    
+    return generated_code
+
+# インタラクティブモード
+def interactive_mode():
+    print("StarCoder2-7B インタラクティブモード (終了は 'exit')")
+    while True:
+        user_input = input("\nプロンプト> ")
+        if user_input.lower() == 'exit':
+            break
+        result = generate_code(user_input)
+        print("\n=== 生成結果 ===\n")
+        print(result)
+
+if __name__ == "__main__":
+    interactive_mode()</code></pre>
+
+<h3>APIサーバーとしての展開</h3>
+<pre><code class="language-python"># api_server.py
+from flask import Flask, request, jsonify
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
+import torch
+import time
+import os
+
+app = Flask(__name__)
+
+# モデルの読み込み（起動時に1回だけ）
+MODEL_PATH = "./starcoder2-7b"
+
+print("モデルを読み込んでいます...")
+tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH)
+
+# 8bit量子化設定
+quantization_config = BitsAndBytesConfig(
+    load_in_8bit=True,
+    llm_int8_threshold=6.0
+)
+
+model = AutoModelForCausalLM.from_pretrained(
+    MODEL_PATH,
+    quantization_config=quantization_config,
+    device_map="auto",
+    trust_remote_code=True,
+    low_cpu_mem_usage=True
+)
+
+@app.route('/generate', methods=['POST'])
+def generate():
+    data = request.json
+    
+    if not data or 'prompt' not in data:
+        return jsonify({'error': 'プロンプトが必要です'}), 400
+    
+    prompt = data['prompt']
+    max_length = data.get('max_length', 256)
+    temperature = data.get('temperature', 0.2)
+    
+    inputs = tokenizer(prompt, return_tensors="pt")
+    
+    start_time = time.time()
+    
+    with torch.no_grad():
+        outputs = model.generate(
+            inputs.input_ids,
+            max_length=max_length,
+            temperature=temperature,
+            top_p=0.95,
+            do_sample=True
+        )
+    
+    elapsed = time.time() - start_time
+    generated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    
+    response = {
+        'generated_text': generated_text,
+        'time_taken': elapsed,
+        'tokens_per_second': (len(outputs[0]) - len(inputs.input_ids[0])) / elapsed
+    }
+    
+    return jsonify(response)
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=False)</code></pre>
+
+<h2>4.4 動作確認とトラブルシューティング</h2>
+
+<h3>基本的な動作確認</h3>
+<p>環境構築後は以下の手順で動作確認を行います：</p>
+
+<ol>
+    <li>単純なコード生成テスト</li>
+    <li>レスポンス時間の計測</li>
+    <li>メモリ使用量の監視</li>
+    <li>長時間実行安定性の確認</li>
+</ol>
+
+<h3>一般的な問題と解決方法</h3>
+<table>
+    <tr>
+        <th>問題</th>
+        <th>考えられる原因</th>
+        <th>解決策</th>
+    </tr>
+    <tr>
+        <td>メモリエラー</td>
+        <td>量子化設定が不適切</td>
+        <td>4bitに変更、不要プロセス終了</td>
+    </tr>
+    <tr>
+        <td>極端に遅い推論</td>
+        <td>CPUコア数不足</td>
+        <td>バッチサイズ縮小、他プロセス停止</td>
+    </tr>
+    <tr>
+        <td>結果の精度低下</td>
+        <td>過度な量子化</td>
+        <td>8bit量子化に変更</td>
+    </tr>
+    <tr>
+        <td>起動失敗</td>
+        <td>ライブラリ不一致</td>
+        <td>バージョン固定でインストール</td>
+    </tr>
+    <tr>
+        <td>日本語対応不良</td>
+        <td>トークナイザー設定</td>
+        <td>トークナイザーオプション調整</td>
+    </tr>
+</table>
+
+<h3>パフォーマンス監視</h3>
+<pre><code class="language-python"># monitor.py
+import psutil
+import time
+import os
+import threading
+import matplotlib.pyplot as plt
+from datetime import datetime
+
+# グラフ用データ
+timestamps = []
+memory_usage = []
+cpu_usage = []
+
+# 監視対象プロセスID
+pid = None  # 実際のPIDに置き換え
+
+def monitor(pid, interval=1.0):
+    process = psutil.Process(pid)
+    
+    while True:
+        try:
+            # メモリ使用量 (GB)
+            mem = process.memory_info().rss / 1024 / 1024 / 1024
+            # CPU使用率 (%)
+            cpu = process.cpu_percent(interval=0.1)
+            
+            now = datetime.now().strftime('%H:%M:%S')
+            
+            timestamps.append(now)
+            memory_usage.append(mem)
+            cpu_usage.append(cpu)
+            
+            # 最新の状態をコンソールに表示
+            print(f"[{now}] メモリ: {mem:.2f} GB, CPU: {cpu:.1f}%")
+            
+            # 古いデータを削除（直近30ポイントのみ保持）
+            if len(timestamps) > 30:
+                timestamps.pop(0)
+                memory_usage.pop(0)
+                cpu_usage.pop(0)
+                
+            time.sleep(interval)
+            
+        except Exception as e:
+            print(f"監視エラー: {e}")
+            break
+
+# 使用例：
+# python monitor.py <プロセスID>
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv) > 1:
+        pid = int(sys.argv[1])
+        print(f"プロセスID {pid} の監視を開始します...")
+        monitor(pid)
+    else:
+        print("使用方法: python monitor.py <プロセスID>")
+</code></pre>
+
+<h3>最適な運用設定</h3>
+<svg viewBox="0 0 500 300" width="500" height="300">
+    <!-- 背景 -->
+    <rect x="10" y="10" width="480" height="280" fill="#f9f9f9" stroke="#333" stroke-width="2"/>
+    
+    <!-- タイトル -->
+    <text x="250" y="35" text-anchor="middle" font-size="16" font-weight="bold">最適運用設定ガイド</text>
+    
+    <!-- 3x3グリッド -->
+    <rect x="50" y="60" width="120" height="60" fill="#e3f2fd" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="110" y="82" text-anchor="middle" font-size="12">量子化レベル</text>
+    <text x="110" y="100" text-anchor="middle" font-size="11">8bit推奨</text>
+    
+    <rect x="190" y="60" width="120" height="60" fill="#e8f5e9" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="250" y="82" text-anchor="middle" font-size="12">バッチサイズ</text>
+    <text x="250" y="100" text-anchor="middle" font-size="11">1または2</text>
+    
+    <rect x="330" y="60" width="120" height="60" fill="#fff3e0" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="390" y="82" text-anchor="middle" font-size="12">生成長</text>
+    <text x="390" y="100" text-anchor="middle" font-size="11">256トークン以下</text>
+    
+    <rect x="50" y="140" width="120" height="60" fill="#fce4ec" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="110" y="162" text-anchor="middle" font-size="12">プロセス優先度</text>
+    <text x="110" y="180" text-anchor="middle" font-size="11">高に設定</text>
+    
+    <rect x="190" y="140" width="120" height="60" fill="#f3e5f5" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="250" y="162" text-anchor="middle" font-size="12">メモリ管理</text>
+    <text x="250" y="180" text-anchor="middle" font-size="11">キャッシュ制限</text>
+    
+    <rect x="330" y="140" width="120" height="60" fill="#e0f2f1" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="390" y="162" text-anchor="middle" font-size="12">温度パラメータ</text>
+    <text x="390" y="180" text-anchor="middle" font-size="11">0.2-0.4</text>
+    
+    <rect x="50" y="220" width="120" height="60" fill="#ede7f6" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="110" y="242" text-anchor="middle" font-size="12">再起動戦略</text>
+    <text x="110" y="260" text-anchor="middle" font-size="11">4時間ごと</text>
+    
+    <rect x="190" y="220" width="120" height="60" fill="#e8eaf6" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="250" y="242" text-anchor="middle" font-size="12">実行スレッド</text>
+    <text x="250" y="260" text-anchor="middle" font-size="11">最大4スレッド</text>
+    
+    <rect x="330" y="220" width="120" height="60" fill="#efebe9" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="390" y="242" text-anchor="middle" font-size="12">コンテキスト長</text>
+    <text x="390" y="260" text-anchor="middle" font-size="11">最大2048</text>
+</svg>
+
+<h2>用語集</h2>
+
+<h3>A-Z</h3>
+<dl>
+    <dt>API (Application Programming Interface)</dt>
+    <dd>アプリケーション同士が通信するための仕様</dd>
+    
+    <dt>Flask</dt>
+    <dd>Pythonの軽量ウェブアプリケーションフレームワーク</dd>
+    
+    <dt>NF4 (Normal Float 4-bit)</dt>
+    <dd>量子化手法の一種、正規分布に基づく4bit表現</dd>
+    
+    <dt>PyTorch</dt>
+    <dd>機械学習フレームワークの一つ</dd>
+</dl>
+
+<h3>あ行</h3>
+<dl>
+    <dt>インタラクティブモード</dt>
+    <dd>対話形式でモデルとやり取りする実行モード</dd>
+    
+    <dt>量子化（りょうしか）</dt>
+    <dd>モデルの精度を下げてメモリ使用量を削減する技術</dd>
+</dl>
+
+<h3>か行</h3>
+<dl>
+    <dt>仮想環境（かそうかんきょう）</dt>
+    <dd>Python実行環境を分離するための機能</dd>
+</dl>
+
+<h3>さ行</h3>
+<dl>
+    <dt>推論（すいろん）</dt>
+    <dd>学習済みモデルを使用して予測や生成を行うこと</dd>
+</dl>
+
+<h3>た行</h3>
+<dl>
+    <dt>トークナイザー</dt>
+    <dd>テキストをモデル入力用のトークンに分割する機能</dd>
+    
+    <dt>トークン</dt>
+    <dd>言語モデルが処理する最小単位、単語や文字の一部</dd>
+</dl>
+
+<h3>は行</h3>
+<dl>
+    <dt>バッチサイズ</dt>
+    <dd>一度に処理するデータのまとまりの大きさ</dd>
+</dl>

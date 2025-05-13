@@ -1,0 +1,389 @@
+<body>
+    <h1>第4章: UI・システム・入力処理</h1>
+    
+    <h2>4.1 UI要素の配置と管理</h2>
+    
+    <p>GodotのUIシステムは、従来のWebフロントエンドとは異なる独自の設計を持っています。レスポンシブなレイアウトと階層管理が特徴です。</p>
+    
+    <h3>主要なControlノード</h3>
+    
+    <table>
+        <tr>
+            <th>ノードタイプ</th>
+            <th>主な用途</th>
+            <th>レイアウト機能</th>
+            <th>Web要素相当</th>
+        </tr>
+        <tr>
+            <td>Control</td>
+            <td>基本UIコンテナ</td>
+            <td>アンカー、マージン</td>
+            <td>div</td>
+        </tr>
+        <tr>
+            <td>Button</td>
+            <td>ボタン</td>
+            <td>テキスト、アイコン</td>
+            <td>button</td>
+        </tr>
+        <tr>
+            <td>Label</td>
+            <td>テキスト表示</td>
+            <td>文字サイズ、配置</td>
+            <td>span</td>
+        </tr>
+        <tr>
+            <td>LineEdit</td>
+            <td>入力フィールド</td>
+            <td>プレースホルダー</td>
+            <td>input</td>
+        </tr>
+        <tr>
+            <td>Panel</td>
+            <td>背景パネル</td>
+            <td>スタイル設定</td>
+            <td>div with background</td>
+        </tr>
+    </table>
+    
+    <h3>アンカーシステムの活用</h3>
+    
+    <pre>
+# 動的なUIレイアウト管理
+extends Control
+
+@onready var health_bar = $CanvasLayer/UI/HealthBar
+@onready var inventory_panel = $CanvasLayer/UI/InventoryPanel
+
+func _ready():
+    # 画面サイズに合わせた配置
+    health_bar.anchor_left = 0
+    health_bar.anchor_top = 0
+    health_bar.anchor_right = 0.3  # 画面幅の30%
+    health_bar.anchor_bottom = 0.05
+    
+    # マージンで微調整
+    health_bar.margin_left = 10
+    health_bar.margin_top = 10
+    health_bar.margin_right = -10
+    health_bar.margin_bottom = -10
+
+func resize_ui():
+    # ウィンドウサイズ変更時の処理
+    var screen_size = get_viewport_rect().size
+    inventory_panel.position = Vector2(screen_size.x - 300, 50)
+    </pre>
+    
+    <div>
+        <h3>レイアウトコンテナの比較</h3>
+        <table>
+            <tr>
+                <th>コンテナ名</th>
+                <th>特徴</th>
+                <th>CSS Flexbox相当</th>
+                <th>実装工数</th>
+            </tr>
+            <tr>
+                <td>HBoxContainer</td>
+                <td>水平配置</td>
+                <td>flex-direction: row</td>
+                <td>低</td>
+            </tr>
+            <tr>
+                <td>VBoxContainer</td>
+                <td>垂直配置</td>
+                <td>flex-direction: column</td>
+                <td>低</td>
+            </tr>
+            <tr>
+                <td>GridContainer</td>
+                <td>グリッド配置</td>
+                <td>display: grid</td>
+                <td>中</td>
+            </tr>
+            <tr>
+                <td>MarginContainer</td>
+                <td>余白管理</td>
+                <td>padding</td>
+                <td>低</td>
+            </tr>
+            <tr>
+                <td>AspectRatioContainer</td>
+                <td>比率保持</td>
+                <td>aspect-ratio</td>
+                <td>中</td>
+            </tr>
+        </table>
+    </div>
+    
+    <h2>4.2 入力処理とイベントシステム</h2>
+    
+    <p>Godotの入力システムは、統一されたインターフェースでキーボード、マウス、ゲームパッドを扱えます。</p>
+    
+    <h3>入力処理の基本パターン</h3>
+    
+    <pre>
+extends Node
+
+func _ready():
+    # 入力アクションの設定は project.godot で行う
+    pass
+
+func _input(event):
+    # 汎用入力イベント処理
+    if event is InputEventMouseButton:
+        if event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+            print("左クリック: ", event.position)
+    
+    if event is InputEventKey:
+        if event.pressed and event.keycode == KEY_ESCAPE:
+            get_tree().quit()
+
+func _unhandled_input(event):
+    # UI要素で処理されなかった入力
+    if event.is_action_pressed("attack"):
+        attack()
+    
+    if event.is_action_pressed("jump"):
+        jump()
+
+func _process(delta):
+    # 連続的な入力の処理
+    var direction = Input.get_vector("move_left", "move_right", "move_up", "move_down")
+    move_character(direction)
+    </pre>
+    
+    <h3>入力処理の優先順位</h3>
+    
+    <ol>
+        <li><strong>_input():</strong> イベント発生時に最初に実行</li>
+        <li><strong>Controlノードの処理:</strong> UI要素の標準処理</li>
+        <li><strong>_unhandled_input():</strong> 未処理イベントの処理</li>
+        <li><strong>_process():</strong> 毎フレームの状態チェック</li>
+    </ol>
+    
+    <h2>4.3 シグナルシステムの活用</h2>
+    
+    <p>シグナルは、Godotの疎結合設計の中核となる仕組みです。UIとゲームロジックの分離に特に有効です。</p>
+    
+    <div>
+        <h3>シグナルの活用パターン</h3>
+        <table>
+            <tr>
+                <th>パターン</th>
+                <th>用途</th>
+                <th>実装例</th>
+                <th>利点</th>
+            </tr>
+            <tr>
+                <td>Observer</td>
+                <td>状態変化通知</td>
+                <td>health_changed</td>
+                <td>UIと分離</td>
+            </tr>
+            <tr>
+                <td>Command</td>
+                <td>操作実行</td>
+                <td>button_pressed</td>
+                <td>再利用性</td>
+            </tr>
+            <tr>
+                <td>Event Bus</td>
+                <td>グローバル通知</td>
+                <td>game_started</td>
+                <td>疎結合</td>
+            </tr>
+        </table>
+    </div>
+    
+    <pre>
+# シグナルを使ったUI連携
+extends Control
+
+signal inventory_opened
+signal item_selected(item_name)
+signal stats_updated(stats)
+
+@onready var inventory_button = $InventoryButton
+@onready var stat_label = $StatLabel
+
+func _ready():
+    # ボタンのシグナルと連携
+    inventory_button.pressed.connect(_on_inventory_pressed)
+    
+    # ゲームマネージャーのシグナルリスニング
+    GameManager.player_stats_changed.connect(_on_player_stats_changed)
+
+func _on_inventory_pressed():
+    inventory_opened.emit()
+
+func _on_player_stats_changed(stats):
+    stat_label.text = "HP: %d / MP: %d" % [stats.hp, stats.mp]
+    stats_updated.emit(stats)
+    </pre>
+    
+    <h3>効率的なシグナル管理</h3>
+    
+    <ul>
+        <li><strong>一括接続:</strong> connect()の第三引数でワンショット指定</li>
+        <li><strong>自動切断:</strong> ノード削除時の自動切断機能</li>
+        <li><strong>型安全性:</strong> await signal で非同期待機</li>
+        <li><strong>グループ化:</strong> 関連シグナルのまとめ方</li>
+    </ul>
+    
+    <h2>4.4 シーン切り替えと状態管理</h2>
+    
+    <p>Godotのシーン管理は、シンプルでありながら柔軟な設計です。アプリケーション状態の管理に適しています。</p>
+    
+    <pre>
+# グローバルなシーン管理
+extends Node
+
+var current_scene = null
+
+func _ready():
+    var root = get_tree().root
+    current_scene = root.get_child(-1)
+
+func goto_scene(path):
+    # 現在のシーンを削除予約
+    call_deferred("_deferred_goto_scene", path)
+
+func _deferred_goto_scene(path):
+    # 現在のシーンを解放
+    current_scene.free()
+    
+    # 新しいシーンを読み込み
+    var new_scene = ResourceLoader.load(path)
+    current_scene = new_scene.instantiate()
+    
+    # ルートに追加
+    get_tree().root.add_child(current_scene)
+    get_tree().current_scene = current_scene
+
+# 状態管理付きシーン切り替え
+func transition_to_battle(enemy_data):
+    GameState.prepare_battle(enemy_data)
+    goto_scene("res://scenes/Battle.tscn")
+    </pre>
+    
+    <h3>状態管理パターン</h3>
+    
+    <table>
+        <tr>
+            <th>パターン</th>
+            <th>適用場面</th>
+            <th>実装方式</th>
+            <th>保存方法</th>
+        </tr>
+        <tr>
+            <td>シングルトン</td>
+            <td>ゲーム全体</td>
+            <td>AutoLoad</td>
+            <td>グローバル変数</td>
+        </tr>
+        <tr>
+            <td>ステートマシン</td>
+            <td>キャラクター</td>
+            <td>Switch文/辞書</td>
+            <td>ローカル変数</td>
+        </tr>
+        <tr>
+            <td>MVC</td>
+            <td>UI管理</td>
+            <td>シグナル</td>
+            <td>モデルに集約</td>
+        </tr>
+    </table>
+    
+    <h2>4.5 セーブ・ロード機能</h2>
+    
+    <p>Godotのセーブシステムは、JSONやバイナリ形式に対応しています。暗号化機能も標準で利用可能です。</p>
+    
+    <pre>
+# 基本的なセーブ・ロードシステム
+extends Node
+
+const SAVE_PATH = "user://savegame.save"
+
+func save_game():
+    var save_file = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
+    
+    # セーブデータの構築
+    var save_data = {
+        "player_name": GameData.player_name,
+        "level": GameData.level,
+        "position": GameData.player_position,
+        "inventory": GameData.inventory,
+        "timestamp": Time.get_unix_time_from_system()
+    }
+    
+    # JSON形式で保存
+    save_file.store_var(save_data)
+    save_file.close()
+
+func load_game():
+    if not FileAccess.file_exists(SAVE_PATH):
+        return false
+    
+    var save_file = FileAccess.open(SAVE_PATH, FileAccess.READ)
+    var save_data = save_file.get_var()
+    save_file.close()
+    
+    # データの復元
+    GameData.player_name = save_data.player_name
+    GameData.level = save_data.level
+    GameData.player_position = save_data.position
+    GameData.inventory = save_data.inventory
+    
+    return true
+
+# 暗号化セーブの実装
+func save_game_encrypted():
+    var save_file = FileAccess.open_encrypted_with_pass(
+        SAVE_PATH, 
+        FileAccess.WRITE,
+        "your_password"
+    )
+    # 同様の処理...
+    </pre>
+    
+    <h3>セーブデータ設計のベストプラクティス</h3>
+    
+    <ul>
+        <li><strong>バージョン管理:</strong> セーブフォーマットの変更に対応</li>
+        <li><strong>分割保存:</strong> 大きなデータの部分保存</li>
+        <li><strong>検証処理:</strong> 不正なデータの検出</li>
+        <li><strong>バックアップ:</strong> 複数スロットの管理</li>
+    </ul>
+    
+    <h2>4.6 設定画面の実装</h2>
+    
+    <p>ゲーム設定は、ユーザビリティに直結する重要な要素です。Godotでは簡単にカスタマイズ可能な設定画面が実装できます。</p>
+    
+    <pre>
+# 設定管理システム
+extends Control
+
+var settings = {
+    "master_volume": 1.0,
+    "sfx_volume": 1.0,
+    "music_volume": 1.0,
+    "fullscreen": false,
+    "vsync": true,
+    "language": "ja"
+}
+
+@onready var volume_sliders = $VBoxContainer/VolumeSettings
+@onready var display_options = $VBoxContainer/DisplaySettings
+
+func _ready():
+    load_settings()
+    apply_settings()
+    setup_ui()
+
+func setup_ui():
+    # 音量スライダーの設定
+    for child in volume_sliders.get_children():
+        if child is HSlider:
+            child.value_changed.connect(_on_

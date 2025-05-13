@@ -1,0 +1,217 @@
+<body>
+    <h1>第3章: 2D/3D基本開発</h1>
+    
+    <h2>3.1 2Dゲーム開発の基本パターン</h2>
+    
+    <p>Godotの2D開発は、従来の2Dゲームエンジンとは異なる特徴があります。ノードベースの設計により、柔軟で再利用可能な構造が実現できます。</p>
+    
+    <h3>主要な2Dノードタイプ</h3>
+    
+    <table>
+        <tr>
+            <th>ノードタイプ</th>
+            <th>主な用途</th>
+            <th>特徴</th>
+            <th>使用頻度</th>
+        </tr>
+        <tr>
+            <td>Node2D</td>
+            <td>基本的な2Dオブジェクト</td>
+            <td>position, rotation, scale</td>
+            <td>★★★★★</td>
+        </tr>
+        <tr>
+            <td>Sprite2D</td>
+            <td>画像表示</td>
+            <td>テクスチャ、アニメーション対応</td>
+            <td>★★★★★</td>
+        </tr>
+        <tr>
+            <td>CharacterBody2D</td>
+            <td>キャラクター制御</td>
+            <td>移動、コリジョン処理</td>
+            <td>★★★★☆</td>
+        </tr>
+        <tr>
+            <td>RigidBody2D</td>
+            <td>物理シミュレーション</td>
+            <td>重力、衝突反応</td>
+            <td>★★★☆☆</td>
+        </tr>
+        <tr>
+            <td>Area2D</td>
+            <td>領域検出</td>
+            <td>トリガー、センサー</td>
+            <td>★★★★☆</td>
+        </tr>
+    </table>
+    
+    <h3>典型的な2Dゲームの構成</h3>
+    
+    <pre>
+# プレイヤーキャラクターの基本実装
+extends CharacterBody2D
+
+@export var speed = 300.0
+@export var jump_velocity = -400.0
+
+# 重力は物理サーバーのプロジェクト設定から取得
+var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
+
+func _physics_process(delta):
+    # 重力処理
+    if not is_on_floor():
+        velocity.y += gravity * delta
+    
+    # ジャンプ処理
+    if Input.is_action_just_pressed("ui_accept") and is_on_floor():
+        velocity.y = jump_velocity
+    
+    # 水平移動
+    var direction = Input.get_axis("ui_left", "ui_right")
+    if direction != 0:
+        velocity.x = direction * speed
+    else:
+        velocity.x = move_toward(velocity.x, 0, speed)
+    
+    move_and_slide()
+    </pre>
+    
+    <div>
+        <h3>2D開発の設計パターン</h3>
+        <ul>
+            <li><strong>コンポーネント分離：</strong>移動、攻撃、HPなどを別ノードで管理</li>
+            <li><strong>状態機械：</strong>キャラクターの状態遷移を明確に定義</li>
+            <li><strong>イベント駆動：</strong>シグナルを使った疎結合設計</li>
+            <li><strong>オブジェクトプール：</strong>弾丸などの頻繁に生成/削除されるオブジェクト</li>
+        </ul>
+    </div>
+    
+    <h2>3.2 スプライトとアニメーション処理</h2>
+    
+    <p>Godotのアニメーションシステムは、スプライトシートとタイムライン両方に対応した柔軟な設計です。</p>
+    
+    <h3>アニメーション実装方法の比較</h3>
+    
+    <table>
+        <tr>
+            <th>方式</th>
+            <th>適用場面</th>
+            <th>メリット</th>
+            <th>デメリット</th>
+        </tr>
+        <tr>
+            <td>AnimatedSprite2D</td>
+            <td>スプライトシート</td>
+            <td>簡単、軽量</td>
+            <td>機能が限定的</td>
+        </tr>
+        <tr>
+            <td>AnimationPlayer</td>
+            <td>複雑なアニメーション</td>
+            <td>多機能、同期可能</td>
+            <td>設定が複雑</td>
+        </tr>
+        <tr>
+            <td>Tween</td>
+            <td>単純な変化</td>
+            <td>コードで完結</td>
+            <td>複雑な動きに不向き</td>
+        </tr>
+    </table>
+    
+    <pre>
+# AnimatedSprite2Dの基本的な使用方法
+extends Node2D
+
+@onready var animated_sprite = $AnimatedSprite2D
+
+func _ready():
+    # アニメーション準備
+    animated_sprite.play("idle")
+
+func start_walking():
+    animated_sprite.play("walk")
+    animated_sprite.speed_scale = 1.5  # 再生速度調整
+
+func start_attacking():
+    animated_sprite.play("attack")
+    # アニメーション終了時のコールバック
+    animated_sprite.connect("animation_finished", _on_attack_finished)
+
+func _on_attack_finished():
+    animated_sprite.play("idle")
+    </pre>
+    
+    <h3>AnimationPlayerの活用</h3>
+    
+    <ul>
+        <li><strong>キーフレームアニメーション：</strong>位置、回転、スケールを時間軸で制御</li>
+        <li><strong>プロパティアニメーション：</strong>任意のノードプロパティを変化</li>
+        <li><strong>コールメソッド：</strong>特定タイミングで関数を実行</li>
+        <li><strong>アニメーションブレンド：</strong>複数アニメーションの合成</li>
+    </ul>
+    
+    <h2>3.3 3D開発のワークフロー</h2>
+    
+    <p>Godotの3D機能は、UnityやUnrealほど高機能ではありませんが、必要十分な機能を持っています。</p>
+    
+    <h3>3D開発環境の構築</h3>
+    
+    <table>
+        <tr>
+            <th>要素</th>
+            <th>Godot対応</th>
+            <th>Unity比較</th>
+            <th>Unreal比較</th>
+        </tr>
+        <tr>
+            <td>モデリング</td>
+            <td>Blenderエクスポート</td>
+            <td>FBX, OBJ対応</td>
+            <td>独自形式推奨</td>
+        </tr>
+        <tr>
+            <td>シェーダー</td>
+            <td>GDShader</td>
+            <td>Shader Graph</td>
+            <td>Material Editor</td>
+        </tr>
+        <tr>
+            <td>ライティング</td>
+            <td>Forward+</td>
+            <td>URP/HDRP</td>
+            <td>Deferred/Forward</td>
+        </tr>
+        <tr>
+            <td>物理</td>
+            <td>Bullet Physics</td>
+            <td>PhysX</td>
+            <td>Chaos Physics</td>
+        </tr>
+    </table>
+    
+    <pre>
+# 基本的な3Dキャラクターコントローラー
+extends CharacterBody3D
+
+@export var speed = 5.0
+@export var jump_velocity = 4.5
+@export var mouse_sensitivity = 0.002
+
+var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
+
+@onready var camera = $Camera3D
+
+func _ready():
+    # マウスカーソルを画面中央に固定
+    Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+
+func _physics_process(delta):
+    # 重力追加
+    if not is_on_floor():
+        velocity.y -= gravity * delta
+    
+    # ジャンプ処理
+    if Input.is_action_just_pressed("ui_accept") and is_on_floor():
+        velocity.y = jump_velocity

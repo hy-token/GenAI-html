@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<body>
+<h1>グラフ構造判別と最適解法の選択</h1>
+
+<h2>6.1 問題のグラフ構造への変換</h2>
+<p>実世界の多くの問題は、グラフ理論を用いて解決できます。しかし、問題をグラフ構造に変換するためには、適切なモデリングが必要です。以下に、一般的な問題のグラフへの変換方法を紹介します。</p>
+
+<table border="1">
+    <tr>
+        <th>問題タイプ</th>
+        <th>グラフへの変換方法</th>
+        <th>ノード表現</th>
+        <th>エッジ表現</th>
+    </tr>
+    <tr>
+        <td>ネットワーク問題</td>
+        <td>直接変換</td>
+        <td>地点、デバイス、ステーション</td>
+        <td>接続、道路、リンク</td>
+    </tr>
+    <tr>
+        <td>スケジューリング問題</td>
+        <td>依存関係をエッジとして表現</td>
+        <td>タスク、イベント</td>
+        <td>順序制約、依存関係</td>
+    </tr>
+    <tr>
+        <td>割り当て問題</td>
+        <td>二部グラフとして表現</td>
+        <td>リソース、作業</td>
+        <td>割り当て可能性、適合度</td>
+    </tr>
+    <tr>
+        <td>最適化問題</td>
+        <td>重み付きグラフとして表現</td>
+        <td>決定ポイント</td>
+        <td>コスト、利益、距離</td>
+    </tr>
+</table>
+
+<div class="example-box">
+    <h3>例：迷路問題のグラフ変換</h3>
+    <p>迷路を解く問題では、通路の交差点や分岐点をノードとし、通路をエッジとします。壁は接続されていない状態を表します。スタート地点からゴール地点までの最短経路は、グラフ上の最短経路問題として解くことができます。</p>
+</div>
+
+<p>問題をグラフに変換する際のポイント：</p>
+<ul>
+    <li>何をノードとして表現するかを明確にする</li>
+    <li>ノード間の関係性をエッジとして定義する</li>
+    <li>問題に応じて、有向/無向、重み付き/重みなし、サイクルの有無などを決定する</li>
+    <li>制約条件をグラフの構造的特性として表現する</li>
+</ul>
+
+<h2>6.2 構造に基づく解法選択フレームワーク</h2>
+<p>問題を適切なグラフ構造に変換したら、その構造に最適なアルゴリズムを選択する必要があります。以下に、グラフ構造に基づいた解法選択のフレームワークを示します。</p>
+
+<svg width="600" height="450" viewBox="0 0 600 450">
+    <!-- フレームワーク図 -->
+    <g transform="translate(300, 50)">
+        <!-- 開始ポイント -->
+        <rect x="-150" y="0" width="300" height="40" rx="20" fill="#7CB9E8" />
+        <text x="0" y="25" text-anchor="middle" font-size="16">問題特性の分析</text>
+        
+        <!-- 第一階層の分岐 -->
+        <line x1="0" y1="40" x2="0" y2="70" stroke="black" stroke-width="2" />
+        <line x1="0" y1="70" x2="-200" y2="70" stroke="black" stroke-width="2" />
+        <line x1="0" y1="70" x2="0" y2="70" stroke="black" stroke-width="2" />
+        <line x1="0" y1="70" x2="200" y2="70" stroke="black" stroke-width="2" />
+        <line x1="-200" y1="70" x2="-200" y2="100" stroke="black" stroke-width="2" />
+        <line x1="0" y1="70" x2="0" y2="100" stroke="black" stroke-width="2" />
+        <line x1="200" y1="70" x2="200" y2="100" stroke="black" stroke-width="2" />
+        
+        <!-- 第一階層のボックス -->
+        <rect x="-280" y="100" width="160" height="40" rx="5" fill="#FFB347" />
+        <text x="-200" y="125" text-anchor="middle" font-size="14">階層関係あり</text>
+        
+        <rect x="-80" y="100" width="160" height="40" rx="5" fill="#FFB347" />
+        <text x="0" y="125" text-anchor="middle" font-size="14">方向性あり</text>
+        
+        <rect x="120" y="100" width="160" height="40" rx="5" fill="#FFB347" />
+        <text x="200" y="125" text-anchor="middle" font-size="14">相互関係</text>
+        
+        <!-- 第二階層への線 -->
+        <line x1="-200" y1="140" x2="-200" y2="180" stroke="black" stroke-width="2" />
+        <line x1="0" y1="140" x2="0" y2="180" stroke="black" stroke-width="2" />
+        <line x1="200" y1="140" x2="200" y2="180" stroke="black" stroke-width="2" />
+        
+        <!-- 第二階層のボックス -->
+        <rect x="-280" y="180" width="160" height="40" rx="5" fill="#77DD77" />
+        <text x="-200" y="205" text-anchor="middle" font-size="14">木構造</text>
+        
+        <rect x="-80" y="180" width="160" height="40" rx="5" fill="#77DD77" />
+        <text x="0" y="205" text-anchor="middle" font-size="14">DAG</text>
+        
+        <rect x="120" y="180" width="160" height="40" rx="5" fill="#77DD77" />
+        <text x="200" y="205" text-anchor="middle" font-size="14">無向グラフ</text>
+        
+        <!-- 第三階層への線 -->
+        <line x1="-200" y1="220" x2="-200" y2="260" stroke="black" stroke-width="2" />
+        <line x1="0" y1="220" x2="0" y2="260" stroke="black" stroke-width="2" />
+        <line x1="200" y1="220" x2="200" y2="260" stroke="black" stroke-width="2" />
+        
+        <!-- 第三階層のボックス (代表的なアルゴリズム) -->
+        <rect x="-280" y="260" width="160" height="110" rx="5" fill="#9DE0F5" />
+        <text x="-200" y="280" text-anchor="middle" font-size="14">・深さ/幅優先探索</text>
+        <text x="-200" y="305" text-anchor="middle" font-size="14">・最小共通祖先(LCA)</text>
+        <text x="-200" y="330" text-anchor="middle" font-size="14">・木DP</text>
+        <text x="-200" y="355" text-anchor="middle" font-size="14">・重心分解</text>
+        
+        <rect x="-80" y="260" width="160" height="110" rx="5" fill="#9DE0F5" />
+        <text x="0" y="280" text-anchor="middle" font-size="14">・トポロジカルソート</text>
+        <text x="0" y="305" text-anchor="middle" font-size="14">・最長/最短経路</text>
+        <text x="0" y="330" text-anchor="middle" font-size="14">・クリティカルパス</text>
+        <text x="0" y="355" text-anchor="middle" font-size="14">・動的計画法</text>
+        
+        <rect x="120" y="260" width="160" height="110" rx="5" fill="#9DE0F5" />
+        <text x="200" y="280" text-anchor="middle" font-size="14">・最小全域木</text>
+        <text x="200" y="305" text-anchor="middle" font-size="14">・最短経路</text>
+        <text x="200" y="330" text-anchor="middle" font-size="14">・連結成分分解</text>
+        <text x="200" y="355" text-anchor="middle" font-size="14">・ネットワークフロー</text>
+    </g>
+</svg>
+
+<p>グラフ構造に基づく解法選択の基本ステップ：</p>
+<ol>
+    <li><strong>問題特性の分析：</strong> 問題の制約条件や目的を明確にする</li>
+    <li><strong>グラフ構造の特定：</strong> 階層関係、方向性、相互関係などを判断</li>
+    <li><strong>具体的なグラフ構造の決定：</strong> 木構造、DAG、無向グラフなど</li>
+    <li><strong>適切なアルゴリズムの選択：</strong> グラフ構造に最適なアルゴリズムを選ぶ</li>
+    <li><strong>パラメータの調整：</strong> 問題サイズや要件に合わせてアルゴリズムを調整</li>
+</ol>
+
+<div class="example-box">
+    <h3>問題例：プロジェクトスケジューリング</h3>
+    <p>各タスクに所要時間があり、タスク間に依存関係がある場合：</p>
+    <ul>
+        <li>構造特定：依存関係はDAG構造として表現できる</li>
+        <li>解法選択：トポロジカルソートでタスクの実行順序を決定し、最長経路計算で最短完了時間を算出</li>
+        <li>クリティカルパス分析でボトルネックとなるタスクを特定</li>
+    </ul>
+</div>
+
+<h2>6.3 計算量とトレードオフの分析</h2>
+<p>グラフアルゴリズムの選択では、計算量とその他の要素（メモリ使用量、実装の複雑さなど）のトレードオフを考慮することが重要です。</p>
+
+<table border="1">
+    <tr>
+        <th>アルゴリズム</th>
+        <th>時間計算量</th>
+        <th>空間計算量</th>
+        <th>実装の複雑さ</th>
+        <th>適用シナリオ</th>
+    </tr>
+    <tr>
+        <td>深さ優先探索 (DFS)</td>
+        <td>O(V+E)</td>
+        <td>O(V)</td>
+        <td>低</td>
+        <td>連結性確認、サイクル検出、トポロジカルソート</td>
+    </tr>
+    <tr>
+        <td>幅優先探索 (BFS)</td>
+        <td>O(V+E)</td>
+        <td>O(V)</td>
+        <td>低</td>
+        <td>最短経路（重みなし）、レベル順走査</td>
+    </tr>
+    <tr>
+        <td>ダイクストラ法</td>
+        <td>O((V+E)log V)</td>
+        <td>O(V)</td>
+        <td>中</td>
+        <td>単一始点最短経路（正の重み）</td>
+    </tr>
+    <tr>
+        <td>クラスカル法</td>
+        <td>O(E log E)</td>
+        <td>O(V)</td>
+        <td>中</td>
+        <td>最小全域木（疎グラフに適している）</td>
+    </tr>
+    <tr>
+        <td>プリム法</td>
+        <td>O(E log V)</td>
+        <td>O(V)</td>
+        <td>中</td>
+        <td>最小全域木（密グラフに適している）</td>
+    </tr>
+    <tr>
+        <td>フロイド-ワーシャル法</td>
+        <td>O(V³)</td>
+        <td>O(V²)</td>
+        <td>低</td>
+        <td>全点対間最短経路（小規模グラフ）</td>
+    </tr>
+    <tr>
+        <td>Ford-Fulkerson法</td>
+        <td>O(E×max_flow)</td>
+        <td>O(V+E)</td>
+        <td>中</td>
+        <td>最大フロー（容量が整数の場合）</td>
+    </tr>
+</table>
+
+<p>トレードオフを考慮する際のポイント：</p>
+<ul>
+    <li><strong>問題サイズ：</strong> 大規模データでは計算量が重要、小規模では実装のシンプルさが優先</li>
+    <li><strong>実行頻度：</strong> 頻繁に実行される場合は効率が重要</li>
+    <li><strong>最適解 vs 近似解：</strong> 厳密解が必要か、良い近似解で十分か</li>
+    <li><strong>メモリ制約：</strong> 利用可能なメモリ量によって選択が変わる</li>
+    <li><strong>特殊条件の活用：</strong> グラフの特性（平面グラフ、スパースグラフなど）を活かした最適化</li>
+</ul>
+
+<h2>6.4 実装上の注意点とベストプラクティス</h2>
+<p>グラフアルゴリズムを実装する際の注意点とベストプラクティスを紹介します。</p>
+
+<h3>グラフの表現方法</h3>
+<p>グラフの表現方法によって、アルゴリズムの効率や実装の複雑さが大きく変わります。</p>
+
+<table border="1">
+    <tr>
+        <th>表現方法</th>
+        <th>メモリ使用量</th>
+        <th>エッジの検索</th>
+        <th>全ノード探索</th>
+        <th>適したグラフ</th>
+    </tr>
+    <tr>
+        <td>隣接行列</td>
+        <td>O(V²)</td>
+        <td>O(1)</td>
+        <td>O(V²)</td>
+        <td>密グラフ、小規模グラフ</td>
+    </tr>
+    <tr>
+        <td>隣接リスト</td>
+        <td>O(V+E)</td>
+        <td>O(度数)</td>
+        <td>O(V+E)</td>
+        <td>疎グラフ、大規模グラフ</td>
+    </tr>
+    <tr>
+        <td>エッジリスト</td>
+        <td>O(E)</td>
+        <td>O(E)</td>
+        <td>O(E)</td>
+        <td>変更の多いグラフ、Union-Find操作</td>
+    </tr>
+</table>
+
+<div class="code-block">
+<pre>
+<code>
+// 隣接リストによるグラフ表現の例（JavaScript）
+class Graph {
+    constructor(isDirected = false) {
+        this.adjacencyList = {};
+        this.isDirected = isDirected;
+    }
+    
+    addVertex(vertex) {
+        if (!this.adjacencyList[vertex]) {
+            this.adjacencyList[vertex] = [];
+        }
+    }
+    
+    addEdge(v1, v2, weight = 1) {
+        this.adjacencyList[v1].push({node: v2, weight});
+        if (!this.isDirected) {
+            this.adjacencyList[v2].push({node: v1, weight});
+        }
+    }
+    
+    // その他のメソッド（DFS, BFSなど）
+}
+</code>
+</pre>
+</div>
+
+<h3>実装上のベストプラクティス</h3>
+<ul>
+    <li><strong>入力検証：</strong> グラフが想定通りの構造か確認（DAGの場合はサイクルがないかなど）</li>
+    <li><strong>効率的なデータ構造：</strong> 優先度付きキュー、Union-Findなどの適切な補助データ構造の活用</li>
+    <li><strong>メモ化：</strong> 重複計算を避けるためのキャッシング</li>
+    <li><strong>早期終了：</strong> 条件を満たした時点で探索を停止する最適化</li>
+    <li><strong>並列化：</strong> 独立した部分問題の並列処理</li>
+    <li><strong>段階的処理：</strong> 大規模グラフの場合、前処理、主処理、後処理に分ける</li>
+</ul>
+
+<div class="example-box">
+    <h3>実装例：効率的な最短経路計算</h3>
+    <p>ダイクストラ法を実装する際、単純な配列ではなく優先度付きキューを使用することで、O(V²)からO((V+E)log V)に計算量を改善できます。また、目的地が決まっている場合は、到達した時点で探索を終了することで更に最適化できます。</p>
+</div>
+
+<p>グラフアルゴリズムを実装する際は、理論的な計算量だけでなく、実際の実行環境や問題の特性に合わせた最適化が重要です。標準ライブラリや既存のグラフ処理フレームワークの活用も検討しましょう。</p>
+
+<style>
+    .example-box {
+        background-color: #f0f8ff;
+        border-left: 5px solid #7CB9E8;
+        padding: 10px;
+        margin: 15px 0;
+    }
+    
+    .code-block {
+        background-color: #f5f5f5;
+        border-left: 5px solid #8a8a8a;
+        padding: 10px;
+        margin: 15px 0;
+        overflow-x: auto;
+    }
+</style>
+
+<style>
+    .example-box {
+        background-color: #f0f8ff;
+        border-left: 5px solid #7CB9E8;
+        padding: 10px;
+        margin: 15px 0;
+    }
+    
+    .code-block {
+        background-color: #f5f5f5;
+        border-left: 5px solid #8a8a8a;
+        padding: 10px;
+        margin: 15px 0;
+        overflow-x: auto;
+    }
+</style>
+</body>
+</html>

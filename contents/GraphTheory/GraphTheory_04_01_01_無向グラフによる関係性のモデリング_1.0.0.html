@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<body>
+<h1>無向グラフによる関係性のモデリング</h1>
+
+<h2>4.1 無向グラフの特性と基本アルゴリズム</h2>
+<p>無向グラフ（Undirected Graph）は、ノード間の関係に方向性がないグラフです。友人関係や道路網など、双方向の関係を表現するのに適しています。</p>
+
+<p>無向グラフの主な特徴は以下の通りです：</p>
+<ul>
+    <li>エッジに方向がなく、ノードA→ノードBの接続は、ノードB→ノードAの接続も意味する</li>
+    <li>隣接するノード間は対等な関係性を持つ</li>
+    <li>エッジは「通り道」として双方向に使用できる</li>
+    <li>「次数」（あるノードに接続しているエッジの数）が重要な指標となる</li>
+</ul>
+
+<svg width="600" height="300" viewBox="0 0 600 300">
+    <!-- 無向グラフの例 -->
+    <g transform="translate(300, 150)">
+        <!-- ノード -->
+        <circle cx="-150" cy="-100" r="20" fill="#77DD77" />
+        <circle cx="0" cy="-120" r="20" fill="#77DD77" />
+        <circle cx="150" cy="-100" r="20" fill="#77DD77" />
+        <circle cx="-180" cy="20" r="20" fill="#77DD77" />
+        <circle cx="-60" cy="40" r="20" fill="#77DD77" />
+        <circle cx="80" cy="40" r="20" fill="#77DD77" />
+        <circle cx="200" cy="20" r="20" fill="#77DD77" />
+        <circle cx="0" cy="120" r="20" fill="#77DD77" />
+        
+        <!-- エッジ -->
+        <line x1="-150" y1="-100" x2="0" y2="-120" stroke="black" stroke-width="2" />
+        <line x1="0" y1="-120" x2="150" y2="-100" stroke="black" stroke-width="2" />
+        <line x1="-150" y1="-100" x2="-180" y2="20" stroke="black" stroke-width="2" />
+        <line x1="-150" y1="-100" x2="-60" y2="40" stroke="black" stroke-width="2" />
+        <line x1="0" y1="-120" x2="-60" y2="40" stroke="black" stroke-width="2" />
+        <line x1="0" y1="-120" x2="80" y2="40" stroke="black" stroke-width="2" />
+        <line x1="150" y1="-100" x2="80" y2="40" stroke="black" stroke-width="2" />
+        <line x1="150" y1="-100" x2="200" y2="20" stroke="black" stroke-width="2" />
+        <line x1="-180" y1="20" x2="-60" y2="40" stroke="black" stroke-width="2" />
+        <line x1="-60" y1="40" x2="80" y2="40" stroke="black" stroke-width="2" />
+        <line x1="80" y1="40" x2="200" y2="20" stroke="black" stroke-width="2" />
+        <line x1="-60" y1="40" x2="0" y2="120" stroke="black" stroke-width="2" />
+        <line x1="80" y1="40" x2="0" y2="120" stroke="black" stroke-width="2" />
+        
+        <!-- ラベル -->
+        <text x="-150" y="-100" dy="5" text-anchor="middle" font-size="16" fill="white">A</text>
+        <text x="0" y="-120" dy="5" text-anchor="middle" font-size="16" fill="white">B</text>
+        <text x="150" y="-100" dy="5" text-anchor="middle" font-size="16" fill="white">C</text>
+        <text x="-180" y="20" dy="5" text-anchor="middle" font-size="16" fill="white">D</text>
+        <text x="-60" y="40" dy="5" text-anchor="middle" font-size="16" fill="white">E</text>
+        <text x="80" y="40" dy="5" text-anchor="middle" font-size="16" fill="white">F</text>
+        <text x="200" y="20" dy="5" text-anchor="middle" font-size="16" fill="white">G</text>
+        <text x="0" y="120" dy="5" text-anchor="middle" font-size="16" fill="white">H</text>
+    </g>
+</svg>
+
+<p>無向グラフで使われる主要なアルゴリズムには以下のようなものがあります：</p>
+
+<table border="1">
+    <tr>
+        <th>アルゴリズム</th>
+        <th>目的</th>
+        <th>計算量</th>
+        <th>応用例</th>
+    </tr>
+    <tr>
+        <td>幅優先探索（BFS）</td>
+        <td>最短パス、到達可能性の確認</td>
+        <td>O(V+E)</td>
+        <td>最短ルート探索、友達の友達検索</td>
+    </tr>
+    <tr>
+        <td>深さ優先探索（DFS）</td>
+        <td>連結成分の特定、サイクル検出</td>
+        <td>O(V+E)</td>
+        <td>迷路探索、ネットワーク解析</td>
+    </tr>
+    <tr>
+        <td>最小全域木（MST）</td>
+        <td>最小コストで全ノードを接続</td>
+        <td>O(E log V)</td>
+        <td>ネットワーク設計、クラスタリング</td>
+    </tr>
+    <tr>
+        <td>連結成分分解</td>
+        <td>独立したサブグラフの特定</td>
+        <td>O(V+E)</td>
+        <td>コミュニティ検出、画像分割</td>
+    </tr>
+</table>
+
+<div class="code-block">
+<pre>
+<code>
+// 無向グラフでの幅優先探索（BFS）の擬似コード
+function BFS(graph, startNode):
+    queue = new Queue()
+    visited = new Set()
+    
+    queue.enqueue(startNode)
+    visited.add(startNode)
+    
+    while !queue.isEmpty():
+        currentNode = queue.dequeue()
+        
+        for each neighbor of currentNode:
+            if neighbor not in visited:
+                queue.enqueue(neighbor)
+                visited.add(neighbor)
+                
+    return visited  // 到達可能なすべてのノード
+</code>
+</pre>
+</div>
+
+<h2>4.2 ネットワーク最適化問題</h2>
+<p>無向グラフは、ネットワークの最適化問題に特に適しています。以下に代表的な問題とその解法を紹介します：</p>
+
+<h3>最小全域木（MST）問題</h3>
+<p>すべてのノードを最小コストで接続するエッジの集合を見つける問題です。例えば、最小限のケーブルでコンピュータネットワークを構築する場合などに応用されます。</p>
+
+<div class="example-box">
+    <h3>例：電力網の構築</h3>
+    <p>複数の都市に電力を供給するために、最小限のコストで送電線を敷設する問題。都市をノード、可能な送電線をエッジ、敷設コストを重みとして、最小全域木アルゴリズム（クラスカル法やプリム法）で最適な敷設計画を立てることができます。</p>
+</div>
+
+<p>最小全域木を求める代表的なアルゴリズム：</p>
+<ul>
+    <li><strong>クラスカル法（Kruskal's Algorithm）：</strong> エッジを重みの昇順でソートし、サイクルを作らないように追加していく</li>
+    <li><strong>プリム法（Prim's Algorithm）：</strong> 任意のノードから開始し、現在の木に接続可能な最小重みのエッジを順次追加する</li>
+</ul>
+
+<svg width="600" height="350" viewBox="0 0 600 350">
+    <!-- 最小全域木の例 -->
+    <g transform="translate(300, 150)">
+        <!-- 元のグラフ -->
+        <g transform="translate(-200, 0)">
+            <!-- ノード -->
+            <circle cx="-80" cy="-80" r="20" fill="#77DD77" />
+            <circle cx="80" cy="-80" r="20" fill="#77DD77" />
+            <circle cx="-80" cy="80" r="20" fill="#77DD77" />
+            <circle cx="80" cy="80" r="20" fill="#77DD77" />
+            
+            <!-- エッジ -->
+            <line x1="-80" y1="-80" x2="80" y2="-80" stroke="black" stroke-width="2" />
+            <line x1="-80" y1="-80" x2="-80" y2="80" stroke="black" stroke-width="2" />
+            <line x1="-80" y1="-80" x2="80" y2="80" stroke="black" stroke-width="2" stroke-dasharray="5,5" />
+            <line x1="80" y1="-80" x2="80" y2="80" stroke="black" stroke-width="2" />
+            <line x1="-80" y1="80" x2="80" y2="80" stroke="black" stroke-width="2" />
+            
+            <!-- 重み -->
+            <text x="0" y="-95" text-anchor="middle" font-size="14">5</text>
+            <text x="-95" y="0" text-anchor="middle" font-size="14">3</text>
+            <text x="0" y="0" text-anchor="middle" font-size="14">9</text>
+            <text x="95" y="0" text-anchor="middle" font-size="14">6</text>
+            <text x="0" y="95" text-anchor="middle" font-size="14">4</text>
+            
+            <text x="0" y="130" text-anchor="middle" font-size="16">元のグラフ</text>
+        </g>
+        
+        <!-- 最小全域木 -->
+        <g transform="translate(200, 0)">
+            <!-- ノード -->
+            <circle cx="-80" cy="-80" r="20" fill="#77DD77" />
+            <circle cx="80" cy="-80" r="20" fill="#77DD77" />
+            <circle cx="-80" cy="80" r="20" fill="#77DD77" />
+            <circle cx="80" cy="80" r="20" fill="#77DD77" />
+            
+            <!-- エッジ (MST) -->
+            <line x1="-80" y1="-80" x2="-80" y2="80" stroke="red" stroke-width="3" />
+            <line x1="-80" y1="80" x2="80" y2="80" stroke="red" stroke-width="3" />
+            <line x1="80" y1="-80" x2="80" y2="80" stroke="red" stroke-width="3" />
+            
+            <!-- 重み -->
+            <text x="-95" y="0" text-anchor="middle" font-size="14">3</text>
+            <text x="0" y="95" text-anchor="middle" font-size="14">4</text>
+            <text x="95" y="0" text-anchor="middle" font-size="14">6</text>
+            
+            <text x="0" y="130" text-anchor="middle" font-size="16">最小全域木</text>
+        </g>
+    </g>
+</svg>
+
+<h3>ネットワークフロー問題</h3>
+<p>ソース（始点）からシンク（終点）まで、最大の流量を送るための最適なフロー配分を求める問題です。例えば、道路網での交通量最適化や、パイプラインでの流体輸送などに応用されます。</p>
+
+<h2>4.3 連結性と到達可能性の分析</h2>
+<p>無向グラフにおける連結性の分析は、多くの実世界の問題に応用されます。特に重要なのは「連結成分」の概念です。</p>
+
+<h3>連結成分（Connected Components）</h3>
+<p>連結成分とは、グラフ内でお互いに到達可能なノードの集まりです。現実世界では、独立したコミュニティやネットワークのクラスタとして解釈できます。</p>
+
+<div class="example-box">
+    <h3>例：SNS上のコミュニティ検出</h3>
+    <p>SNSのユーザーをノード、友人関係をエッジとした無向グラフを考えます。このグラフの連結成分は「お互いにつながりのあるユーザーグループ」を表し、マーケティングやコンテンツ推薦のターゲットとして活用できます。</p>
+</div>
+
+<p>連結成分を見つける方法：</p>
+<ul>
+    <li>深さ優先探索（DFS）または幅優先探索（BFS）を使用する</li>
+    <li>未訪問のノードから探索を開始し、到達可能なすべてのノードをマークする</li>
+    <li>これを未訪問のノードがなくなるまで繰り返す</li>
+</ul>
+
+<h3>橋とカットポイント</h3>
+<p>グラフの連結性を保つ上で重要な要素として、「橋」と「カットポイント」があります。</p>
+
+<ul>
+    <li><strong>橋（Bridge）：</strong> 削除するとグラフの連結成分数が増えるエッジ</li>
+    <li><strong>カットポイント（Articulation Point）：</strong> 削除するとグラフの連結成分数が増えるノード</li>
+</ul>
+
+<svg width="600" height="300" viewBox="0 0 600 300">
+    <!-- 橋とカットポイントの例 -->
+    <g transform="translate(300, 150)">
+        <!-- ノード -->
+        <circle cx="-150" cy="-50" r="20" fill="#77DD77" />
+        <circle cx="-50" cy="-50" r="20" fill="#77DD77" />
+        <circle cx="50" cy="-50" r="20" fill="#77DD77" />
+        <circle cx="150" cy="-50" r="20" fill="#77DD77" />
+        <circle cx="-150" cy="50" r="20" fill="#77DD77" />
+        <circle cx="-50" cy="50" r="20" fill="#FFB347" /> <!-- カットポイント -->
+        <circle cx="50" cy="50" r="20" fill="#FFB347" /> <!-- カットポイント -->
+        <circle cx="150" cy="50" r="20" fill="#77DD77" />
+        
+        <!-- エッジ -->
+        <line x1="-150" y1="-50" x2="-50" y2="-50" stroke="black" stroke-width="2" />
+        <line x1="-50" y1="-50" x2="50" y2="-50" stroke="black" stroke-width="2" />
+        <line x1="50" y1="-50" x2="150" y2="-50" stroke="black" stroke-width="2" />
+        <line x1="-150" y1="50" x2="-50" y2="50" stroke="black" stroke-width="2" />
+        <line x1="-50" y1="50" x2="50" y2="50" stroke="red" stroke-width="3" /> <!-- 橋 -->
+        <line x1="50" y1="50" x2="150" y2="50" stroke="black" stroke-width="2" />
+        <line x1="-150" y1="-50" x2="-150" y2="50" stroke="black" stroke-width="2" />
+        <line x1="-50" y1="-50" x2="-50" y2="50" stroke="black" stroke-width="2" />
+        <line x1="50" y1="-50" x2="50" y2="50" stroke="black" stroke-width="2" />
+        <line x1="150" y1="-50" x2="150" y2="50" stroke="black" stroke-width="2" />
+        
+        <!-- 説明 -->
+        <text x="0" y="-90" text-anchor="middle" font-size="16">橋とカットポイントの例</text>
+        <text x="0" y="90" text-anchor="middle" font-size="14">赤のエッジ: 橋、オレンジのノード: カットポイント</text>
+    </g>
+</svg>
+
+<p>橋やカットポイントは、ネットワークの脆弱性分析に役立ちます。例えば、通信ネットワークや交通網の障害に対する耐性を評価する際に重要です。</p>
+
+<h2>4.4 適用事例と実装ガイドライン</h2>
+
+<h3>適用事例1：ソーシャルネットワーク分析</h3>
+<p>SNSの人間関係を無向グラフとしてモデル化することで、以下のような分析が可能になります：</p>
+<ul>
+    <li>影響力の高いユーザーの特定（中心性の高いノード）</li>
+    <li>コミュニティの検出（密に接続されたノードのクラスタ）</li>
+    <li>情報拡散の予測（ノード間の接続性と拡散モデルを組み合わせる）</li>
+    <li>友達推薦システムの構築（共通の友人が多いユーザーを推薦）</li>
+</ul>
+
+<h3>適用事例2：交通ネットワーク最適化</h3>
+<p>都市の道路網を無向グラフとしてモデル化し、以下のような最適化を行うことができます：</p>
+<ul>
+    <li>最短経路探索（カーナビゲーションシステム）</li>
+    <li>交通渋滞の予測と回避（エッジの容量と流量を考慮）</li>
+    <li>新規道路建設の計画（グラフの連結性を改善する箇所の特定）</li>
+    <li>交通網の耐障害性分析（橋やカットポイントの特定）</li>
+</ul>
+
+<h3>実装ガイドライン：</h3>
+<ul>
+    <li><strong>隣接リストか隣接行列か：</strong> 密度の低いグラフ（エッジが少ない）なら隣接リスト、密度の高いグラフなら隣接行列が適している</li>
+    <li><strong>重み付けの考慮：</strong> 距離やコストなどの重みが必要な場合は、エッジに重み情報を追加する</li>
+    <li><strong>効率的な探索：</strong> 連結成分や到達可能性の分析には、Union-Findデータ構造やDFS/BFSを活用する</li>
+    <li><strong>大規模グラフへの対応：</strong> 実世界の大規模グラフ（SNSなど）では、分散アルゴリズムやサンプリング手法を検討する</li>
+</ul>
+
+<div class="code-block">
+<pre>
+<code>
+// 無向グラフクラスの基本設計例（JavaScript）
+class UndirectedGraph {
+    constructor() {
+        this.adjacencyList = {};
+    }
+    
+    addVertex(vertex) {
+        if (!this.adjacencyList[vertex]) {
+            this.adjacencyList[vertex] = [];
+        }
+    }
+    
+    addEdge(vertex1, vertex2, weight = 1) {
+        this.addVertex(vertex1);
+        this.addVertex(vertex2);
+        this.adjacencyList[vertex1].push({node: vertex2, weight});
+        this.adjacencyList[vertex2].push({node: vertex1, weight});
+    }
+    
+    // 連結成分を見つける
+    findConnectedComponents() {
+        const visited = {};
+        const components = [];
+        
+        for (let vertex in this.adjacencyList) {
+            if (!visited[vertex]) {
+                const component = [];
+                this._dfs(vertex, visited, component);
+                components.push(component);
+            }
+        }
+        
+        return components;
+    }
+    
+    _dfs(vertex, visited, component) {
+        visited[vertex] = true;
+        component.push(vertex);
+        
+        for (let neighbor of this.adjacencyList[vertex]) {
+            if (!visited[neighbor.node]) {
+                this._dfs(neighbor.node, visited, component);
+            }
+        }
+    }
+}
+</code>
+</pre>
+</div>
+
+<p>無向グラフは、相互関係や対称的な関係を表現するのに適しており、特にネットワーク構造の分析や最適化に広く応用されています。次の章では、より特殊なグラフ構造とその応用について学びます。</p>
+
+<style>
+    .example-box {
+        background-color: #f0f8ff;
+        border-left: 5px solid #7CB9E8;
+        padding: 10px;
+        margin: 15px 0;
+    }
+    
+    .code-block {
+        background-color: #f5f5f5;
+        border-left: 5px solid #8a8a8a;
+        padding: 10px;
+        margin: 15px 0;
+        overflow-x: auto;
+    }
+</style>
+</body>
+</html>

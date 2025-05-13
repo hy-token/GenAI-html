@@ -1,0 +1,220 @@
+<h1>ローカルLLM環境構築の基礎</h1>
+
+<h2>1.1 ローカルLLM導入の意義と目的</h2>
+
+<h3>なぜローカルLLMが必要なのか</h3>
+<p>ローカルにLLM（大規模言語モデル）環境を構築することには、以下のような重要な意義があります：</p>
+
+<ul>
+    <li><strong>プライバシーと機密性</strong>：データを外部に送信せず、企業や個人の機密情報を安全に処理</li>
+    <li><strong>ランニングコスト削減</strong>：API利用料金がかからず、継続的な利用コストを抑制</li>
+    <li><strong>カスタマイズの自由度</strong>：用途に応じたモデルの最適化や独自のチューニングが可能</li>
+    <li><strong>可用性とレスポンス</strong>：ネットワーク環境に依存せず、高速なレスポンスを実現</li>
+</ul>
+
+<h3>主な活用シーン</h3>
+<p>ローカルLLM環境は以下のような場面で特に有効です：</p>
+
+<ul>
+    <li>プログラミング支援とコード生成</li>
+    <li>文書作成と編集の自動化</li>
+    <li>データ分析とレポート生成</li>
+    <li>教育・学習支援</li>
+    <li>社内文書の検索・整理</li>
+</ul>
+
+<h2>1.2 システム要件（GPU無、メモリ16GB制限）</h2>
+
+<h3>ハードウェア制約の理解</h3>
+<p>本ガイドでは、以下のシステム制約を前提として環境構築を進めます：</p>
+
+<table>
+    <tr>
+        <th>項目</th>
+        <th>仕様</th>
+        <th>備考</th>
+    </tr>
+    <tr>
+        <td>GPU</td>
+        <td>無し</td>
+        <td>CPUのみでの推論</td>
+    </tr>
+    <tr>
+        <td>メモリ（RAM）</td>
+        <td>16GB</td>
+        <td>モデルサイズに直接影響</td>
+    </tr>
+    <tr>
+        <td>ストレージ</td>
+        <td>推奨50GB以上</td>
+        <td>モデル・依存関係・作業領域</td>
+    </tr>
+    <tr>
+        <td>プロセッサ</td>
+        <td>マルチコア推奨</td>
+        <td>4コア以上が望ましい</td>
+    </tr>
+</table>
+
+<h3>パフォーマンスへの影響</h3>
+<p>GPU無しの環境では以下の点に注意が必要です：</p>
+
+<ul>
+    <li>推論速度は大幅に低下（GPUの1/10〜1/20程度）</li>
+    <li>バッチ処理が困難で、リアルタイム対話に制限</li>
+    <li>モデルサイズが実質的に制限される（7B以下推奨）</li>
+    <li>量子化技術の適用が必須</li>
+</ul>
+
+<h2>1.3 考慮すべき要因</h2>
+
+<h3>技術的考慮事項</h3>
+<p>環境構築時には以下の要因を慎重に検討する必要があります：</p>
+
+<svg viewBox="0 0 400 300" width="400" height="300">
+    <rect x="10" y="10" width="380" height="280" fill="#f5f5f5" stroke="#333" stroke-width="2"/>
+    
+    <!-- 中央の考慮事項 -->
+    <circle cx="200" cy="150" r="40" fill="#4a90e2" stroke="#333" stroke-width="2"/>
+    <text x="200" y="155" text-anchor="middle" fill="white" font-size="12">考慮事項</text>
+    
+    <!-- 周辺要素 -->
+    <circle cx="100" cy="80" r="30" fill="#7ed321" stroke="#333" stroke-width="2"/>
+    <text x="100" y="85" text-anchor="middle" fill="white" font-size="11">精度要件</text>
+    
+    <circle cx="300" cy="80" r="30" fill="#f5a623" stroke="#333" stroke-width="2"/>
+    <text x="300" y="85" text-anchor="middle" fill="white" font-size="11">速度要件</text>
+    
+    <circle cx="100" cy="220" r="30" fill="#d0021b" stroke="#333" stroke-width="2"/>
+    <text x="100" y="225" text-anchor="middle" fill="white" font-size="11">メモリ制約</text>
+    
+    <circle cx="300" cy="220" r="30" fill="#9013fe" stroke="#333" stroke-width="2"/>
+    <text x="300" y="225" text-anchor="middle" fill="white" font-size="11">運用コスト</text>
+    
+    <!-- 接続線 -->
+    <line x1="160" y1="130" x2="130" y2="100" stroke="#666" stroke-width="1"/>
+    <line x1="240" y1="130" x2="270" y2="100" stroke="#666" stroke-width="1"/>
+    <line x1="160" y1="170" x2="130" y2="200" stroke="#666" stroke-width="1"/>
+    <line x1="240" y1="170" x2="270" y2="200" stroke="#666" stroke-width="1"/>
+</svg>
+
+<h3>実運用上の課題</h3>
+<ul>
+    <li><strong>レスポンス時間</strong>：会話やコード生成での待機時間</li>
+    <li><strong>精度のトレードオフ</strong>：量子化による精度低下の許容範囲</li>
+    <li><strong>運用保守</strong>：アップデートやメンテナンスの手順</li>
+    <li><strong>拡張性</strong>：将来的なハードウェア強化への対応</li>
+</ul>
+
+<h2>1.4 環境構築の全体像</h2>
+
+<h3>構築フローの概要</h3>
+<p>ローカルLLM環境の構築は以下の段階で進行します：</p>
+
+<svg viewBox="0 0 500 350" width="500" height="350">
+    <!-- 背景 -->
+    <rect x="10" y="10" width="480" height="330" fill="#f9f9f9" stroke="#333" stroke-width="2"/>
+    
+    <!-- フロー要素 -->
+    <rect x="30" y="40" width="120" height="60" fill="#e8f5e9" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="90" y="65" text-anchor="middle" font-size="12">1. 環境準備</text>
+    <text x="90" y="85" text-anchor="middle" font-size="10">Python・ライブラリ</text>
+    
+    <rect x="190" y="40" width="120" height="60" fill="#e3f2fd" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="250" y="65" text-anchor="middle" font-size="12">2. モデル選定</text>
+    <text x="250" y="85" text-anchor="middle" font-size="10">StarCoder2-7B</text>
+    
+    <rect x="350" y="40" width="120" height="60" fill="#f3e5f5" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="410" y="65" text-anchor="middle" font-size="12">3. 導入・設定</text>
+    <text x="410" y="85" text-anchor="middle" font-size="10">量子化・最適化</text>
+    
+    <rect x="30" y="150" width="120" height="60" fill="#ffecb3" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="90" y="175" text-anchor="middle" font-size="12">4. 推論環境</text>
+    <text x="90" y="195" text-anchor="middle" font-size="10">API/コマンドライン</text>
+    
+    <rect x="190" y="150" width="120" height="60" fill="#ffdbf0" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="250" y="175" text-anchor="middle" font-size="12">5. 動作確認</text>
+    <text x="250" y="195" text-anchor="middle" font-size="10">テスト・評価</text>
+    
+    <rect x="350" y="150" width="120" height="60" fill="#e0f2f1" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="410" y="175" text-anchor="middle" font-size="12">6. 運用開始</text>
+    <text x="410" y="195" text-anchor="middle" font-size="10">本番利用</text>
+    
+    <!-- 矢印 -->
+    <path d="M 150 70 L 170 70" fill="none" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+    <path d="M 310 70 L 330 70" fill="none" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+    <path d="M 410 100 L 100 140" fill="none" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+    <path d="M 150 180 L 170 180" fill="none" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+    <path d="M 310 180 L 330 180" fill="none" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+    
+    <!-- 矢印定義 -->
+    <defs>
+        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+        </marker>
+    </defs>
+</svg>
+
+<h3>想定される工数</h3>
+<table>
+    <tr>
+        <th>段階</th>
+        <th>所要時間</th>
+        <th>難易度</th>
+    </tr>
+    <tr>
+        <td>基本環境準備</td>
+        <td>2-4時間</td>
+        <td>★★☆</td>
+    </tr>
+    <tr>
+        <td>モデル入手・設定</td>
+        <td>4-8時間</td>
+        <td>★★★</td>
+    </tr>
+    <tr>
+        <td>推論環境構築</td>
+        <td>2-4時間</td>
+        <td>★★☆</td>
+    </tr>
+    <tr>
+        <td>動作確認・調整</td>
+        <td>2-6時間</td>
+        <td>★★★</td>
+    </tr>
+</table>
+
+<h2>用語集</h2>
+
+<h3>A-Z</h3>
+<dl>
+    <dt>API（Application Programming Interface）</dt>
+    <dd>アプリケーション同士が通信するためのインターフェース</dd>
+    
+    <dt>CPU（Central Processing Unit）</dt>
+    <dd>コンピュータの中央処理装置、計算処理を行う</dd>
+    
+    <dt>GPU（Graphics Processing Unit）</dt>
+    <dd>グラフィック処理専用のプロセッサ、AI処理にも広く利用される</dd>
+    
+    <dt>LLM（Large Language Model）</dt>
+    <dd>大規模な言語モデル、自然言語処理タスクを実行</dd>
+</dl>
+
+<h3>あ行</h3>
+<dl>
+    <dt>量子化（りょうしか）</dt>
+    <dd>モデルのパラメータ精度を下げてメモリ使用量を削減する技術</dd>
+    
+    <dt>推論（すいろん）</dt>
+    <dd>学習済みモデルを使用して予測や生成を行うプロセス</dd>
+</dl>
+
+<h3>数字・記号</h3>
+<dl>
+    <dt>7B</dt>
+    <dd>70億個のパラメータを持つモデルサイズの表記</dd>
+    
+    <dt>16GB</dt>
+    <dd>メモリ容量の単位、1GBは約10億バイト</dd>
+</dl>

@@ -1,0 +1,368 @@
+<body>
+    <h1>第5章: ゲーム要素の実装</h1>
+    
+    <h2>5.1 オーディオとエフェクト</h2>
+    
+    <p>Godotのオーディオシステムは、バス構造とノードベースの設計により、柔軟な音声処理が可能です。</p>
+    
+    <h3>主要なオーディオノード</h3>
+    
+    <table>
+        <tr>
+            <th>ノードタイプ</th>
+            <th>主な用途</th>
+            <th>特徴</th>
+            <th>実装工数</th>
+        </tr>
+        <tr>
+            <td>AudioStreamPlayer</td>
+            <td>BGM、UI効果音</td>
+            <td>2D/3D非対応</td>
+            <td>低</td>
+        </tr>
+        <tr>
+            <td>AudioStreamPlayer2D</td>
+            <td>2D効果音</td>
+            <td>距離減衰対応</td>
+            <td>低</td>
+        </tr>
+        <tr>
+            <td>AudioStreamPlayer3D</td>
+            <td>3D空間オーディオ</td>
+            <td>立体音響対応</td>
+            <td>中</td>
+        </tr>
+    </table>
+    
+    <pre>
+# オーディオマネージャーの実装例
+extends Node
+
+var audio_players = {
+    "bgm": AudioStreamPlayer.new(),
+    "sfx": AudioStreamPlayer.new(),
+    "voice": AudioStreamPlayer.new()
+}
+
+func _ready():
+    # オーディオプレイヤーの設定
+    for player in audio_players.values():
+        add_child(player)
+    
+    # バス設定
+    audio_players.bgm.bus = "Music"
+    audio_players.sfx.bus = "SFX"
+    audio_players.voice.bus = "Voice"
+
+func play_bgm(stream: AudioStream, fade_in: bool = true):
+    if fade_in:
+        audio_players.bgm.volume_db = -60
+        audio_players.bgm.stream = stream
+        audio_players.bgm.play()
+        
+        # フェードイン
+        var tween = create_tween()
+        tween.tween_property(audio_players.bgm, "volume_db", 0, 1.0)
+    else:
+        audio_players.bgm.stream = stream
+        audio_players.bgm.play()
+
+func play_sfx(stream: AudioStream, pitch_variation: float = 0.0):
+    # 効果音の同時再生のための対策
+    var sfx_player = AudioStreamPlayer.new()
+    add_child(sfx_player)
+    sfx_player.bus = "SFX"
+    sfx_player.stream = stream
+    
+    # ピッチバリエーション
+    if pitch_variation > 0:
+        sfx_player.pitch_scale = randf_range(1.0 - pitch_variation, 1.0 + pitch_variation)
+    
+    sfx_player.play()
+    
+    # 再生終了後に自動削除
+    sfx_player.finished.connect(func(): sfx_player.queue_free())
+
+func play_3d_sfx(stream: AudioStream, position: Vector3, max_distance: float = 20.0):
+    var sfx_3d = AudioStreamPlayer3D.new()
+    add_child(sfx_3d)
+    sfx_3d.stream = stream
+    sfx_3d.global_position = position
+    sfx_3d.max_distance = max_distance
+    sfx_3d.unit_size = 1.0
+    sfx_3d.play()
+    
+    # オブジェクトプールの考慮
+    sfx_3d.finished.connect(func(): sfx_3d.queue_free())
+    </pre>
+    
+    <h3>DSPエフェクトの種類</h3>
+    
+    <table>
+        <tr>
+            <th>エフェクト</th>
+            <th>用途</th>
+            <th>パラメータ例</th>
+            <th>よく使う場面</th>
+        </tr>
+        <tr>
+            <td>Reverb</td>
+            <td>残響効果</td>
+            <td>Room Size, Damping</td>
+            <td>洞窟、大広間</td>
+        </tr>
+        <tr>
+            <td>Delay</td>
+            <td>エコー</td>
+            <td>Time, Feedback</td>
+            <td>水中、山間部</td>
+        </tr>
+        <tr>
+            <td>Chorus</td>
+            <td>音の奥行き</td>
+            <td>Voice Count, Spread</td>
+            <td>魔法エフェクト</td>
+        </tr>
+        <tr>
+            <td>Limiter</td>
+            <td>音量制限</td>
+            <td>Threshold, Ceiling</td>
+            <td>音割れ防止</td>
+        </tr>
+    </table>
+    
+    <h2>5.2 アニメーションとパーティクルシステム</h2>
+    
+    <p>Godotのアニメーションシステムは、タイムライン型とコード制御型の両方に対応しています。</p>
+    
+    <h3>アニメーションの種類と用途</h3>
+    
+    <table>
+        <tr>
+            <th>システム</th>
+            <th>適用場面</th>
+            <th>実装方法</th>
+            <th>学習難易度</th>
+        </tr>
+        <tr>
+            <td>AnimationPlayer</td>
+            <td>キーフレームアニメーション</td>
+            <td>エディタで設定</td>
+            <td>低</td>
+        </tr>
+        <tr>
+            <td>AnimationTree</td>
+            <td>状態遷移アニメーション</td>
+            <td>ステートマシン</td>
+            <td>中</td>
+        </tr>
+        <tr>
+            <td>Tween</td>
+            <td>シンプルな動作</td>
+            <td>コードで完結</td>
+            <td>低</td>
+        </tr>
+        <tr>
+            <td>Shader Material</td>
+            <td>視覚エフェクト</td>
+            <td>GLSL/GDShader</td>
+            <td>高</td>
+        </tr>
+    </table>
+    
+    <pre>
+# AnimationTreeを使った状態管理
+extends CharacterBody2D
+
+@onready var animation_tree = $AnimationTree
+@onready var animation_state = animation_tree.get("parameters/playback")
+
+func _ready():
+    animation_tree.active = true
+
+func update_animation_state():
+    var velocity_length = velocity.length()
+    
+    # アニメーション状態の切り替え
+    if not is_on_floor():
+        if velocity.y < 0:
+            animation_state.travel("jump")
+        else:
+            animation_state.travel("fall")
+    elif abs(velocity.x) < 0.1:
+        animation_state.travel("idle")
+    elif abs(velocity.x) < 200:
+        animation_state.travel("walk")
+    else:
+        animation_state.travel("run")
+    
+    # ブレンドパラメータの設定
+    animation_tree.set("parameters/run/blend_position", velocity.x)
+    animation_tree.set("parameters/conditions/is_attacking", input_buffer.has_attack())
+
+# パーティクルエフェクトの実装
+func create_explosion_particle(position: Vector3):
+    var particles = preload("res://effects/Explosion.tscn").instantiate()
+    get_parent().add_child(particles)
+    particles.global_position = position
+    particles.emitting = true
+    
+    # 自動削除
+    particles.one_shot = true
+    var timer = Timer.new()
+    timer.timeout.connect(func(): particles.queue_free())
+    timer.autostart = true
+    timer.wait_time = 3.0
+    add_child(timer)
+    </pre>
+    
+    <h3>パーティクルシステムの設定</h3>
+    
+    <div>
+        <ul>
+            <li><strong>Emission：</strong>放出速度、形状、方向</li>
+            <li><strong>Direction：</strong>初速度、角度のばらつき</li>
+            <li><strong>Initial Velocity：</strong>速度の範囲設定</li>
+            <li><strong>Lifetime：</strong>パーティクルの寿命</li>
+            <li><strong>Material：</strong>見た目とシェーダー</li>
+        </ul>
+    </div>
+    
+    <h2>5.3 AIとゲームロジック</h2>
+    
+    <p>Godotは、基本的なAI実装からNavigation Meshを使った高度なナビゲーションまで対応しています。</p>
+    
+    <pre>
+# 基本的なAI実装（状態パターン）
+extends CharacterBody2D
+
+enum AIState { IDLE, PATROL, CHASE, ATTACK, FLEE }
+
+var current_state = AIState.IDLE
+var player_ref = null
+var patrol_points = []
+var current_patrol_index = 0
+
+@export var detection_range = 200.0
+@export var attack_range = 50.0
+@export var chase_speed = 150.0
+@export var patrol_speed = 100.0
+
+func _ready():
+    # 初期化処理
+    player_ref = get_node("/root/Player")
+
+func _physics_process(delta):
+    match current_state:
+        AIState.IDLE:
+            handle_idle_state()
+        AIState.PATROL:
+            handle_patrol_state()
+        AIState.CHASE:
+            handle_chase_state()
+        AIState.ATTACK:
+            handle_attack_state()
+        AIState.FLEE:
+            handle_flee_state()
+    
+    move_and_slide()
+
+func handle_idle_state():
+    # プレイヤー検知
+    var distance_to_player = global_position.distance_to(player_ref.global_position)
+    
+    if distance_to_player < detection_range:
+        current_state = AIState.CHASE
+    elif patrol_points.size() > 0:
+        current_state = AIState.PATROL
+
+func handle_chase_state():
+    var distance_to_player = global_position.distance_to(player_ref.global_position)
+    
+    if distance_to_player > detection_range * 1.5:
+        current_state = AIState.IDLE
+    elif distance_to_player < attack_range:
+        current_state = AIState.ATTACK
+    else:
+        # プレイヤーへの移動
+        var direction = (player_ref.global_position - global_position).normalized()
+        velocity = direction * chase_speed
+
+func handle_attack_state():
+    # 攻撃処理
+    attack_cooldown -= delta
+    
+    if attack_cooldown <= 0:
+        perform_attack()
+        attack_cooldown = 2.0  # 2秒のクールダウン
+    
+    # 距離チェック
+    var distance_to_player = global_position.distance_to(player_ref.global_position)
+    if distance_to_player > attack_range:
+        current_state = AIState.CHASE
+
+# Navigation Meshを使った経路探索
+@onready var navigation_agent = $NavigationAgent2D
+
+func move_to_target(target_position: Vector2):
+    navigation_agent.target_position = target_position
+    
+    if navigation_agent.is_navigation_finished():
+        return
+    
+    var next_position = navigation_agent.get_next_path_position()
+    var direction = (next_position - global_position).normalized()
+    velocity = direction * chase_speed
+    </pre>
+    
+    <h3>AI実装の工数見積</h3>
+    
+    <table>
+        <tr>
+            <th>AIタイプ</th>
+            <th>実装時間</th>
+            <th>必要スキル</th>
+            <th>利用シーン</th>
+        </tr>
+        <tr>
+            <td>単純追従AI</td>
+            <td>2-4時間</td>
+            <td>基本的なGDScript</td>
+            <td>シンプルな敵</td>
+        </tr>
+        <tr>
+            <td>状態遷移AI</td>
+            <td>8-16時間</td>
+            <td>ステートパターン</td>
+            <td>一般的な敵</td>
+        </tr>
+        <tr>
+            <td>経路探索AI</td>
+            <td>16-24時間</td>
+            <td>Navigation2D/3D</td>
+            <td>複雑な地形</td>
+        </tr>
+        <tr>
+            <td>行動ツリーAI</td>
+            <td>24-40時間</td>
+            <td>高度な設計</td>
+            <td>ボスキャラ</td>
+        </tr>
+    </table>
+    
+    <h2>5.4 ネットワーク機能（マルチプレイヤー）</h2>
+    
+    <p>Godot 4のマルチプレイヤー機能は大幅に強化され、シンプルな記述で実装可能になりました。</p>
+    
+    <pre>
+# マルチプレイヤーマネージャー
+extends Node
+
+const SERVER_PORT = 9999
+const MAX_CLIENTS = 10
+
+@export var player_scene: PackedScene
+
+func _ready():
+    # ネットワークイベントの設定
+    multiplayer.peer_connected.connect(_on_player_connected)

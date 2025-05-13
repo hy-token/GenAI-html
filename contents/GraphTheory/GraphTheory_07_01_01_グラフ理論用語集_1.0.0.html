@@ -1,0 +1,224 @@
+<h1>グラフ理論 用語集</h1>
+
+<div class="term">
+    <h3>グラフ (Graph)</h3>
+    <p>頂点（ノード）と辺（エッジ）からなる数学的構造。頂点は点で表され、辺は頂点と頂点を結ぶ線として表現される。</p>
+</div>
+
+<div class="term">
+    <h3>ノード/頂点 (Node/Vertex)</h3>
+    <p>グラフの基本要素。実世界の対象（人、場所、概念など）を表現する。</p>
+</div>
+
+<div class="term">
+    <h3>エッジ/辺 (Edge)</h3>
+    <p>ノード間の関係や接続を表す線。有向または無向。</p>
+</div>
+
+<div class="term">
+    <h3>有向グラフ (Directed Graph/Digraph)</h3>
+    <p>エッジに方向がある（一方通行の）グラフ。エッジはノードAからノードBへの関係を示す。</p>
+</div>
+
+<div class="term">
+    <h3>無向グラフ (Undirected Graph)</h3>
+    <p>エッジに方向がない（双方向の）グラフ。ノードA-ノードB間の接続は双方向に有効。</p>
+</div>
+
+<div class="term">
+    <h3>重み付きグラフ (Weighted Graph)</h3>
+    <p>各エッジに数値（重み）が割り当てられているグラフ。距離、コスト、容量などを表現できる。</p>
+</div>
+
+<div class="term">
+    <h3>隣接 (Adjacent)</h3>
+    <p>2つのノードが直接エッジで接続されている状態。</p>
+</div>
+
+<div class="term">
+    <h3>次数 (Degree)</h3>
+    <p>あるノードに接続しているエッジの数。有向グラフでは入次数（入ってくるエッジ）と出次数（出ていくエッジ）に分けられる。</p>
+</div>
+
+<div class="term">
+    <h3>パス (Path)</h3>
+    <p>グラフ内で隣接ノードを順に辿ってできる道筋。ノードとエッジの交互の列。</p>
+</div>
+
+<div class="term">
+    <h3>サイクル (Cycle)</h3>
+    <p>同じノードから始まり同じノードで終わるパス。</p>
+</div>
+
+<div class="term">
+    <h3>非巡回グラフ (Acyclic Graph)</h3>
+    <p>サイクルを含まないグラフ。</p>
+</div>
+
+<div class="term">
+    <h3>連結グラフ (Connected Graph)</h3>
+    <p>任意の2ノード間にパスが存在するグラフ。</p>
+</div>
+
+<div class="term">
+    <h3>連結成分 (Connected Component)</h3>
+    <p>グラフ内で相互に到達可能なノードの最大集合。</p>
+</div>
+
+<div class="term">
+    <h3>木 (Tree)</h3>
+    <p>サイクルのない連結グラフ。任意の2ノード間にちょうど1つのパスが存在する。</p>
+</div>
+
+<div class="term">
+    <h3>根付き木 (Rooted Tree)</h3>
+    <p>1つのノードが根（ルート）として指定されている木。親子関係が定義される。</p>
+</div>
+
+<div class="term">
+    <h3>二分木 (Binary Tree)</h3>
+    <p>各ノードが最大2つの子を持つ根付き木。</p>
+</div>
+
+<div class="term">
+    <h3>深さ優先探索 (DFS: Depth-First Search)</h3>
+    <p>グラフ探索アルゴリズムの一つ。可能な限り深く進んでから戻るという方法でノードを探索する。</p>
+</div>
+
+<div class="term">
+    <h3>幅優先探索 (BFS: Breadth-First Search)</h3>
+    <p>グラフ探索アルゴリズムの一つ。始点から同じ距離にあるノードをすべて探索してから次の距離のノードに進む。</p>
+</div>
+
+<div class="term">
+    <h3>有向非巡回グラフ (DAG: Directed Acyclic Graph)</h3>
+    <p>サイクルを持たない有向グラフ。依存関係や順序関係を表現するのに適している。</p>
+</div>
+
+<div class="term">
+    <h3>トポロジカルソート (Topological Sort)</h3>
+    <p>DAGのノードを、エッジの方向に従って一列に並べること。依存関係を満たす順序を得られる。</p>
+</div>
+
+<div class="term">
+    <h3>最短経路 (Shortest Path)</h3>
+    <p>2ノード間で最小の総重みを持つパス。ダイクストラ法やベルマン-フォード法などで求められる。</p>
+</div>
+
+<div class="term">
+    <h3>最小全域木 (MST: Minimum Spanning Tree)</h3>
+    <p>グラフの全ノードを接続する最小の総重みを持つ木。クラスカル法やプリム法で求められる。</p>
+</div>
+
+<div class="term">
+    <h3>ネットワークフロー (Network Flow)</h3>
+    <p>容量制限のあるネットワーク上で、始点（ソース）から終点（シンク）までの流量を表すモデル。最大フロー問題などに応用される。</p>
+</div>
+
+<div class="term">
+    <h3>二部グラフ (Bipartite Graph)</h3>
+    <p>ノードが2つのグループに分けられ、同じグループ内のノード同士が接続されないグラフ。マッチング問題に応用される。</p>
+</div>
+
+<div class="term">
+    <h3>マッチング (Matching)</h3>
+    <p>グラフ内の共通ノードを持たないエッジの集合。二部グラフでは最大マッチング、重み付き二部マッチングなどの問題が解かれる。</p>
+</div>
+
+<div class="term">
+    <h3>スケールフリーネットワーク (Scale-Free Network)</h3>
+    <p>少数の「ハブ」ノードが多数の接続を持ち、大多数のノードは少数の接続しか持たないネットワーク。次数分布がべき乗則に従う。</p>
+</div>
+
+<div class="term">
+    <h3>スモールワールドネットワーク (Small-World Network)</h3>
+    <p>平均パス長が短く、クラスタリング係数が高いネットワーク。「六次の隔たり」現象を説明するモデル。</p>
+</div>
+
+<div class="term">
+    <h3>クラスタリング係数 (Clustering Coefficient)</h3>
+    <p>グラフ内でノードの隣接ノード同士が接続している度合いを表す指標。0から1の値をとる。</p>
+</div>
+
+<div class="term">
+    <h3>橋 (Bridge)</h3>
+    <p>グラフから削除すると連結成分の数が増えるエッジ。ネットワークの脆弱性分析に使用される。</p>
+</div>
+
+<div class="term">
+    <h3>カットポイント/関節点 (Cut Vertex/Articulation Point)</h3>
+    <p>グラフから削除すると連結成分の数が増えるノード。</p>
+</div>
+
+<div class="term">
+    <h3>オイラー路 (Eulerian Path)</h3>
+    <p>グラフの全てのエッジをちょうど一度ずつ通る経路。</p>
+</div>
+
+<div class="term">
+    <h3>オイラー閉路 (Eulerian Cycle)</h3>
+    <p>グラフの全てのエッジをちょうど一度ずつ通り、始点と終点が同じ閉じた経路。</p>
+</div>
+
+<div class="term">
+    <h3>ハミルトン路 (Hamiltonian Path)</h3>
+    <p>グラフの全てのノードをちょうど一度ずつ通る経路。NP困難問題の一つ。</p>
+</div>
+
+<div class="term">
+    <h3>隣接行列 (Adjacency Matrix)</h3>
+    <p>グラフを表現するデータ構造の一つ。n×nの行列でノード間の接続関係を表す。</p>
+</div>
+
+<div class="term">
+    <h3>隣接リスト (Adjacency List)</h3>
+    <p>グラフを表現するデータ構造の一つ。各ノードに隣接するノードのリストを保持する。</p>
+</div>
+
+<div class="term">
+    <h3>動的計画法 (Dynamic Programming)</h3>
+    <p>問題を部分問題に分割し、部分問題の解を記録しながら解く手法。グラフ上の最適経路問題などに応用される。</p>
+</div>
+
+<div class="term">
+    <h3>貪欲法 (Greedy Algorithm)</h3>
+    <p>各ステップで局所的に最適な選択をする手法。クラスカル法やプリム法など、多くのグラフアルゴリズムで使用される。</p>
+</div>
+
+<style>
+    .term {
+        background-color: #f5f5f5;
+        padding: 10px;
+        margin: 15px 0;
+        border-left: 5px solid #7CB9E8;
+    }
+    
+    .term h3 {
+        margin-top: 0;
+        color: #333;
+    }
+</style>
+</body>
+</html>
+
+<div class="term"><!DOCTYPE html>
+<body>
+<h1>グラフ理論 用語集</h1>
+
+<p>準備中</p>
+
+<style>
+    .term {
+        background-color: #f5f5f5;
+        padding: 10px;
+        margin: 15px 0;
+        border-left: 5px solid #7CB9E8;
+    }
+    
+    .term h3 {
+        margin-top: 0;
+        color: #333;
+    }
+</style>
+</body>
+</html>

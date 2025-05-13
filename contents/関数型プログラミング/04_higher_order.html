@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <title>第4章 高階関数と関数型プログラミングの抽象化</title>
+</head>
+
+<body>
+  <h1>第4章 高階関数と関数型プログラミングの抽象化</h1>
+
+  <h2>4.1 高階関数の基礎</h2>
+  <p>高階関数は、関数型プログラミングの中核となる概念です。関数を引数として受け取ったり、関数を返したりする関数のことを指します。</p>
+
+  <h3>4.1.1 高階関数とは</h3>
+  <p>高階関数の基本的な特徴：</p>
+  <ul>
+    <li><strong>関数を引数として受け取る</strong>
+      <pre>
+// 関数を引数として受け取る例
+function applyOperation(x: number, y: number, operation: (a: number, b: number) => number): number {
+    return operation(x, y);
+}
+
+// 使用例
+const add = (a: number, b: number) => a + b;
+const multiply = (a: number, b: number) => a * b;
+
+console.log(applyOperation(5, 3, add));      // 8
+console.log(applyOperation(5, 3, multiply)); // 15
+      </pre>
+    </li>
+    <li><strong>関数を返す</strong>
+      <pre>
+// 関数を返す例
+function createMultiplier(factor: number): (x: number) => number {
+    return (x: number) => x * factor;
+}
+
+// 使用例
+const double = createMultiplier(2);
+const triple = createMultiplier(3);
+
+console.log(double(5)); // 10
+console.log(triple(5)); // 15
+      </pre>
+    </li>
+  </ul>
+
+  <h3>4.1.2 第一級関数（First-Class Functions）</h3>
+  <p>JavaScript/TypeScriptでは、関数は第一級オブジェクトとして扱われます。これは以下の特性を持つことを意味します：</p>
+  <ul>
+    <li><strong>変数への代入</strong>
+      <pre>
+const greet = (name: string) => `Hello, ${name}!`;
+const sayHello = greet;
+console.log(sayHello('John')); // "Hello, John!"
+      </pre>
+    </li>
+    <li><strong>データ構造への格納</strong>
+      <pre>
+const operations = {
+    add: (a: number, b: number) => a + b,
+    subtract: (a: number, b: number) => a - b,
+    multiply: (a: number, b: number) => a * b
+};
+
+console.log(operations.add(5, 3));      // 8
+console.log(operations.multiply(5, 3)); // 15
+      </pre>
+    </li>
+    <li><strong>関数の引数として渡す</strong>
+      <pre>
+function executeWithLogging(operation: (x: number) => number, value: number): number {
+    console.log(`Executing operation with value: ${value}`);
+    const result = operation(value);
+    console.log(`Result: ${result}`);
+    return result;
+}
+
+const square = (x: number) => x * x;
+console.log(executeWithLogging(square, 5)); // 25
+      </pre>
+    </li>
+  </ul>
+
+  <h2>4.2 基本的な高階関数</h2>
+  <h3>4.2.1 map関数</h3>
+  <p>map関数は、配列の各要素に対して関数を適用し、新しい配列を生成します：</p>
+  <pre>
+// map関数の実装
+function map<T, U>(array: T[], transform: (item: T) => U): U[] {
+    return array.map(transform);
+}
+
+// 使用例
+const numbers = [1, 2, 3, 4, 5];
+const doubled = map(numbers, x => x * 2);
+console.log(doubled); // [2, 4, 6, 8, 10]
+
+// オブジェクトの変換
+interface User {
+    name: string;
+    age: number;
+}
+
+const users: User[] = [
+    { name: 'John', age: 30 },
+    { name: 'Jane', age: 25 }
+];
+
+const names = map(users, user => user.name);
+console.log(names); // ['John', 'Jane']
+  </pre>
+
+  <h3>4.2.2 filter関数</h3>
+  <p>filter関数は、条件に合致する要素のみを抽出して新しい配列を生成します：</p>
+  <pre>
+// filter関数の実装
+function filter<T>(array: T[], predicate: (item: T) => boolean): T[] {
+    return array.filter(predicate);
+}
+
+// 使用例
+const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+const evenNumbers = filter(numbers, x => x % 2 === 0);
+console.log(evenNumbers); // [2, 4, 6, 8, 10]
+
+// オブジェクトのフィルタリング
+const users: User[] = [
+    { name: 'John', age: 30 },
+    { name: 'Jane', age: 25 },
+    { name: 'Bob', age: 35 }
+];
+
+const adults = filter(users, user => user.age >= 30);
+console.log(adults); // [{ name: 'John', age: 30 }, { name: 'Bob', age: 35 }]
+  </pre>
+
+  <h3>4.2.3 reduce関数</h3>
+  <p>reduce関数は、配列の要素を順番に処理して単一の値に集約します：</p>
+  <pre>
+// reduce関数の実装
+function reduce<T, U>(
+    array: T[],
+    reducer: (accumulator: U, current: T) => U,
+    initialValue: U
+): U {
+    return array.reduce(reducer, initialValue);
+}
+
+// 使用例
+const numbers = [1, 2, 3, 4, 5];
+const sum = reduce(numbers, (acc, curr) => acc + curr, 0);
+console.log(sum); // 15
+
+// オブジェクトの集約
+const users: User[] = [
+    { name: 'John', age: 30 },
+    { name: 'Jane', age: 25 },
+    { name: 'Bob', age: 35 }
+];
+
+const totalAge = reduce(users, (acc, user) => acc + user.age, 0);
+console.log(totalAge); // 90
+  </pre>
+
+  <h2>4.3 高度な高階関数</h2>
+  <h3>4.3.1 関数合成（Function Composition）</h3>
+  <p>関数合成は、複数の関数を組み合わせて新しい関数を作成する手法です：</p>
+  <pre>
+// 関数合成の実装
+function compose<T>(...functions: Array<(arg: T) => T>): (arg: T) => T {
+    return (arg: T) => functions.reduceRight((result, fn) => fn(result), arg);
+}
+
+// 使用例
+const addOne = (x: number) => x + 1;
+const double = (x: number) => x * 2;
+const square = (x: number) => x * x;
+
+const addOneAndDoubleAndSquare = compose(square, double, addOne);
+console.log(addOneAndDoubleAndSquare(5)); // 144
+  </pre>
+
+  <h3>4.3.2 カリー化（Currying）</h3>
+  <p>カリー化は、複数の引数を受け取る関数を、1つの引数を受け取る関数の連鎖に変換する手法です：</p>
+  <pre>
+// カリー化の実装
+function curry<T, U, V>(fn: (x: T, y: U) => V): (x: T) => (y: U) => V {
+    return (x: T) => (y: U) => fn(x, y);
+}
+
+// 使用例
+const add = (x: number, y: number) => x + y;
+const curriedAdd = curry(add);
+const addFive = curriedAdd(5);
+console.log(addFive(3)); // 8
+
+// 実践的な例
+interface User {
+    name: string;
+    role: string;
+}
+
+const createUser = (name: string) => (role: string): User => ({
+    name,
+    role
+});
+
+const createAdmin = createUser('John');
+const admin = createAdmin('admin');
+console.log(admin); // { name: 'John', role: 'admin' }
+  </pre>
+
+  <h2>4.4 実践的なアプリケーション</h2>
+  <h3>4.4.1 データ変換パイプライン</h3>
+  <p>高階関数を使用してデータ変換のパイプラインを構築する例：</p>
+  <pre>
+// データ変換パイプラインの実装
+interface Product {
+    id: number;
+    name: string;
+    price: number;
+    category: string;
+}
+
+const products: Product[] = [
+    { id: 1, name: 'Laptop', price: 1000, category: 'Electronics' },
+    { id: 2, name: 'Book', price: 20, category: 'Books' },
+    { id: 3, name: 'Phone', price: 500, category: 'Electronics' }
+];
+
+// パイプラインの構築
+const pipeline = compose(
+    // カテゴリーでフィルタリング
+    (products: Product[]) => filter(products, p => p.category === 'Electronics'),
+    // 価格でソート
+    (products: Product[]) => [...products].sort((a, b) => b.price - a.price),
+    // 名前のみを抽出
+    (products: Product[]) => map(products, p => p.name)
+);
+
+const result = pipeline(products);
+console.log(result); // ['Laptop', 'Phone']
+  </pre>
+
+  <h3>4.4.2 非同期処理の抽象化</h3>
+  <p>高階関数を使用して非同期処理を抽象化する例：</p>
+  <pre>
+// 非同期処理の抽象化
+async function withRetry<T>(
+    operation: () => Promise<T>,
+    maxRetries: number = 3
+): Promise<T> {
+    let lastError: Error | null = null;
+    
+    for (let i = 0; i < maxRetries; i++) {
+        try {
+            return await operation();
+        } catch (error) {
+            lastError = error as Error;
+            console.log(`Retry ${i + 1}/${maxRetries} failed: ${error.message}`);
+        }
+    }
+    
+    throw lastError;
+}
+
+// 使用例
+const fetchData = async (url: string) => {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Network response was not ok');
+    return response.json();
+};
+
+// リトライ付きのデータ取得
+const getDataWithRetry = (url: string) => withRetry(() => fetchData(url));
+
+// 使用
+getDataWithRetry('https://api.example.com/data')
+    .then(data => console.log(data))
+    .catch(error => console.error('All retries failed:', error));
+  </pre>
+
+  <h2>4.5 パフォーマンス最適化</h2>
+  <h3>4.5.1 メモ化（Memoization）</h3>
+  <p>高階関数を使用して関数の結果をキャッシュする例：</p>
+  <pre>
+// メモ化の実装
+function memoize<T, U>(fn: (arg: T) => U): (arg: T) => U {
+    const cache = new Map<string, U>();
+    
+    return (arg: T): U => {
+        const key = JSON.stringify(arg);
+        if (cache.has(key)) {
+            console.log('Cache hit!');
+            return cache.get(key)!;
+        }
+        
+        const result = fn(arg);
+        cache.set(key, result);
+        return result;
+    };
+}
+
+// 使用例
+const expensiveOperation = (x: number) => {
+    console.log('Computing...');
+    return x * x;
+};
+
+const memoizedOperation = memoize(expensiveOperation);
+
+console.log(memoizedOperation(5)); // Computing... 25
+console.log(memoizedOperation(5)); // Cache hit! 25
+  </pre>
+
+  <h3>4.5.2 遅延評価（Lazy Evaluation）</h3>
+  <p>高階関数を使用して遅延評価を実装する例：</p>
+  <pre>
+// 遅延評価の実装
+class Lazy<T> {
+    private value: T | null = null;
+    private computation: () => T;
+
+    constructor(computation: () => T) {
+        this.computation = computation;
+    }
+
+    get(): T {
+        if (this.value === null) {
+            this.value = this.computation();
+        }
+        return this.value;
+    }
+
+    map<U>(fn: (x: T) => U): Lazy<U> {
+        return new Lazy(() => fn(this.get()));
+    }
+}
+
+// 使用例
+const lazyValue = new Lazy(() => {
+    console.log('Computing expensive value...');
+    return 42;
+});
+
+console.log('Value not computed yet');
+console.log(lazyValue.get()); // Computing expensive value... 42
+console.log(lazyValue.get()); // 42 (キャッシュされた値)
+  </pre>
+
+  <h2>4.6 コラム：高階関数の実践的な利点</h2>
+  <p>高階関数を使用することによる実践的な利点：</p>
+  <ul>
+    <li><strong>コードの再利用性</strong>
+      <p>共通の処理パターンを関数として抽象化することで、コードの重複を減らし、再利用性を高めることができます。</p>
+    </li>
+    <li><strong>可読性の向上</strong>
+      <p>処理の意図が明確になり、コードの可読性が向上します。</p>
+    </li>
+    <li><strong>保守性の向上</strong>
+      <p>処理の変更が局所化され、コードの保守が容易になります。</p>
+    </li>
+    <li><strong>テストの容易さ</strong>
+      <p>純粋関数として実装することで、テストが容易になります。</p>
+    </li>
+  </ul>
+
+  <h2>4.7 演習問題</h2>
+  <h3>4.7.1 基礎演習</h3>
+  <ol>
+    <li>配列の要素を2倍にする関数を実装してください。</li>
+    <li>配列から偶数のみを抽出する関数を実装してください。</li>
+    <li>配列の要素の合計を計算する関数を実装してください。</li>
+  </ol>
+
+  <h3>4.7.2 応用演習</h3>
+  <ol>
+    <li>複数の関数を合成するユーティリティ関数を実装してください。</li>
+    <li>非同期処理をリトライする関数を実装してください。</li>
+    <li>メモ化を使用してパフォーマンスを最適化する関数を実装してください。</li>
+  </ol>
+
+  <p><a href="00_index.html">目次に戻る</a></p>
+</body>
+
+</html>

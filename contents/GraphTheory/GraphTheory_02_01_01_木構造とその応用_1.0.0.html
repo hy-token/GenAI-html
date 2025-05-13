@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<body>
+<h1>木構造とその応用</h1>
+
+<h2>2.1 木構造の特性と基本アルゴリズム</h2>
+<p>木構造（Tree）はグラフ理論の中でも特に重要で、多くの実用的な問題に応用される構造です。木構造は以下の特徴を持ちます：</p>
+
+<ul>
+    <li>サイクル（循環）がない連結グラフ</li>
+    <li>任意の2つのノード間にはちょうど1つのパスが存在する</li>
+    <li>ノード数がN個の木には必ずN-1個のエッジがある</li>
+    <li>1つのエッジを削除すると、グラフは非連結になる</li>
+</ul>
+
+<p>木構造には様々な種類があります：</p>
+
+<table border="1">
+    <tr>
+        <th>木の種類</th>
+        <th>特徴</th>
+        <th>応用例</th>
+    </tr>
+    <tr>
+        <td>根付き木（Rooted Tree）</td>
+        <td>1つのノードが根（ルート）として指定されている</td>
+        <td>ファイルシステム、組織図</td>
+    </tr>
+    <tr>
+        <td>二分木（Binary Tree）</td>
+        <td>各ノードが最大2つの子を持つ</td>
+        <td>検索アルゴリズム、構文解析</td>
+    </tr>
+    <tr>
+        <td>平衡木（Balanced Tree）</td>
+        <td>左右のサブツリーの高さがほぼ等しい</td>
+        <td>データベースのインデックス</td>
+    </tr>
+    <tr>
+        <td>最小全域木（MST）</td>
+        <td>重み付きグラフから作られる最小コストの木</td>
+        <td>ネットワーク設計、クラスタリング</td>
+    </tr>
+</table>
+
+<svg width="600" height="300" viewBox="0 0 600 300">
+    <!-- 根付き木 -->
+    <g transform="translate(150, 50)">
+        <circle cx="0" cy="0" r="20" fill="#7CB9E8" />
+        <circle cx="-75" cy="60" r="20" fill="#7CB9E8" />
+        <circle cx="0" cy="60" r="20" fill="#7CB9E8" />
+        <circle cx="75" cy="60" r="20" fill="#7CB9E8" />
+        <circle cx="-115" cy="120" r="20" fill="#7CB9E8" />
+        <circle cx="-35" cy="120" r="20" fill="#7CB9E8" />
+        <circle cx="35" cy="120" r="20" fill="#7CB9E8" />
+        
+        <line x1="0" y1="0" x2="-75" y2="60" stroke="black" stroke-width="2" />
+        <line x1="0" y1="0" x2="0" y2="60" stroke="black" stroke-width="2" />
+        <line x1="0" y1="0" x2="75" y2="60" stroke="black" stroke-width="2" />
+        <line x1="-75" y1="60" x2="-115" y2="120" stroke="black" stroke-width="2" />
+        <line x1="-75" y1="60" x2="-35" y2="120" stroke="black" stroke-width="2" />
+        <line x1="0" y1="60" x2="35" y2="120" stroke="black" stroke-width="2" />
+        
+        <text x="0" y="-5" text-anchor="middle" font-size="16" fill="white">R</text>
+        <text x="0" y="170" text-anchor="middle" font-size="16">根付き木</text>
+    </g>
+    
+    <!-- 二分木 -->
+    <g transform="translate(450, 50)">
+        <circle cx="0" cy="0" r="20" fill="#FFB347" />
+        <circle cx="-50" cy="60" r="20" fill="#FFB347" />
+        <circle cx="50" cy="60" r="20" fill="#FFB347" />
+        <circle cx="-75" cy="120" r="20" fill="#FFB347" />
+        <circle cx="-25" cy="120" r="20" fill="#FFB347" />
+        <circle cx="25" cy="120" r="20" fill="#FFB347" />
+        <circle cx="75" cy="120" r="20" fill="#FFB347" />
+        
+        <line x1="0" y1="0" x2="-50" y2="60" stroke="black" stroke-width="2" />
+        <line x1="0" y1="0" x2="50" y2="60" stroke="black" stroke-width="2" />
+        <line x1="-50" y1="60" x2="-75" y2="120" stroke="black" stroke-width="2" />
+        <line x1="-50" y1="60" x2="-25" y2="120" stroke="black" stroke-width="2" />
+        <line x1="50" y1="60" x2="25" y2="120" stroke="black" stroke-width="2" />
+        <line x1="50" y1="60" x2="75" y2="120" stroke="black" stroke-width="2" />
+        
+        <text x="0" y="170" text-anchor="middle" font-size="16">二分木</text>
+    </g>
+</svg>
+
+<p>木構造に対する主要なアルゴリズムには次のようなものがあります：</p>
+
+<ul>
+    <li><strong>深さ優先探索（DFS）：</strong> 可能な限り深くまで探索してから戻る方法</li>
+    <li><strong>幅優先探索（BFS）：</strong> 同じ深さのノードを先に探索してから次の深さへ進む方法</li>
+    <li><strong>最小共通祖先（LCA）：</strong> 2つのノードの最も近い共通の祖先を見つける手法</li>
+</ul>
+
+<h2>2.2 実世界での木構造モデリング</h2>
+<p>木構造は多くの実世界の問題をモデル化するのに適しています：</p>
+
+<div class="example-box">
+    <h3>実世界での木構造の例</h3>
+    <ul>
+        <li><strong>ファイルシステム：</strong> フォルダとサブフォルダは典型的な木構造</li>
+        <li><strong>家系図：</strong> 先祖から子孫への関係を表す</li>
+        <li><strong>組織図：</strong> 会社の指揮系統を表現する</li>
+        <li><strong>ウェブサイトの構造：</strong> メインページから各ページへの階層関係</li>
+        <li><strong>決定木：</strong> 質問に基づいて分岐していく意思決定プロセス</li>
+    </ul>
+</div>
+
+<p>これらの例では、一方向の階層関係や親子関係が明確であるため、木構造として表現するのが適しています。特に、何かを分類する問題や、段階的に選択していく問題は木構造で表現しやすいです。</p>
+
+<h2>2.3 木構造の解法と一般解</h2>
+<p>木構造には、多くの問題に対して効率的な一般解が存在します：</p>
+
+<table border="1">
+    <tr>
+        <th>問題</th>
+        <th>一般解</th>
+        <th>計算量</th>
+        <th>アルゴリズム</th>
+    </tr>
+    <tr>
+        <td>各ノードの深さ/高さ計算</td>
+        <td>ルートからの距離を再帰的に計算</td>
+        <td>O(N)</td>
+        <td>DFSまたはBFS</td>
+    </tr>
+    <tr>
+        <td>最小共通祖先（LCA）</td>
+        <td>二分探索と事前計算を組み合わせる</td>
+        <td>前処理O(N log N)、クエリO(log N)</td>
+        <td>Binary Lifting</td>
+    </tr>
+    <tr>
+        <td>ノード間の距離計算</td>
+        <td>LCAを使用して計算</td>
+        <td>O(log N)</td>
+        <td>距離 = 深さA + 深さB - 2×(LCAの深さ)</td>
+    </tr>
+    <tr>
+        <td>木のDP（動的計画法）</td>
+        <td>葉から根へ値を集計</td>
+        <td>O(N)</td>
+        <td>後順走査（Postorder Traversal）</td>
+    </tr>
+</table>
+
+<div class="code-block">
+<pre>
+<code>
+// 深さ計算のPythonコード例
+def calculate_depth(node, depth=0, depths={}):
+    depths[node] = depth
+    for child in node.children:
+        calculate_depth(child, depth + 1, depths)
+    return depths
+</code>
+</pre>
+</div>
+
+<p>木構造の重要な性質として、多くの問題が線形時間（O(N)）または対数時間（O(log N)）で解けることが挙げられます。これは、木構造がサイクルを持たないため、問題解決の過程で同じノードを複数回処理する必要がないからです。</p>
+
+<h2>2.4 適用事例と実装ガイドライン</h2>
+<p>以下は、木構造を実際に応用する際の具体的な事例とガイドラインです：</p>
+
+<h3>適用事例1：ファイル検索システム</h3>
+<p>コンピュータのファイルシステムは典型的な木構造です。特定のファイルを検索する場合、深さ優先探索（DFS）または幅優先探索（BFS）を使用します。大量のファイルから特定の条件を満たすものを効率的に見つけることができます。</p>
+
+<h3>適用事例2：構文解析（パーサー）</h3>
+<p>プログラミング言語のコードを解析する際、抽象構文木（AST）が使われます。例えば、「2 + 3 * 4」という数式は、演算子を内部ノード、数値を葉ノードとする木として表現され、正しい順序で計算できるようになります。</p>
+
+<h3>実装ガイドライン：</h3>
+<ul>
+    <li><strong>ノード設計：</strong> 親への参照と子ノードのリストを持つ構造にする</li>
+    <li><strong>木の走査：</strong> 目的に応じて前順（Preorder）、中順（Inorder）、後順（Postorder）の適切な走査方法を選ぶ</li>
+    <li><strong>メモ化：</strong> 部分問題の結果を保存して再計算を避ける</li>
+    <li><strong>バランス考慮：</strong> 木が偏りすぎないように、必要に応じて平衡木を使用する</li>
+</ul>
+
+<div class="code-block">
+<pre>
+<code>
+// ノードクラスの基本設計例（JavaScript）
+class TreeNode {
+    constructor(value) {
+        this.value = value;
+        this.children = [];
+        this.parent = null;
+    }
+    
+    addChild(childNode) {
+        childNode.parent = this;
+        this.children.push(childNode);
+    }
+}
+</code>
+</pre>
+</div>
+
+<p>木構造は、階層的なデータを扱う問題や、効率的な検索が必要な場面で特に有用です。次の章では、より複雑なグラフ構造である「有向非巡回グラフ（DAG）」について学びます。</p>
+
+<style>
+    .example-box {
+        background-color: #f0f8ff;
+        border-left: 5px solid #7CB9E8;
+        padding: 10px;
+        margin: 15px 0;
+    }
+    
+    .code-block {
+        background-color: #f5f5f5;
+        border-left: 5px solid #8a8a8a;
+        padding: 10px;
+        margin: 15px 0;
+        overflow-x: auto;
+    }
+</style>
+</body>
+</html>

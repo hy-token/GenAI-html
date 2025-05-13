@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <title>第5章 関数型プログラミングのデザインパターン</title>
+</head>
+
+<body>
+  <h1>第5章 関数型プログラミングのデザインパターン</h1>
+
+  <h2>5.1 関数型プログラミングの基本パターン</h2>
+  <p>関数型プログラミングでは、共通の問題に対する解決策として様々なパターンが確立されています。</p>
+
+  <h3>5.1.1 関数合成パターン</h3>
+  <p>関数合成は、複数の関数を組み合わせて新しい関数を作成する基本的なパターンです：</p>
+  <pre>
+// 基本的な関数合成
+const compose = (...fns) => {
+    return fns.reduce((f, g) => {
+        return (...args) => f(g(...args));
+    });
+};
+
+// パイプライン
+const pipe = (...fns) => {
+    return fns.reduce((f, g) => {
+        return (...args) => g(f(...args));
+    });
+};
+
+// 使用例
+const processData = pipe(
+    filter(x => x > 0),
+    map(x => x * 2),
+    reduce((acc, x) => acc + x, 0)
+);
+  </pre>
+
+  <h3>5.1.2 カリー化パターン</h3>
+  <p>カリー化は、関数の引数を部分適用するためのパターンです：</p>
+  <pre>
+// カリー化の実装
+const curry = (fn) => {
+    return function curried(...args) {
+        if (args.length >= fn.length) {
+            return fn.apply(this, args);
+        }
+        return (...moreArgs) => curried.apply(this, args.concat(moreArgs));
+    };
+};
+
+// 使用例
+const add = (a, b) => a + b;
+const curriedAdd = curry(add);
+const addFive = curriedAdd(5);
+  </pre>
+
+  <h2>5.2 エラーハンドリングパターン</h2>
+  <h3>5.2.1 Either型</h3>
+  <p>Either型は、成功または失敗の結果を表現するパターンです：</p>
+  <pre>
+// Either型の実装
+class Either {
+    static left(value) {
+        return new Left(value);
+    }
+
+    static right(value) {
+        return new Right(value);
+    }
+}
+
+class Left extends Either {
+    map(fn) {
+        return this;
+    }
+
+    chain(fn) {
+        return this;
+    }
+}
+
+class Right extends Either {
+    map(fn) {
+        return Either.right(fn(this.value));
+    }
+
+    chain(fn) {
+        return fn(this.value);
+    }
+}
+
+// 使用例
+const parseJSON = (str) => {
+    try {
+        return Either.right(JSON.parse(str));
+    } catch (e) {
+        return Either.left(e);
+    }
+};
+  </pre>
+
+  <h3>5.2.2 Option型</h3>
+  <p>Option型は、値が存在するかどうかを表現するパターンです：</p>
+  <pre>
+// Option型の実装
+class Option {
+    static some(value) {
+        return new Some(value);
+    }
+
+    static none() {
+        return new None();
+    }
+}
+
+class Some extends Option {
+    map(fn) {
+        return Option.some(fn(this.value));
+    }
+
+    chain(fn) {
+        return fn(this.value);
+    }
+}
+
+class None extends Option {
+    map(fn) {
+        return this;
+    }
+
+    chain(fn) {
+        return this;
+    }
+}
+
+// 使用例
+const findUser = (id) => {
+    const user = users.find(u => u.id === id);
+    return user ? Option.some(user) : Option.none();
+};
+  </pre>
+
+  <h2>5.3 状態管理パターン</h2>
+  <h3>5.3.1 Stateモナド</h3>
+  <p>Stateモナドは、状態の変更を管理するパターンです：</p>
+  <pre>
+// Stateモナドの実装
+class State {
+    constructor(run) {
+        this.run = run;
+    }
+
+    static of(value) {
+        return new State(state => [value, state]);
+    }
+
+    map(fn) {
+        return new State(state => {
+            const [value, newState] = this.run(state);
+            return [fn(value), newState];
+        });
+    }
+
+    chain(fn) {
+        return new State(state => {
+            const [value, newState] = this.run(state);
+            return fn(value).run(newState);
+        });
+    }
+}
+
+// 使用例
+const increment = new State(state => [state + 1, state + 1]);
+const double = new State(state => [state * 2, state]);
+  </pre>
+
+  <h3>5.3.2 Readerモナド</h3>
+  <p>Readerモナドは、環境（コンテキスト）に依存する計算を管理するパターンです：</p>
+  <pre>
+// Readerモナドの実装
+class Reader {
+    constructor(run) {
+        this.run = run;
+    }
+
+    static of(value) {
+        return new Reader(() => value);
+    }
+
+    map(fn) {
+        return new Reader(env => fn(this.run(env)));
+    }
+
+    chain(fn) {
+        return new Reader(env => fn(this.run(env)).run(env));
+    }
+}
+
+// 使用例
+const getConfig = new Reader(env => env.config);
+const getDatabase = new Reader(env => env.database);
+  </pre>
+
+  <h2>5.4 非同期処理パターン</h2>
+  <h3>5.4.1 Futureモナド</h3>
+  <p>Futureモナドは、非同期計算を管理するパターンです：</p>
+  <pre>
+// Futureモナドの実装
+class Future {
+    constructor(computation) {
+        this.computation = computation;
+    }
+
+    static of(value) {
+        return new Future((resolve) => resolve(value));
+    }
+
+    map(fn) {
+        return new Future((resolve, reject) => {
+            this.computation(
+                value => resolve(fn(value)),
+                error => reject(error)
+            );
+        });
+    }
+
+    chain(fn) {
+        return new Future((resolve, reject) => {
+            this.computation(
+                value => fn(value).computation(resolve, reject),
+                error => reject(error)
+            );
+        });
+    }
+}
+
+// 使用例
+const fetchUser = (id) => new Future((resolve, reject) => {
+    fetch(`/api/users/${id}`)
+        .then(response => response.json())
+        .then(resolve)
+        .catch(reject);
+});
+  </pre>
+
+  <h2>5.5 実践的なアプリケーションパターン</h2>
+  <h3>5.5.1 リクエスト/レスポンスパターン</h3>
+  <pre>
+// リクエスト/レスポンスの処理
+const handleRequest = pipe(
+    validateRequest,
+    enrichRequest,
+    processRequest,
+    formatResponse
+);
+
+// エラーハンドリング
+const safeHandleRequest = (request) => {
+    return Either.try(() => handleRequest(request))
+        .mapLeft(error => ({
+            status: 500,
+            body: { error: error.message }
+        }));
+};
+  </pre>
+
+  <h3>5.5.2 バリデーションパターン</h3>
+  <pre>
+// バリデーションの実装
+const validate = (schema) => (data) => {
+    const errors = [];
+    for (const [key, validator] of Object.entries(schema)) {
+        const result = validator(data[key]);
+        if (result !== true) {
+            errors.push({ field: key, error: result });
+        }
+    }
+    return errors.length === 0 ? Either.right(data) : Either.left(errors);
+};
+
+// 使用例
+const userSchema = {
+    name: (value) => value && value.length > 0 ? true : '名前は必須です',
+    email: (value) => /^[^@]+@[^@]+\.[^@]+$/.test(value) ? true : '有効なメールアドレスを入力してください'
+};
+  </pre>
+
+  <h2>5.6 高度なトピック</h2>
+  <h3>5.6.1 モナド変換子</h3>
+  <p>モナド変換子は、異なるモナドを組み合わせるためのパターンです：</p>
+  <pre>
+// モナド変換子の実装
+class MaybeT {
+    constructor(m) {
+        this.m = m;
+    }
+
+    static of(value) {
+        return new MaybeT(Option.of(value));
+    }
+
+    map(fn) {
+        return new MaybeT(this.m.map(maybe => maybe.map(fn)));
+    }
+
+    chain(fn) {
+        return new MaybeT(this.m.chain(maybe => 
+            maybe.isSome() ? fn(maybe.value) : MaybeT.of(null)
+        ));
+    }
+}
+  </pre>
+
+  <h3>5.6.2 型システムとの統合</h3>
+  <pre>
+// TypeScriptでの型定義
+type Monad<T> = {
+    map: <U>(fn: (t: T) => U) => Monad<U>;
+    chain: <U>(fn: (t: T) => Monad<U>) => Monad<U>;
+};
+
+type Either<L, R> = Left<L> | Right<R>;
+type Option<T> = Some<T> | None;
+  </pre>
+
+  <p><a href="00_index.html">目次に戻る</a></p>
+</body>
+
+</html>

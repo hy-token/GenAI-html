@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <title>第3章 イミュータビリティと永続データ構造</title>
+</head>
+
+<body>
+  <h1>第3章 イミュータビリティと永続データ構造</h1>
+
+  <h2>3.1 イミュータビリティの理論的基盤</h2>
+  <p>イミュータビリティ（不変性）は、関数型プログラミングの重要な概念の一つです。データの不変性を保証することで、プログラムの予測可能性と信頼性を高めることができます。</p>
+
+  <h3>3.1.1 値の不変性と参照の不変性</h3>
+  <p>イミュータビリティには、値の不変性と参照の不変性の2つの側面があります：</p>
+  <ul>
+    <li><strong>値の不変性（Value Immutability）</strong>
+      <p>プリミティブ型の値（数値、文字列、真偽値など）は、一度作成されると変更できません。例えば、文字列の一部を変更しようとすると、新しい文字列が作成されます。</p>
+      <pre>
+// 値の不変性の例
+const str = "Hello";
+const newStr = str.toUpperCase(); // 新しい文字列が作成される
+console.log(str); // "Hello" - 元の文字列は変更されない
+console.log(newStr); // "HELLO"
+      </pre>
+    </li>
+    <li><strong>参照の不変性（Reference Immutability）</strong>
+      <p>オブジェクトや配列などの参照型のデータについて、その参照自体を変更できないようにすることです。JavaScriptでは`const`を使用して実現できます。</p>
+      <pre>
+// 参照の不変性の例
+const obj = { count: 0 };
+obj.count = 1; // オブジェクトの内容は変更可能
+obj = { count: 2 }; // エラー: 参照の再代入は不可
+      </pre>
+    </li>
+  </ul>
+
+  <h3>3.1.2 不変性の利点</h3>
+  <p>イミュータビリティには以下のような利点があります：</p>
+  <ul>
+    <li><strong>予測可能性の向上</strong>
+      <p>データが変更されないため、プログラムの動作が予測しやすくなります。特に並行処理において、データの競合を防ぐことができます。</p>
+    </li>
+    <li><strong>デバッグの容易さ</strong>
+      <p>データの変更履歴を追跡する必要がなく、各時点での状態が明確になります。</p>
+    </li>
+    <li><strong>最適化の可能性</strong>
+      <p>不変データは共有が安全なため、メモリ使用量の最適化が可能になります。</p>
+    </li>
+  </ul>
+
+  <h2>3.2 永続データ構造</h2>
+  <p>永続データ構造は、更新操作を行っても元のデータ構造を保持し、新しいバージョンを作成するデータ構造です。</p>
+
+  <h3>3.2.1 永続リストの実装</h3>
+  <p>永続リストは、連結リストを基にした不変なデータ構造です：</p>
+  <pre>
+// 永続リストの実装
+class PersistentList<T> {
+    private constructor(
+        private readonly value: T,
+        private readonly next: PersistentList<T> | null
+    ) {}
+
+    static empty<T>(): PersistentList<T> {
+        return new PersistentList<T>(null, null);
+    }
+
+    static cons<T>(value: T, list: PersistentList<T>): PersistentList<T> {
+        return new PersistentList(value, list);
+    }
+
+    head(): T {
+        if (this.next === null) {
+            throw new Error('Empty list');
+        }
+        return this.value;
+    }
+
+    tail(): PersistentList<T> {
+        if (this.next === null) {
+            throw new Error('Empty list');
+        }
+        return this.next;
+    }
+
+    isEmpty(): boolean {
+        return this.next === null;
+    }
+
+    // 新しい要素を追加（元のリストは変更されない）
+    append(value: T): PersistentList<T> {
+        return PersistentList.cons(value, this);
+    }
+}
+
+// 使用例
+const list1 = PersistentList.cons(1, PersistentList.cons(2, PersistentList.empty()));
+const list2 = list1.append(3);
+console.log(list1.head()); // 1
+console.log(list2.head()); // 3
+  </pre>
+
+  <h3>3.2.2 構造共有（Structural Sharing）</h3>
+  <p>構造共有は、永続データ構造の効率的な実装手法です。データの更新時に、変更が必要な部分のみを新しいノードで置き換え、変更のない部分は既存のノードを再利用します。</p>
+  <pre>
+// 構造共有を利用した永続ベクトルの実装
+class PersistentVector<T> {
+    private constructor(
+        private readonly root: Node<T>,
+        private readonly size: number
+    ) {}
+
+    static empty<T>(): PersistentVector<T> {
+        return new PersistentVector<T>(new Node<T>(), 0);
+    }
+
+    // 要素の追加（構造共有を利用）
+    append(value: T): PersistentVector<T> {
+        const newRoot = this.root.append(this.size, value);
+        return new PersistentVector<T>(newRoot, this.size + 1);
+    }
+
+    // 要素の取得
+    get(index: number): T {
+        if (index < 0 || index >= this.size) {
+            throw new Error('Index out of bounds');
+        }
+        return this.root.get(index);
+    }
+}
+
+// 使用例
+const vec1 = PersistentVector.empty<number>();
+const vec2 = vec1.append(1).append(2).append(3);
+const vec3 = vec2.append(4);
+
+// vec2とvec3は最初の3つの要素を共有
+console.log(vec2.get(0)); // 1
+console.log(vec3.get(0)); // 1
+  </pre>
+
+  <h2>3.3 実践的な実装パターン</h2>
+  <h3>3.3.1 不変オブジェクトの実装</h3>
+  <p>JavaScript/TypeScriptで不変オブジェクトを実装する方法：</p>
+  <pre>
+// 不変オブジェクトの実装パターン
+class ImmutableUser {
+    private constructor(
+        private readonly name: string,
+        private readonly email: string,
+        private readonly age: number
+    ) {}
+
+    static create(name: string, email: string, age: number): ImmutableUser {
+        return new ImmutableUser(name, email, age);
+    }
+
+    // 新しいプロパティを持つ新しいインスタンスを返す
+    withName(name: string): ImmutableUser {
+        return new ImmutableUser(name, this.email, this.age);
+    }
+
+    withEmail(email: string): ImmutableUser {
+        return new ImmutableUser(this.name, email, this.age);
+    }
+
+    withAge(age: number): ImmutableUser {
+        return new ImmutableUser(this.name, this.email, age);
+    }
+
+    // ゲッター
+    getName(): string { return this.name; }
+    getEmail(): string { return this.email; }
+    getAge(): number { return this.age; }
+}
+
+// 使用例
+const user1 = ImmutableUser.create('John', 'john@example.com', 30);
+const user2 = user1.withName('Jane');
+console.log(user1.getName()); // 'John'
+console.log(user2.getName()); // 'Jane'
+  </pre>
+
+  <h3>3.3.2 不変配列の操作</h3>
+  <p>不変配列の操作パターン：</p>
+  <pre>
+// 不変配列の操作パターン
+const immutableArray = {
+    // 要素の追加
+    append: <T>(arr: T[], value: T): T[] => [...arr, value],
+
+    // 要素の更新
+    update: <T>(arr: T[], index: number, value: T): T[] => {
+        if (index < 0 || index >= arr.length) {
+            throw new Error('Index out of bounds');
+        }
+        return arr.map((item, i) => i === index ? value : item);
+    },
+
+    // 要素の削除
+    remove: <T>(arr: T[], index: number): T[] => {
+        if (index < 0 || index >= arr.length) {
+            throw new Error('Index out of bounds');
+        }
+        return arr.filter((_, i) => i !== index);
+    },
+
+    // 配列の結合
+    concat: <T>(arr1: T[], arr2: T[]): T[] => [...arr1, ...arr2]
+};
+
+// 使用例
+const numbers = [1, 2, 3];
+const newNumbers = immutableArray.append(numbers, 4);
+console.log(numbers); // [1, 2, 3]
+console.log(newNumbers); // [1, 2, 3, 4]
+  </pre>
+
+  <h2>3.4 パフォーマンス最適化</h2>
+  <h3>3.4.1 メモリ使用量の最適化</h3>
+  <p>不変データ構造のメモリ使用量を最適化する方法：</p>
+  <ul>
+    <li><strong>構造共有の活用</strong>
+      <p>変更のない部分を共有することで、メモリ使用量を削減します。</p>
+    </li>
+    <li><strong>ガベージコレクションの最適化</strong>
+      <p>不要になった古いバージョンのデータを適切に解放します。</p>
+    </li>
+    <li><strong>データの圧縮</strong>
+      <p>類似したデータを圧縮して保存します。</p>
+    </li>
+  </ul>
+
+  <h3>3.4.2 更新操作の最適化</h3>
+  <p>不変データ構造の更新操作を効率化する方法：</p>
+  <ul>
+    <li><strong>バッチ処理</strong>
+      <p>複数の更新をまとめて処理します。</p>
+    </li>
+    <li><strong>遅延評価</strong>
+      <p>必要な時まで更新を遅延させます。</p>
+    </li>
+    <li><strong>部分的な更新</strong>
+      <p>変更が必要な部分のみを更新します。</p>
+    </li>
+  </ul>
+
+  <h2>3.5 実践的な応用</h2>
+  <h3>3.5.1 状態管理での活用</h3>
+  <p>不変データ構造を状態管理に活用する例：</p>
+  <pre>
+// Reduxでの不変データ構造の使用例
+interface State {
+    users: User[];
+    selectedUser: User | null;
+}
+
+const initialState: State = {
+    users: [],
+    selectedUser: null
+};
+
+// アクション
+const addUser = (user: User) => ({
+    type: 'ADD_USER',
+    payload: user
+});
+
+// リデューサー
+const reducer = (state: State = initialState, action: any): State => {
+    switch (action.type) {
+        case 'ADD_USER':
+            return {
+                ...state,
+                users: [...state.users, action.payload]
+            };
+        case 'SELECT_USER':
+            return {
+                ...state,
+                selectedUser: action.payload
+            };
+        default:
+            return state;
+    }
+};
+  </pre>
+
+  <h3>3.5.2 並行処理での活用</h3>
+  <p>不変データ構造を並行処理で活用する例：</p>
+  <pre>
+// 並行処理での不変データ構造の使用例
+class ConcurrentQueue<T> {
+    private constructor(
+        private readonly items: T[],
+        private readonly processing: Set<T>
+    ) {}
+
+    static empty<T>(): ConcurrentQueue<T> {
+        return new ConcurrentQueue<T>([], new Set());
+    }
+
+    // アイテムの追加
+    enqueue(item: T): ConcurrentQueue<T> {
+        return new ConcurrentQueue<T>(
+            [...this.items, item],
+            this.processing
+        );
+    }
+
+    // アイテムの処理開始
+    startProcessing(item: T): ConcurrentQueue<T> {
+        return new ConcurrentQueue<T>(
+            this.items.filter(i => i !== item),
+            new Set([...this.processing, item])
+        );
+    }
+
+    // アイテムの処理完了
+    completeProcessing(item: T): ConcurrentQueue<T> {
+        return new ConcurrentQueue<T>(
+            this.items,
+            new Set([...this.processing].filter(i => i !== item))
+        );
+    }
+}
+  </pre>
+
+  <h2>3.6 コラム：不変データ構造の実践的な利点</h2>
+  <p>不変データ構造を使用することによる実践的な利点：</p>
+  <ul>
+    <li><strong>デバッグの容易さ</strong>
+      <p>データの変更履歴を追跡できるため、バグの特定が容易になります。</p>
+    </li>
+    <li><strong>テストの簡素化</strong>
+      <p>状態の変更が予測可能なため、テストケースの作成が容易になります。</p>
+    </li>
+    <li><strong>並行処理の安全性</strong>
+      <p>データの競合が発生しないため、並行処理が安全に行えます。</p>
+    </li>
+    <li><strong>コードの保守性</strong>
+      <p>状態の変更が明確なため、コードの理解と保守が容易になります。</p>
+    </li>
+  </ul>
+
+  <p><a href="00_index.html">目次に戻る</a></p>
+</body>
+
+</html>

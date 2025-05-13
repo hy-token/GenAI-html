@@ -1,0 +1,333 @@
+<h1>StarCoder2の入手と準備</h1>
+
+<h2>3.1 公式サイトからのダウンロード</h2>
+
+<h3>BigCode公式リポジトリ</h3>
+<p>StarCoder2の公式配布元は、BigCodeプロジェクトのGitHubリポジトリです。</p>
+
+<ul>
+    <li><strong>URL：</strong>https://github.com/bigcode-project/starcoder2</li>
+    <li><strong>配布形式：</strong>PyTorch形式（.pt）またはSafeTensors形式</li>
+    <li><strong>推奨形式：</strong>SafeTensors（安全性とパフォーマンス向上）</li>
+</ul>
+
+<h3>ダウンロード手順</h3>
+<ol>
+    <li>GitHubリポジトリにアクセス</li>
+    <li>Releasesページを確認</li>
+    <li>StarCoder2-7Bの最新版を選択</li>
+    <li>zip/tar.gzファイルをダウンロード</li>
+    <li>ローカルに解凍（約15GB以上の空き容量が必要）</li>
+</ol>
+
+<svg viewBox="0 0 500 250" width="500" height="250">
+    <!-- 背景 -->
+    <rect x="10" y="10" width="480" height="230" fill="#f8f9fa" stroke="#333" stroke-width="2"/>
+    
+    <!-- ステップ -->
+    <rect x="30" y="40" width="80" height="40" fill="#e3f2fd" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="70" y="62" text-anchor="middle" font-size="11">GitHubへ</text>
+    <text x="70" y="74" text-anchor="middle" font-size="11">アクセス</text>
+    
+    <rect x="130" y="40" width="80" height="40" fill="#e8f5e9" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="170" y="62" text-anchor="middle" font-size="11">Releases</text>
+    <text x="170" y="74" text-anchor="middle" font-size="11">確認</text>
+    
+    <rect x="230" y="40" width="80" height="40" fill="#fff3e0" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="270" y="62" text-anchor="middle" font-size="11">7B版</text>
+    <text x="270" y="74" text-anchor="middle" font-size="11">選択</text>
+    
+    <rect x="330" y="40" width="80" height="40" fill="#fce4ec" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="370" y="62" text-anchor="middle" font-size="11">ダウンロード</text>
+    
+    <rect x="80" y="120" width="100" height="40" fill="#f3e5f5" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="130" y="142" text-anchor="middle" font-size="11">解凍</text>
+    <text x="130" y="154" text-anchor="middle" font-size="10">（15GB+）</text>
+    
+    <rect x="200" y="120" width="100" height="40" fill="#e0f2f1" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="250" y="142" text-anchor="middle" font-size="11">完了</text>
+    
+    <!-- 矢印 -->
+    <path d="M 110 60 L 122 60" fill="none" stroke="#666" stroke-width="2" marker-end="url(#arrowhead)"/>
+    <path d="M 210 60 L 222 60" fill="none" stroke="#666" stroke-width="2" marker-end="url(#arrowhead)"/>
+    <path d="M 310 60 L 322 60" fill="none" stroke="#666" stroke-width="2" marker-end="url(#arrowhead)"/>
+    <path d="M 370 80 L 130 110" fill="none" stroke="#666" stroke-width="2" marker-end="url(#arrowhead)"/>
+    <path d="M 180 140 L 192 140" fill="none" stroke="#666" stroke-width="2" marker-end="url(#arrowhead)"/>
+    
+    <!-- 矢印定義 -->
+    <defs>
+        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#666"/>
+        </marker>
+    </defs>
+</svg>
+
+<h2>3.2 Hugging Faceからの取得方法</h2>
+
+<h3>Hugging Face Hubの利用</h3>
+<p>Hugging Faceは、事前学習済みモデルの配布プラットフォームとして広く利用されています。</p>
+
+<ul>
+    <li><strong>URL：</strong>https://huggingface.co/bigcode/starcoder2-7b</li>
+    <li><strong>利点：</strong>高速ダウンロード、断続的ダウンロード対応</li>
+    <li><strong>必要ツール：</strong>huggingface-cli または git-lfs</li>
+</ul>
+
+<h3>コマンドラインを使用した取得</h3>
+<pre><code class="language-bash"># Hugging Face CLIのインストール
+pip install huggingface-hub
+
+# モデルのダウンロード
+huggingface-cli download bigcode/starcoder2-7b \
+    --local-dir ./starcoder2-7b \
+    --exclude "*.pth" \
+    --include "*.safetensors"</code></pre>
+
+<h3>Hugging Face利用時の注意点</h3>
+<table>
+    <tr>
+        <th>項目</th>
+        <th>注意点</th>
+        <th>対策</th>
+    </tr>
+    <tr>
+        <td>ダウンロード速度</td>
+        <td>地域により遅延あり</td>
+        <td>ミラーサイト活用</td>
+    </tr>
+    <tr>
+        <td>ファイル形式</td>
+        <td>複数形式が混在</td>
+        <td>SafeTensorsを優先</td>
+    </tr>
+    <tr>
+        <td>ストレージ</td>
+        <td>一時容量が2倍必要</td>
+        <td>後でクリーンアップ</td>
+    </tr>
+    <tr>
+        <td>権限</td>
+        <td>一部モデルは要認証</td>
+        <td>事前にアカウント作成</td>
+    </tr>
+</table>
+
+<h2>3.3 ミラーサイトの活用</h2>
+
+<h3>主要なミラーサイト</h3>
+<p>ダウンロード速度向上のために、地域別のミラーサイトを活用できます。</p>
+
+<table>
+    <tr>
+        <th>地域</th>
+        <th>ミラーサイト</th>
+        <th>特徴</th>
+        <th>推奨度</th>
+    </tr>
+    <tr>
+        <td>国内（日本）</td>
+        <td>RIKEN Mirror</td>
+        <td>高速、安定性◎</td>
+        <td>★★★</td>
+    </tr>
+    <tr>
+        <td>アジア</td>
+        <td>KISTI Mirror</td>
+        <td>韓国拠点、速度良好</td>
+        <td>★★☆</td>
+    </tr>
+    <tr>
+        <td>北米</td>
+        <td>NCSA Mirror</td>
+        <td>公式に近い速度</td>
+        <td>★☆☆</td>
+    </tr>
+</table>
+
+<h3>ミラーサイト使用時の設定</h3>
+<pre><code class="language-bash"># 環境変数の設定（例：RIKENミラー）
+export HF_ENDPOINT="https://huggingface.riken.jp"
+
+# ダウンロード実行
+huggingface-cli download bigcode/starcoder2-7b \
+    --local-dir ./starcoder2-7b</code></pre>
+
+<h2>3.4 モデルファイルの確認と検証</h2>
+
+<h3>ダウンロード完了後の確認事項</h3>
+<p>正常にダウンロードできたかを確認するチェックリスト：</p>
+
+<ol>
+    <li>ファイルサイズの確認（約14-15GB）</li>
+    <li>チェックサムの検証</li>
+    <li>必須ファイルの存在確認</li>
+    <li>破損チェック</li>
+</ol>
+
+<h3>必須ファイル一覧</h3>
+<table>
+    <tr>
+        <th>ファイル名</th>
+        <th>説明</th>
+        <th>サイズ目安</th>
+        <th>必須度</th>
+    </tr>
+    <tr>
+        <td>model.safetensors</td>
+        <td>モデル本体</td>
+        <td>13-14GB</td>
+        <td>◯</td>
+    </tr>
+    <tr>
+        <td>config.json</td>
+        <td>設定ファイル</td>
+        <td>1-2KB</td>
+        <td>◯</td>
+    </tr>
+    <tr>
+        <td>tokenizer.json</td>
+        <td>トークナイザー</td>
+        <td>500KB-1MB</td>
+        <td>◯</td>
+    </tr>
+    <tr>
+        <td>special_tokens_map.json</td>
+        <td>特殊トークン定義</td>
+        <td>1KB以下</td>
+        <td>◯</td>
+    </tr>
+    <tr>
+        <td>README.md</td>
+        <td>ドキュメント</td>
+        <td>10-50KB</td>
+        <td>△</td>
+    </tr>
+</table>
+
+<h3>チェックサムによる検証</h3>
+<pre><code class="language-bash"># SHA256チェックサムの計算
+sha256sum model.safetensors
+
+# 公式チェックサムと比較
+# 例：公式からダウンロードしたSHA256SUMSファイルと照合
+sha256sum -c SHA256SUMS</code></pre>
+
+<h3>破損チェックの実行</h3>
+<p>Pythonスクリプトを使用した簡易チェック：</p>
+
+<pre><code class="language-python"># model_check.py
+from safetensors import safe_open
+import os
+
+def verify_model(model_path):
+    try:
+        # ファイルサイズチェック
+        file_size = os.path.getsize(model_path)
+        print(f"ファイルサイズ: {file_size / 1024 / 1024 / 1024:.2f} GB")
+        
+        # SafeTensorsファイルを開く
+        with safe_open(model_path, framework="pt") as f:
+            # テンソルキーの取得
+            keys = f.keys()
+            print(f"テンソル数: {len(keys)}")
+            
+            # 最初のテンソルを読み込んでテスト
+            first_key = list(keys)[0]
+            tensor = f.get_tensor(first_key)
+            print(f"テンソル形状: {tensor.shape}")
+            
+        print("ファイルは正常です")
+        return True
+        
+    except Exception as e:
+        print(f"エラー: {e}")
+        return False
+
+# 実行
+verify_model("./starcoder2-7b/model.safetensors")</code></pre>
+
+<svg viewBox="0 0 450 300" width="450" height="300">
+    <!-- 背景 -->
+    <rect x="10" y="10" width="430" height="280" fill="#f9f9f9" stroke="#333" stroke-width="2"/>
+    
+    <!-- タイトル -->
+    <text x="225" y="35" text-anchor="middle" font-size="16" font-weight="bold">検証プロセス</text>
+    
+    <!-- フローチャート -->
+    <rect x="150" y="60" width="100" height="40" fill="#e3f2fd" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="200" y="82" text-anchor="middle" font-size="12">ダウンロード完了</text>
+    
+    <rect x="150" y="120" width="100" height="40" fill="#e8f5e9" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="200" y="142" text-anchor="middle" font-size="12">サイズ確認</text>
+    
+    <rect x="50" y="180" width="100" height="40" fill="#fff3e0" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="100" y="202" text-anchor="middle" font-size="12">チェックサム</text>
+    
+    <rect x="250" y="180" width="100" height="40" fill="#fce4ec" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="300" y="202" text-anchor="middle" font-size="12">破損チェック</text>
+    
+    <rect x="150" y="240" width="100" height="40" fill="#e0f2f1" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="200" y="262" text-anchor="middle" font-size="12">検証完了</text>
+    
+    <!-- 矢印 -->
+    <path d="M 200 100 L 200 112" fill="none" stroke="#666" stroke-width="2" marker-end="url(#arrowhead)"/>
+    <path d="M 200 160 L 200 172" fill="none" stroke="#666" stroke-width="2" marker-end="url(#arrowhead)"/>
+    <path d="M 180 200 L 167 200" fill="none" stroke="#666" stroke-width="2" marker-end="url(#arrowhead)"/>
+    <path d="M 220 200 L 233 200" fill="none" stroke="#666" stroke-width="2" marker-end="url(#arrowhead)"/>
+    <path d="M 100 220 L 190 232" fill="none" stroke="#666" stroke-width="2" marker-end="url(#arrowhead)"/>
+    <path d="M 300 220 L 210 232" fill="none" stroke="#666" stroke-width="2" marker-end="url(#arrowhead)"/>
+    
+    <!-- 矢印定義 -->
+    <defs>
+        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#666"/>
+        </marker>
+    </defs>
+</svg>
+
+<h2>用語集</h2>
+
+<h3>A-Z</h3>
+<dl>
+    <dt>BigCode</dt>
+    <dd>責任あるAI開発を目指すオープンソースプロジェクト</dd>
+    
+    <dt>CLI（Command Line Interface）</dt>
+    <dd>コマンドラインからプログラムを操作するインターフェース</dd>
+    
+    <dt>Git LFS（Large File Storage）</dt>
+    <dd>大容量ファイルをGitで管理するための拡張機能</dd>
+    
+    <dt>Hugging Face</dt>
+    <dd>機械学習モデルの共有プラットフォーム</dd>
+    
+    <dt>SafeTensors</dt>
+    <dd>高速で安全なテンソルファイル形式</dd>
+    
+    <dt>SHA256</dt>
+    <dd>ファイルの整合性を確認するハッシュ関数</dd>
+</dl>
+
+<h3>あ行</h3>
+<dl>
+    <dt>入手（にゅうしゅ）</dt>
+    <dd>必要なファイルやデータを取得すること</dd>
+</dl>
+
+<h3>か行</h3>
+<dl>
+    <dt>検証（けんしょう）</dt>
+    <dd>データの正確性や整合性を確認すること</dd>
+</dl>
+
+<h3>さ行</h3>
+<dl>
+    <dt>チェックサム</dt>
+    <dd>データの完全性を確認するための検査値</dd>
+</dl>
+
+<h3>ま行</h3>
+<dl>
+    <dt>ミラーサイト</dt>
+    <dd>オリジナルサイトのコピーを提供する別のサーバー</dd>
+</dl>
